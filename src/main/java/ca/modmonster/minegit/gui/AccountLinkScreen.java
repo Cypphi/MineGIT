@@ -141,7 +141,7 @@ public class AccountLinkScreen extends Screen {
         String username = usernameEdit.getValue();
         String pat = CryptoManager.encrypt(patEdit.getValue());
         ConfigManager.save(new Config(username, pat));
-        minecraft.setScreen(parent);
+        minecraft.gui.setScreen(parent);
         if (closeCallback != null) closeCallback.run();
     }
 

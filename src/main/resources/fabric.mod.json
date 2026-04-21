@@ -18,10 +18,7 @@
 	"entrypoints": {
 		"client": [
 			"ca.modmonster.minegit.MineGIT"
-		],
-        "modmenu": [
-            "ca.modmonster.minegit.extra.ModMenuImplementation"
-        ]
+		]
 	},
 	"mixins": [
 		{
@@ -31,7 +28,7 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.19.2",
-		"minecraft": "~26.1",
+		"minecraft": "~26.2-",
 		"java": ">=25",
 		"fabric-api": "*"
 	},

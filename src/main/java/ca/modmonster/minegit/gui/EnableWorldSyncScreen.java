@@ -68,7 +68,7 @@ public class EnableWorldSyncScreen extends Screen {
         statusWidget = new StringWidget(Component.empty(), font);
         columnLayout.addChild(statusWidget);
 
-        openSetupButton = Button.builder(Component.translatable("minegit.link.setup.open"), button -> minecraft.setScreen(new AccountLinkScreen(this.parent))).build();
+        openSetupButton = Button.builder(Component.translatable("minegit.link.setup.open"), button -> minecraft.gui.setScreen(new AccountLinkScreen(this.parent))).build();
         openSetupButton.visible = false;
         columnLayout.addChild(openSetupButton);
 
@@ -111,13 +111,13 @@ public class EnableWorldSyncScreen extends Screen {
             return;
         }
 
-        minecraft.getToastManager().addToast(new SystemToast(new SystemToast.SystemToastId(), Component.translatable("minegit.sync.enable.complete"), null));
+        SystemToast.add(minecraft.gui.toastManager(), new SystemToast.SystemToastId(), Component.translatable("minegit.sync.enable.complete"), null);
         onClose();
     }
 
     @Override
     public void onClose() {
-        minecraft.setScreen(parent);
+        minecraft.gui.setScreen(parent);
         if (closeCallback != null) closeCallback.run();
     }
 

@@ -56,7 +56,7 @@ public abstract class WorldListEntryMixin {
         if (!GitManager.syncEnabled(minecraft, worldId)) return;
         ci.cancel();
         GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_pull"));
-        minecraft.setScreen(progressScreen);
+        minecraft.gui.setScreen(progressScreen);
         new Thread(() -> {
             boolean ok = GitManager.pull(minecraft, worldId, progressScreen);
             if (ok) {
@@ -64,8 +64,8 @@ public abstract class WorldListEntryMixin {
                 minecraft.submit(() -> minecraft.createWorldOpenFlows().openWorld(getLevelSummary().getLevelId(), list::returnToScreen));
             } else {
                 // Show toast saying "error :("
-                minecraft.setScreen(null);
-                minecraft.getToastManager().addToast(new SystemToast(new SystemToast.SystemToastId(), Component.translatable("minegit.sync.status.git_pull_error"), null));
+                minecraft.gui.setScreen(null);
+                SystemToast.add(minecraft.gui.toastManager(), new SystemToast.SystemToastId(), Component.translatable("minegit.sync.status.git_pull_error"), null);
             }
         }).start();
     }

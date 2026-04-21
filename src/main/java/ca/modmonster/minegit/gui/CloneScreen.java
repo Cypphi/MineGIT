@@ -91,7 +91,7 @@ public class CloneScreen extends Screen {
 
             minecraft.submit(() -> {
                 if (result == 0) {
-                    minecraft.getToastManager().addToast(new SystemToast(new SystemToast.SystemToastId(), Component.translatable("minegit.clone.success"), null));
+                    SystemToast.add(minecraft.gui.toastManager(), new SystemToast.SystemToastId(), Component.translatable("minegit.clone.success"), null);
                     onClose();
                 } else if (result == 1) {
                     testCredentialsStatus.setMessage(Component.translatable("minegit.clone.error_invalid_remote"));
@@ -113,7 +113,7 @@ public class CloneScreen extends Screen {
 
     @Override
     public void onClose() {
-        minecraft.setScreen(parent);
+        minecraft.gui.setScreen(parent);
         if (closeCallback != null) closeCallback.run();
     }
 

@@ -50,12 +50,12 @@ public class SinglePlayerScreenMixin extends Screen {
         // Add world sync button
         worldSyncButton = Button.builder(Component.literal("☁"), button -> {
             if (worldSyncButtonState == WorldSyncButtonState.SETUP) {
-                this.minecraft.setScreen(new AccountLinkScreen(this, () -> {
+                this.minecraft.gui.setScreen(new AccountLinkScreen(this, () -> {
                     if (this.list != null) this.list.returnToScreen();
                     updateWorldSyncButton();
                 }));
             } else if (worldSyncButtonState == WorldSyncButtonState.ENABLE) {
-                if (hoveredLevel != null) this.minecraft.setScreen(new EnableWorldSyncScreen(this, hoveredLevel, () -> {
+                if (hoveredLevel != null) this.minecraft.gui.setScreen(new EnableWorldSyncScreen(this, hoveredLevel, () -> {
                     if (this.list != null) this.list.returnToScreen();
                     updateWorldSyncButton();
                 }));
@@ -65,7 +65,7 @@ public class SinglePlayerScreenMixin extends Screen {
         addRenderableWidget(worldSyncButton);
 
         // Add clone button
-        cloneButton = Button.builder(Component.literal("↓"), button -> this.minecraft.setScreen(new CloneScreen(this, () -> {
+        cloneButton = Button.builder(Component.literal("↓"), button -> this.minecraft.gui.setScreen(new CloneScreen(this, () -> {
             if (this.list != null) this.list.returnToScreen();
             updateWorldSyncButton();
         }))).tooltip(Tooltip.create(Component.translatable("minegit.clone.title")))

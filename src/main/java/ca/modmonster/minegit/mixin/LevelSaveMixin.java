@@ -1,5 +1,8 @@
 package ca.modmonster.minegit.mixin;
 
+import ca.modmonster.minegit.MineGIT;
+import ca.modmonster.minegit.data.GitManager;
+import ca.modmonster.minegit.gui.GitProgressScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -8,7 +11,6 @@ import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
-
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -17,10 +19,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.nio.file.Path;
-
-import ca.modmonster.minegit.MineGIT;
-import ca.modmonster.minegit.data.GitManager;
-import ca.modmonster.minegit.gui.GitProgressScreen;
 
 @Environment(EnvType.CLIENT)
 @Mixin(IntegratedServer.class)
@@ -39,13 +37,13 @@ public class LevelSaveMixin {
 
         minecraft.submit(() -> {
             GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_push"));
-            minecraft.setScreen(progressScreen);
+            minecraft.gui.setScreen(progressScreen);
             new Thread(() -> {
                 boolean ok = GitManager.push(worldFolder, progressScreen);
                 if (!ok) {
-                    minecraft.getToastManager().addToast(new SystemToast(new SystemToast.SystemToastId(), Component.translatable("minegit.sync.status.git_push_error"), null));
+                    SystemToast.add(minecraft.gui.toastManager(), new SystemToast.SystemToastId(), Component.translatable("minegit.sync.status.git_push_error"), null);
                 }
-                minecraft.submit(() -> minecraft.setScreen(null));
+                minecraft.submit(() -> minecraft.gui.setScreen(null));
             }).start();
         });
     }
