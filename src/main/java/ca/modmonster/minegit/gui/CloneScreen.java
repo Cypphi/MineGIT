@@ -1,5 +1,6 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.data.GitManager;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
@@ -8,8 +9,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
-import ca.modmonster.minegit.data.GitManager;
-
 public class CloneScreen extends Screen {
     private static final Component REPO_LABEL = Component.translatable("minegit.clone.repo");
     private static final Identifier RALSPIN = Identifier.fromNamespaceAndPath("minegit", "ralspin");
@@ -17,6 +16,7 @@ public class CloneScreen extends Screen {
 
     private final Screen parent;
     private final Runnable closeCallback;
+    private final Runnable cloneSuccessCallback;
     private Button backButton;
     private EditBox repoEdit;
     private Button testCredentialsButton;
@@ -29,9 +29,14 @@ public class CloneScreen extends Screen {
     }
 
     public CloneScreen(Screen parent, Runnable closeCallback) {
+        this(parent, closeCallback, null);
+    }
+
+    public CloneScreen(Screen parent, Runnable closeCallback, Runnable cloneSuccessCallback) {
         super(Component.translatable("minegit.clone.title"));
         this.parent = parent;
         this.closeCallback = closeCallback;
+        this.cloneSuccessCallback = cloneSuccessCallback;
     }
 
     @Override
@@ -92,7 +97,11 @@ public class CloneScreen extends Screen {
             minecraft.submit(() -> {
                 if (result == 0) {
                     SystemToast.add(minecraft.gui.toastManager(), new SystemToast.SystemToastId(), Component.translatable("minegit.clone.success"), null);
-                    onClose();
+                    if (cloneSuccessCallback != null) {
+                        cloneSuccessCallback.run();
+                    } else {
+                        onClose();
+                    }
                 } else if (result == 1) {
                     testCredentialsStatus.setMessage(Component.translatable("minegit.clone.error_invalid_remote"));
                     repositionElements();
