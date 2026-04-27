@@ -8,7 +8,7 @@ import net.minecraft.network.chat.Component;
 
 import org.eclipse.jgit.lib.ProgressMonitor;
 import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 public class GitProgressScreen extends Screen implements ProgressMonitor {
     public static final int PROGRESS_BAR_WIDTH = 128;
@@ -28,7 +28,7 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
 
     @Override
     protected void init() {
-        this.textWidget = this.addRenderableWidget(FocusableTextWidget.builder(this.title, this.font, 12).textWidth(this.font.width(this.title)).build());
+        this.textWidget = this.addRenderableWidget(new FocusableTextWidget(this.width, this.title, this.font, 12));
         this.currentTaskWidget = this.addRenderableWidget(new StringWidget(Component.empty(), font));
         this.repositionElements();
     }

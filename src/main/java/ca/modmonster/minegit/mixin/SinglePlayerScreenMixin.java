@@ -1,21 +1,5 @@
 package ca.modmonster.minegit.mixin;
 
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
-import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.storage.LevelSummary;
-
-import org.jspecify.annotations.Nullable;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
 import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.GitManager;
@@ -23,6 +7,20 @@ import ca.modmonster.minegit.gui.AccountLinkScreen;
 import ca.modmonster.minegit.gui.CloneScreen;
 import ca.modmonster.minegit.gui.EnableWorldSyncScreen;
 import ca.modmonster.minegit.widget.WorldSyncButtonState;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
+import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.storage.LevelSummary;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(SelectWorldScreen.class)
 public class SinglePlayerScreenMixin extends Screen {

@@ -1,21 +1,20 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.data.Config;
+import ca.modmonster.minegit.data.ConfigManager;
+import ca.modmonster.minegit.data.CryptoManager;
+import ca.modmonster.minegit.data.NetworkManager;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
-
-import ca.modmonster.minegit.data.Config;
-import ca.modmonster.minegit.data.ConfigManager;
-import ca.modmonster.minegit.data.CryptoManager;
-import ca.modmonster.minegit.data.NetworkManager;
+import net.minecraft.resources.ResourceLocation;
 
 public class AccountLinkScreen extends Screen {
     private static final Component USERNAME_EDIT_LABEL = Component.translatable("minegit.link.username");
     private static final Component PAT_EDIT_LABEL = Component.translatable("minegit.link.pat");
-    private static final Identifier RALSPIN = Identifier.fromNamespaceAndPath("minegit", "ralspin");
+    private static final ResourceLocation RALSPIN = ResourceLocation.fromNamespaceAndPath("minegit", "ralspin");
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 60);
 
     private final Screen parent;
