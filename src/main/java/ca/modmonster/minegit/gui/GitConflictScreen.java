@@ -1,5 +1,7 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.data.GitManager;
+import ca.modmonster.minegit.data.SyncResult;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -8,20 +10,15 @@ import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-
 import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
-
-import ca.modmonster.minegit.data.GitManager;
-import ca.modmonster.minegit.data.SyncResult;
 
 public class GitConflictScreen extends Screen {
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 60);
 
-    public GitConflictScreen(@NotNull Runnable resolvedCallback, @Nullable Runnable cancelCallback, @NonNull Path worldFolder) {
+    public GitConflictScreen(@NotNull Runnable resolvedCallback, @Nullable Runnable cancelCallback, @NotNull Path worldFolder) {
         super(Component.translatable("minegit.sync.conflict.title"));
         this.resolvedCallback = resolvedCallback;
         this.cancelCallback = cancelCallback;
