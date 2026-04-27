@@ -1,7 +1,7 @@
 package ca.modmonster.minegit.data;
 
+import ca.modmonster.minegit.MineGIT;
 import net.minecraft.client.Minecraft;
-
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeCommand;
 import org.eclipse.jgit.api.PullResult;
@@ -32,8 +32,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-
-import ca.modmonster.minegit.MineGIT;
 
 public class GitManager {
     public static boolean syncEnabled(Minecraft minecraft, String worldId) {
@@ -221,15 +219,17 @@ public class GitManager {
         }
     }
 
-    public static boolean init(Minecraft minecraft, String worldId, String repoUrl) {
+    public static boolean init(Minecraft minecraft, String worldId, String repoUrl, ProgressMonitor progressMonitor) {
         Path worldFolder = getPath(minecraft, worldId);
         Config config = ConfigManager.getCurrentConfig();
         try (Git git = Git.init().setDirectory(worldFolder.toFile()).call()) {
+            progressMonitor.beginTask("Stage world to commit", 0);
             // add all
             git.add()
                     .addFilepattern(".")
                     .call();
             // commit
+            progressMonitor.beginTask("Commit world state", 0);
             String timestamp = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("h:mm a, MM/dd/yy"));
             git.commit()
                     .setMessage("Initial world snapshot - " + timestamp)
@@ -248,6 +248,7 @@ public class GitManager {
             git.push()
                     .setRemote("origin")
                     .setCredentialsProvider(new UsernamePasswordCredentialsProvider(config.username, config.getPat()))
+                    .setProgressMonitor(progressMonitor)
                     .call();
             return true;
         } catch (GitAPIException | URISyntaxException e) {
@@ -256,7 +257,8 @@ public class GitManager {
         }
     }
 
-    public static int cloneRepo(Minecraft minecraft, String repo) {
+    public static int cloneRepo(Minecraft minecraft, String repo, ProgressMonitor progressMonitor) {
+        progressMonitor.beginTask("Starting world clone", 0);
         Config config = ConfigManager.getCurrentConfig();
         String repoUrl = String.format("https://github.com/%s/%s.git", config.username, repo);
         Path localWorldFolder = getPath(minecraft, repo.replaceFirst(Pattern.quote("minegit_"), ""));
@@ -272,7 +274,7 @@ public class GitManager {
                 .setURI(repoUrl)
                 .setDirectory(localWorldFolder.toFile())
                 .setCredentialsProvider(new UsernamePasswordCredentialsProvider(config.username, config.getPat()))
-                .setDepth(1)
+                .setProgressMonitor(progressMonitor)
                 .call()) {
             return 0;
         } catch (InvalidRemoteException e) {
