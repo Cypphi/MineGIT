@@ -131,6 +131,7 @@ public class AccountLinkScreen extends Screen {
 
     private void updateTestCredentialsStatus(Component message) {
         testCredentialsStatus.setMessage(message);
+        testCredentialsStatus.setWidth(font.width(message));
         layout.arrangeElements();
     }
 

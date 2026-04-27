@@ -8,12 +8,10 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.CommonColors;
 import net.minecraft.world.level.storage.LevelResource;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -50,7 +48,7 @@ public class PauseScreenMixin extends Screen {
 
         if (disconnectButton.isHoveredOrFocused()) {
             // draw red border
-            graphics.submitOutline(
+            graphics.renderOutline(
                     disconnectButton.getX(),
                     disconnectButton.getY(),
                     disconnectButton.getWidth(),
@@ -61,14 +59,14 @@ public class PauseScreenMixin extends Screen {
     }
 
     @Override
-    public boolean keyPressed(@NotNull KeyEvent event) {
-        if (event.key() == InputConstants.KEY_LALT) QuitState.altQuit = true;
-        return super.keyPressed(event);
+    public boolean keyPressed(int i, int j, int k) {
+        if (i == InputConstants.KEY_LALT) QuitState.altQuit = true;
+        return super.keyPressed(i, j, k);
     }
 
     @Override
-    public boolean keyReleased(KeyEvent event) {
-        if (event.key() == InputConstants.KEY_LALT) QuitState.altQuit = false;
-        return super.keyReleased(event);
+    public boolean keyReleased(int i, int j, int k) {
+        if (i == InputConstants.KEY_LALT) QuitState.altQuit = false;
+        return super.keyReleased(i, j, k);
     }
 }

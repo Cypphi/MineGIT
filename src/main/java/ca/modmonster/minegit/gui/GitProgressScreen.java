@@ -83,7 +83,9 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
     public void beginTask(String title, int totalWork) {
         if (currentTaskWidget != null) {
             minecraft.submit(() -> {
-                currentTaskWidget.setMessage(Component.literal(title));
+                Component message = Component.literal(title);
+                currentTaskWidget.setMessage(message);
+                currentTaskWidget.setWidth(font.width(message));
                 repositionElements();
             });
         }

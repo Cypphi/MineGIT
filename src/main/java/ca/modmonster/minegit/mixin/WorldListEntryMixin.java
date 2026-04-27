@@ -1,46 +1,47 @@
 package ca.modmonster.minegit.mixin;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.storage.LevelSummary;
-
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.SyncResult;
 import ca.modmonster.minegit.gui.GitConflictScreen;
 import ca.modmonster.minegit.gui.GitProgressScreen;
 import ca.modmonster.minegit.gui.TwoChoiceScreen;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
+import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.storage.LevelSummary;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(WorldSelectionList.WorldListEntry.class)
 public abstract class WorldListEntryMixin {
-    @Shadow
-    public abstract LevelSummary getLevelSummary();
-
     @Shadow
     @Final
     private Minecraft minecraft;
 
     @Shadow
     @Final
-    private WorldSelectionList list;
+    LevelSummary summary;
+
+    @Shadow
+    @Final
+    private SelectWorldScreen screen;
 
     @Inject(method = "doDeleteWorld", at = @At("HEAD"))
     private void beforeWorldDelete(CallbackInfo ci) {
         // Make .git folder writable
-        GitManager.makeWritable(minecraft, getLevelSummary().getLevelId());
+        GitManager.makeWritable(minecraft, summary.getLevelId());
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Inject(method = "joinWorld", at = @At("HEAD"), cancellable = true)
     private void beforeWorldJoin(CallbackInfo ci) {
-        String worldId = getLevelSummary().getLevelId();
+        String worldId = summary.getLevelId();
         if (!GitManager.syncEnabled(minecraft, worldId)) return;
         ci.cancel();
         GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_pull"));
@@ -57,7 +58,7 @@ public abstract class WorldListEntryMixin {
                     // Generic error; show option to keep local or cloud
                     minecraft.submit(() -> minecraft.setScreen(new GitConflictScreen(
                             this::doLoadWorld,
-                            () -> list.returnToScreen(),
+                            this::returnToScreen,
                             GitManager.getPath(minecraft, worldId)
                     )));
                     break;
@@ -69,15 +70,24 @@ public abstract class WorldListEntryMixin {
                             Component.translatable("minegit.sync.pull_unreachable.continue"),
                             Component.translatable("minegit.sync.pull_unreachable.cancel"),
                             this::doLoadWorld, // continue
-                            () -> list.returnToScreen() // cancel
+                            this::returnToScreen // cancel
                     )));
                     break;
             }
         }).start();
     }
 
+    @Unique
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private void doLoadWorld() {
-        minecraft.submit(() -> minecraft.createWorldOpenFlows().openWorld(getLevelSummary().getLevelId(), list::returnToScreen));
+        minecraft.submit(() -> minecraft.createWorldOpenFlows().openWorld(summary.getLevelId(), this::returnToScreen));
+    }
+
+    @Unique
+    private void returnToScreen() {
+        // disgusting
+        WorldSelectionList list = ((SelectWorldScreenAccessor) screen).getLevelList();
+        ((WorldSelectionListInvoker) list).invokeReloadWorldList();
+        minecraft.setScreen(screen);
     }
 }

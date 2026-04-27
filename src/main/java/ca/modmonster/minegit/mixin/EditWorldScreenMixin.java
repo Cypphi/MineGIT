@@ -3,6 +3,7 @@ package ca.modmonster.minegit.mixin;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.gui.PruneWorldScreen;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
@@ -35,7 +36,7 @@ public class EditWorldScreenMixin extends Screen {
     }
 
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/LinearLayout;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 10), method = "<init>", remap = false)
-    private void init(CallbackInfo info) {
+    private void init(Minecraft minecraft, LevelStorageSource.LevelStorageAccess levelStorageAccess, String string, BooleanConsumer booleanConsumer, CallbackInfo info) {
         if (!GitManager.syncEnabled(minecraft, levelAccess.getLevelId())) return;
 
         // Add prune button

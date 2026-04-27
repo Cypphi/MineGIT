@@ -49,12 +49,12 @@ public class SinglePlayerScreenMixin extends Screen {
         worldSyncButton = Button.builder(Component.literal("☁"), button -> {
             if (worldSyncButtonState == WorldSyncButtonState.SETUP) {
                 this.minecraft.setScreen(new AccountLinkScreen(this, () -> {
-                    if (this.list != null) this.list.returnToScreen();
+                    if (this.list != null) returnToScreen();
                     updateWorldSyncButton();
                 }));
             } else if (worldSyncButtonState == WorldSyncButtonState.ENABLE) {
                 if (hoveredLevel != null) this.minecraft.setScreen(new EnableWorldSyncScreen(this, hoveredLevel, () -> {
-                    if (this.list != null) this.list.returnToScreen();
+                    if (this.list != null) returnToScreen();
                     updateWorldSyncButton();
                 }));
             }
@@ -64,14 +64,14 @@ public class SinglePlayerScreenMixin extends Screen {
 
         // Add clone button
         cloneButton = Button.builder(Component.literal("↓"), button -> this.minecraft.setScreen(new CloneScreen(this, () -> {
-            if (this.list != null) this.list.returnToScreen();
+            if (this.list != null) returnToScreen();
             updateWorldSyncButton();
         }))).tooltip(Tooltip.create(Component.translatable("minegit.clone.title")))
                 .size(20, 20)
                 .build();
         addRenderableWidget(cloneButton);
 
-        repositionElements();
+        doReposition();
         updateWorldSyncButton();
 	}
 
@@ -82,8 +82,14 @@ public class SinglePlayerScreenMixin extends Screen {
         updateWorldSyncButton();
     }
 
-    @Inject(at = @At("TAIL"), method = "repositionElements", remap = false)
-    protected void repositionElements(CallbackInfo ci) {
+    @Override
+    protected void repositionElements() {
+        doReposition();
+        super.repositionElements();
+    }
+
+    @Unique
+    protected void doReposition() {
         if (worldSyncButton != null) worldSyncButton.setPosition(width / 2 - 178, height - 52);
         if (cloneButton != null) cloneButton.setPosition(width / 2 - 178, height - 28);
     }
@@ -105,5 +111,13 @@ public class SinglePlayerScreenMixin extends Screen {
         }
 
         worldSyncButtonState.apply(worldSyncButton);
+    }
+
+    @Unique
+    private void returnToScreen() {
+        // disgusting
+        WorldSelectionList list = ((SelectWorldScreenAccessor) this).getLevelList();
+        ((WorldSelectionListInvoker) list).invokeReloadWorldList();
+        minecraft.setScreen(this);
     }
 }

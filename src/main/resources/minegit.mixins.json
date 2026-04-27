@@ -8,8 +8,10 @@
     "LevelSaveMixin",
     "PauseScreenMixin",
     "QuickPlayMixin",
+    "SelectWorldScreenAccessor",
     "SinglePlayerScreenMixin",
-    "WorldListEntryMixin"
+    "WorldListEntryMixin",
+    "WorldSelectionListInvoker"
   ],
   "injectors": {
     "defaultRequire": 1
