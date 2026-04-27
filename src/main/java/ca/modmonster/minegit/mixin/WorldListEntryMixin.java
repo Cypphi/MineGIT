@@ -1,7 +1,6 @@
 package ca.modmonster.minegit.mixin;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelSummary;
@@ -13,14 +12,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.stream.Stream;
-
-import ca.modmonster.minegit.MineGIT;
 import ca.modmonster.minegit.data.GitManager;
+import ca.modmonster.minegit.data.SyncResult;
+import ca.modmonster.minegit.gui.GitConflictScreen;
 import ca.modmonster.minegit.gui.GitProgressScreen;
+import ca.modmonster.minegit.gui.TwoChoiceScreen;
 
 @Mixin(WorldSelectionList.WorldListEntry.class)
 public abstract class WorldListEntryMixin {
@@ -35,18 +31,10 @@ public abstract class WorldListEntryMixin {
     @Final
     private WorldSelectionList list;
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Inject(method = "doDeleteWorld", at = @At("HEAD"))
     private void beforeWorldDelete(CallbackInfo ci) {
-        Path gitFolder = minecraft.getLevelSource().getBaseDir().resolve(getLevelSummary().getLevelId()).resolve(".git");
-
-        // Delete .git folder
-        if (!gitFolder.toFile().exists()) return;
-        try (Stream<Path> files = Files.walk(gitFolder)){
-            files.forEach(path -> path.toFile().delete());
-        } catch (IOException e) {
-            MineGIT.LOGGER.error("Failed to delete .git folder", e);
-        }
+        // Make .git folder writable
+        GitManager.makeWritable(minecraft, getLevelSummary().getLevelId());
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -58,16 +46,38 @@ public abstract class WorldListEntryMixin {
         GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_pull"));
         minecraft.gui.setScreen(progressScreen);
         new Thread(() -> {
-            boolean ok = GitManager.pull(minecraft, worldId, progressScreen);
+            SyncResult status = GitManager.pull(GitManager.getPath(minecraft, worldId), progressScreen);
             GitManager.makeWritable(minecraft, worldId);
-            if (ok) {
-                // Continue loading the world
-                minecraft.submit(() -> minecraft.createWorldOpenFlows().openWorld(getLevelSummary().getLevelId(), list::returnToScreen));
-            } else {
-                // Show toast saying "error :("
-                minecraft.submit(() -> list.returnToScreen());
-                SystemToast.add(minecraft.gui.toastManager(), new SystemToast.SystemToastId(), Component.translatable("minegit.sync.status.git_pull_error"), null);
+            switch (status) {
+                case SUCCESS:
+                    // Success; load world as normal
+                    doLoadWorld();
+                    break;
+                case FAIL_GENERIC:
+                    // Generic error; show option to keep local or cloud
+                    minecraft.submit(() -> minecraft.gui.setScreen(new GitConflictScreen(
+                            this::doLoadWorld,
+                            () -> list.returnToScreen(),
+                            GitManager.getPath(minecraft, worldId)
+                    )));
+                    break;
+                case FAIL_NETWORK:
+                    // Network error; show unreachable screen
+                    minecraft.submit(() -> minecraft.gui.setScreen(new TwoChoiceScreen(
+                            Component.translatable("minegit.sync.pull_unreachable.title"),
+                            Component.translatable("minegit.sync.pull_unreachable.description"),
+                            Component.translatable("minegit.sync.pull_unreachable.continue"),
+                            Component.translatable("minegit.sync.pull_unreachable.cancel"),
+                            this::doLoadWorld, // continue
+                            () -> list.returnToScreen() // cancel
+                    )));
+                    break;
             }
         }).start();
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private void doLoadWorld() {
+        minecraft.submit(() -> minecraft.createWorldOpenFlows().openWorld(getLevelSummary().getLevelId(), list::returnToScreen));
     }
 }

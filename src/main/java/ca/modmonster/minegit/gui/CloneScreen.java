@@ -1,6 +1,5 @@
 package ca.modmonster.minegit.gui;
 
-import ca.modmonster.minegit.data.GitManager;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
@@ -8,6 +7,8 @@ import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+
+import ca.modmonster.minegit.data.GitManager;
 
 public class CloneScreen extends Screen {
     private static final Component REPO_LABEL = Component.translatable("minegit.clone.repo");
@@ -103,11 +104,11 @@ public class CloneScreen extends Screen {
                         onClose();
                     }
                 } else if (result == 1) {
-                    testCredentialsStatus.setMessage(Component.translatable("minegit.clone.error_invalid_remote"));
+                    testCredentialsStatus.setMessage(Component.translatable("minegit.clone.error.invalid_remote"));
                     repositionElements();
                     updateButtonsStatus();
                 } else {
-                    testCredentialsStatus.setMessage(Component.translatable("minegit.clone.error_generic"));
+                    testCredentialsStatus.setMessage(Component.translatable("minegit.clone.error.generic"));
                     repositionElements();
                     updateButtonsStatus();
                 }
