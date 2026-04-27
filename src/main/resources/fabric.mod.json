@@ -32,6 +32,9 @@
 		"java": ">=21",
 		"fabric-api": "*"
 	},
+	"conflicts": {
+		"fastquit": "*"
+	},
     "custom": {
         "modmenu": {
             "links": {
