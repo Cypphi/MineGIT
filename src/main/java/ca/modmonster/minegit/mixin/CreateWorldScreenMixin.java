@@ -1,10 +1,12 @@
 package ca.modmonster.minegit.mixin;
 
+import ca.modmonster.minegit.data.Config;
+import ca.modmonster.minegit.data.ConfigManager;
+import ca.modmonster.minegit.gui.AccountLinkScreen;
 import ca.modmonster.minegit.gui.CloneScreen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.network.chat.Component;
@@ -19,7 +21,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class CreateWorldScreenMixin extends Screen {
     @Unique
     @Nullable
-    private Button cloneButton;
+    private Button gitButton;
+
+    @Unique
+    private boolean needsSetup = false;
 
     protected CreateWorldScreenMixin(Component title) {
         super(title);
@@ -27,22 +32,58 @@ public abstract class CreateWorldScreenMixin extends Screen {
 
     @Inject(at = @At("TAIL"), method = "init", remap = false)
     private void init(CallbackInfo info) {
-        // Add clone button
-        cloneButton = Button.builder(Component.literal("↓"), button ->
-                        this.minecraft.gui.setScreen(
-                                new CloneScreen(this, null, () ->
-                                        minecraft.gui.setScreen(new SelectWorldScreen(new TitleScreen()))))
-                        )
-                .tooltip(Tooltip.create(Component.translatable("minegit.clone.title")))
-                .size(20, 20)
-                .build();
-        addRenderableWidget(cloneButton);
+        checkNeedsSetup();
+
+        if (needsSetup) {
+            // Add setup button
+            gitButton = Button.builder(Component.literal("☁"), this::onGitButtonPress)
+                    .tooltip(Tooltip.create(Component.translatable("minegit.link.setup")))
+                    .size(20, 20)
+                    .build();
+        } else {
+            // Add clone button
+            gitButton = Button.builder(Component.literal("↓"), this::onGitButtonPress)
+                    .tooltip(Tooltip.create(Component.translatable("minegit.clone.title")))
+                    .size(20, 20)
+                    .build();
+        }
+        addRenderableWidget(gitButton);
 
         repositionElements();
     }
 
+    @Unique
+    void onGitButtonPress(Button gitButton) {
+        if (needsSetup) {
+            this.minecraft.gui.setScreen(new AccountLinkScreen(this, this::updateSetupButton));
+        } else {
+            this.minecraft.gui.setScreen(
+                    new CloneScreen(this, null, () ->
+                            minecraft.gui.setScreen(new SelectWorldScreen(null))));
+        }
+    }
+
+    @Unique
+    void checkNeedsSetup() {
+        Config config = ConfigManager.getCurrentConfig();
+        needsSetup = config.username.isBlank() || config.getPat().isBlank();
+    }
+
+    @Unique
+    void updateSetupButton() {
+        if (gitButton == null) return;
+        checkNeedsSetup();
+        if (needsSetup) {
+            gitButton.setMessage(Component.literal("☁"));
+            gitButton.setTooltip(Tooltip.create(Component.translatable("minegit.link.setup")));
+        } else {
+            gitButton.setMessage(Component.literal("↓"));
+            gitButton.setTooltip(Tooltip.create(Component.translatable("minegit.clone.title")));
+        }
+    }
+
     @Inject(at = @At("TAIL"), method = "repositionElements", remap = false)
     protected void repositionElements(CallbackInfo ci) {
-        if (cloneButton != null) cloneButton.setPosition(width / 2 - 178, height - 26);
+        if (gitButton != null) gitButton.setPosition(width / 2 - 178, height - 26);
     }
 }
