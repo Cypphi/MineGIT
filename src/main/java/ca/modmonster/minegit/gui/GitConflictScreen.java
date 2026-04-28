@@ -1,6 +1,7 @@
 package ca.modmonster.minegit.gui;
 
-import net.minecraft.client.gui.GuiGraphics;
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.components.StringWidget;
@@ -110,9 +111,9 @@ public class GitConflictScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-        this.renderDirtBackground(guiGraphics);
-        super.render(guiGraphics, i, j, f);
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.renderDirtBackground(poseStack);
+        super.render(poseStack, i, j, f);
     }
 
     @Override

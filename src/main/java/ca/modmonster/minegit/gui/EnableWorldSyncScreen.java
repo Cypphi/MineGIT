@@ -1,8 +1,8 @@
 package ca.modmonster.minegit.gui;
 
 import com.google.gson.JsonParser;
+import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -70,9 +70,9 @@ public class EnableWorldSyncScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics guiGraphics, int i, int j, float f) {
-        this.renderDirtBackground(guiGraphics);
-        super.render(guiGraphics, i, j, f);
+    public void render(PoseStack poseStack, int i, int j, float f) {
+        this.renderDirtBackground(poseStack);
+        super.render(poseStack, i, j, f);
     }
 
     private void setupSync() {

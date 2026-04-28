@@ -7,7 +7,6 @@
     "EditWorldScreenMixin",
     "LevelSaveMixin",
     "PauseScreenMixin",
-    "QuickPlayMixin",
     "SelectWorldScreenAccessor",
     "SinglePlayerScreenMixin",
     "WorldListEntryAccessor",

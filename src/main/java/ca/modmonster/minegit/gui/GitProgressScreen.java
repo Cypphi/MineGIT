@@ -1,6 +1,7 @@
 package ca.modmonster.minegit.gui;
 
-import net.minecraft.client.gui.GuiGraphics;
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -45,26 +46,21 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
     }
 
     @Override
-    public void renderBackground(@NotNull GuiGraphics guiGraphics) {
-        renderDirtBackground(guiGraphics);
-    }
-
-    @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
-        this.renderDirtBackground(guiGraphics);
-        super.render(guiGraphics, i, j, f);
+    public void render(@NotNull PoseStack poseStack, int i, int j, float f) {
+        this.renderDirtBackground(poseStack);
+        super.render(poseStack, i, j, f);
 
         // Render progress bar
         int barLeft = this.width / 2 - PROGRESS_BAR_WIDTH / 2;
-        guiGraphics.fill(barLeft, this.height - 16, barLeft + PROGRESS_BAR_WIDTH, this.height - 18, 0xFFA0A0A0);
+        fill(poseStack, barLeft, this.height - 16, barLeft + PROGRESS_BAR_WIDTH, this.height - 18, 0xFFA0A0A0);
 
         float progress = (float) currentTaskWork / currentTaskTotalWork;
         if (progress > 1) progress = 1;
         int barPixels = (int) (PROGRESS_BAR_WIDTH * progress);
-        guiGraphics.fill(barLeft, this.height - 16, barLeft + barPixels, this.height - 18, 0xFF80FF80);
+        fill(poseStack, barLeft, this.height - 16, barLeft + barPixels, this.height - 18, 0xFF80FF80);
 
         // Draw message
-        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 70, 16777215);
+        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 70, 16777215);
     }
 
     @Override
