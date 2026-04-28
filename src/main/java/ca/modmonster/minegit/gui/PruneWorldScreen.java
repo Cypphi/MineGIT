@@ -1,5 +1,8 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.data.GitManager;
+import ca.modmonster.minegit.data.SyncResult;
+import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.components.StringWidget;
@@ -10,12 +13,7 @@ import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelStorageSource;
-
 import org.eclipse.jgit.lib.ProgressMonitor;
-
-import ca.modmonster.minegit.data.GitManager;
-import ca.modmonster.minegit.data.SyncResult;
-import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 
 public class PruneWorldScreen extends Screen {
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 60);
@@ -68,10 +66,11 @@ public class PruneWorldScreen extends Screen {
     private void doPrune(ProgressMonitor progress) {
         String worldId = levelAccess.getLevelId();
         boolean ok = GitManager.prune(minecraft, worldId, progress);
+        if (minecraft == null) return;
         if (ok) {
-            minecraft.getToastManager().addToast(new SystemToast(new SystemToast.SystemToastId(), Component.translatable("minegit.prune.complete"), null));
+            SystemToast.add(minecraft.getToasts(), new SystemToast.SystemToastId(), Component.translatable("minegit.prune.complete"), null);
         } else {
-            minecraft.getToastManager().addToast(new SystemToast(new SystemToast.SystemToastId(), Component.translatable("minegit.prune.failed"), null));
+            SystemToast.add(minecraft.getToasts(), new SystemToast.SystemToastId(), Component.translatable("minegit.prune.failed"), null);
         }
         minecraft.submit(() -> this.callback.accept(true));
     }

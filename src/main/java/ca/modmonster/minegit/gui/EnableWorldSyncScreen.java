@@ -29,7 +29,7 @@ public class EnableWorldSyncScreen extends Screen {
     private Button openSetupButton;
 
     public EnableWorldSyncScreen(Screen parent, LevelSummary level, Runnable closeCallback) {
-        super(Component.translatable("minegit.sync.enable"));
+        super(Component.translatable("minegit.sync.enable.title"));
         this.parent = parent;
         this.level = level;
         this.closeCallback = closeCallback;
@@ -82,7 +82,7 @@ public class EnableWorldSyncScreen extends Screen {
             if (statusCode != 201) {
                 // OOPS! ERROR!!
                 minecraft.submit(() -> {
-                    minecraft.getToastManager().addToast(new SystemToast(new SystemToast.SystemToastId(), Component.translatable("minegit.sync.enable.create_repo.error", statusCode), null));
+                    SystemToast.add(minecraft.getToasts(), new SystemToast.SystemToastId(), Component.translatable("minegit.sync.enable.create_repo.error", statusCode), null);
                     openSetupButton.visible = true;
                     cancelButton.active = true;
 
@@ -100,14 +100,14 @@ public class EnableWorldSyncScreen extends Screen {
             boolean ok = GitManager.init(minecraft, level.getLevelId(), repoUrl, progressScreen);
             if (!ok) {
                 minecraft.submit(() -> {
-                    minecraft.getToastManager().addToast(new SystemToast(new SystemToast.SystemToastId(), Component.translatable("minegit.sync.enable.git_init.error"), null));
+                    SystemToast.add(minecraft.getToasts(), new SystemToast.SystemToastId(), Component.translatable("minegit.sync.enable.git_init.error"), null);
                     minecraft.setScreen(this);
                     cancelButton.active = true;
                 });
                 return;
             }
 
-            minecraft.getToastManager().addToast(new SystemToast(new SystemToast.SystemToastId(), Component.translatable("minegit.sync.enable.complete"), null));
+            SystemToast.add(minecraft.getToasts(), new SystemToast.SystemToastId(), Component.translatable("minegit.sync.enable.complete"), null);
             minecraft.submit(this::onClose);
         }).start();
     }

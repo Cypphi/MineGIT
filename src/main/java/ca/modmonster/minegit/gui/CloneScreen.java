@@ -90,19 +90,19 @@ public class CloneScreen extends Screen {
 
             minecraft.submit(() -> {
                 if (result == 0) {
-                    minecraft.getToastManager().addToast(new SystemToast(new SystemToast.SystemToastId(), Component.translatable("minegit.clone.success"), null));
+                    SystemToast.add(minecraft.getToasts(), new SystemToast.SystemToastId(), Component.translatable("minegit.clone.success"), null);
                     if (cloneSuccessCallback != null) {
                         cloneSuccessCallback.run();
                     } else {
                         onClose();
                     }
                 } else if (result == 1) {
-                    minecraft.getToastManager().addToast(new SystemToast(new SystemToast.SystemToastId(), Component.translatable("minegit.clone.error.invalid_remote"), null));
+                    SystemToast.add(minecraft.getToasts(), new SystemToast.SystemToastId(), Component.translatable("minegit.clone.error.invalid_remote"), null);
                     minecraft.setScreen(this);
                     repositionElements();
                     updateButtonsStatus();
                 } else {
-                    minecraft.getToastManager().addToast(new SystemToast(new SystemToast.SystemToastId(), Component.translatable("minegit.clone.error.generic"), null));
+                    SystemToast.add(minecraft.getToasts(), new SystemToast.SystemToastId(), Component.translatable("minegit.clone.error.generic"), null);
                     minecraft.setScreen(this);
                     repositionElements();
                     updateButtonsStatus();
