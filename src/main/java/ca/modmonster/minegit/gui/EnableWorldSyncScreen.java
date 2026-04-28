@@ -1,21 +1,24 @@
 package ca.modmonster.minegit.gui;
 
-import ca.modmonster.minegit.MineGIT;
-import ca.modmonster.minegit.data.Config;
-import ca.modmonster.minegit.data.ConfigManager;
-import ca.modmonster.minegit.data.GitManager;
-import ca.modmonster.minegit.data.NetworkManager;
 import com.google.gson.JsonParser;
+
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
-import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelSummary;
 
 import java.net.http.HttpResponse;
+
+import ca.modmonster.minegit.MineGIT;
+import ca.modmonster.minegit.data.Config;
+import ca.modmonster.minegit.data.ConfigManager;
+import ca.modmonster.minegit.data.GitManager;
+import ca.modmonster.minegit.data.NetworkManager;
 
 public class EnableWorldSyncScreen extends Screen {
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 60);
@@ -38,32 +41,38 @@ public class EnableWorldSyncScreen extends Screen {
     @Override
     protected void init() {
         // Column layout
-        LinearLayout columnLayout = this.layout.addToContents(LinearLayout.vertical().spacing(8));
+        GridLayout columnLayout = this.layout.addToContents(new GridLayout().spacing(8));
         columnLayout.defaultCellSetting().alignHorizontallyCenter();
 
         // Menu title
         layout.addToHeader(new StringWidget(this.title, this.font));
 
         // Confirmation message
-        columnLayout.addChild(new StringWidget(Component.translatable("minegit.sync.enable.confirm.line1", level.getLevelName()), this.font));
-        columnLayout.addChild(new StringWidget(Component.translatable("minegit.sync.enable.confirm.line2"), this.font));
+        columnLayout.addChild(new StringWidget(Component.translatable("minegit.sync.enable.confirm.line1", level.getLevelName()), this.font), 0, 0);
+        columnLayout.addChild(new StringWidget(Component.translatable("minegit.sync.enable.confirm.line2"), this.font), 1, 0);
 
         // Confirm button
-        LinearLayout buttonRowLayout = columnLayout.addChild(LinearLayout.horizontal().spacing(8));
+        GridLayout buttonRowLayout = columnLayout.addChild(new GridLayout().spacing(8), 2, 0);
         confirmButton = Button.builder(Component.translatable("minegit.sync.enable.confirm.ok"), button -> setupSync()).build();
-        buttonRowLayout.addChild(confirmButton);
+        buttonRowLayout.addChild(confirmButton, 0, 0);
 
         // Cancel button
         cancelButton = Button.builder(Component.translatable("minegit.sync.enable.confirm.cancel"), button -> onClose()).build();
-        buttonRowLayout.addChild(cancelButton);
+        buttonRowLayout.addChild(cancelButton, 0, 1);
 
         openSetupButton = Button.builder(Component.translatable("minegit.link.setup.open"), button -> minecraft.setScreen(new AccountLinkScreen(this.parent, closeCallback))).build();
         openSetupButton.visible = false;
-        columnLayout.addChild(openSetupButton);
+        columnLayout.addChild(openSetupButton, 3, 0);
 
         // Add layout widgets
         this.layout.visitWidgets(this::addRenderableWidget);
         this.layout.arrangeElements();
+    }
+
+    @Override
+    public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+        this.renderDirtBackground(guiGraphics);
+        super.render(guiGraphics, i, j, f);
     }
 
     private void setupSync() {

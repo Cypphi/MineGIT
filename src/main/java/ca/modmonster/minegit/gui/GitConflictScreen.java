@@ -1,20 +1,23 @@
 package ca.modmonster.minegit.gui;
 
-import ca.modmonster.minegit.data.GitManager;
-import ca.modmonster.minegit.data.SyncResult;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
-import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+
+import ca.modmonster.minegit.data.GitManager;
+import ca.modmonster.minegit.data.SyncResult;
 
 public class GitConflictScreen extends Screen {
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 60);
@@ -39,7 +42,7 @@ public class GitConflictScreen extends Screen {
         String localCommitDate = GitManager.getLatestLocalCommitDate(worldFolder);
 
         // Column layout
-        LinearLayout columnLayout = this.layout.addToContents(LinearLayout.vertical().spacing(2));
+        GridLayout columnLayout = this.layout.addToContents(new GridLayout().spacing(2));
         columnLayout.defaultCellSetting().alignHorizontallyCenter();
 
         // Menu title
@@ -47,8 +50,8 @@ public class GitConflictScreen extends Screen {
 
         // Confirmation message
         descriptionWidget = new MultiLineTextWidget(Component.translatable("minegit.sync.conflict.description"), this.font).setMaxWidth(this.width - 50);
-        columnLayout.addChild(descriptionWidget);
-        columnLayout.addChild(new SpacerElement(200, 14));
+        columnLayout.addChild(descriptionWidget, 0, 0);
+        columnLayout.addChild(new SpacerElement(200, 14), 1, 0);
 
         // Remote button
         Button remoteButton = Button.builder(Component.translatable("minegit.sync.conflict.remote").append(" - " + remoteCommitDate), button -> {
@@ -70,7 +73,7 @@ public class GitConflictScreen extends Screen {
                 }
             }).start();
         }).width(240).build();
-        columnLayout.addChild(remoteButton);
+        columnLayout.addChild(remoteButton, 2, 0);
 
         // Local button
         Button localButton = Button.builder(Component.translatable("minegit.sync.conflict.local").append(" - " + localCommitDate), button -> {
@@ -92,18 +95,24 @@ public class GitConflictScreen extends Screen {
                 }
             }).start();
         }).width(240).build();
-        columnLayout.addChild(localButton);
+        columnLayout.addChild(localButton, 3, 0);
 
         // Cancel button
         if (cancelCallback != null) {
-            columnLayout.addChild(new SpacerElement(200, 6));
+            columnLayout.addChild(new SpacerElement(200, 6), 4, 0);
             Button cancelButton = Button.builder(Component.translatable("minegit.sync.conflict.cancel"), button -> cancelCallback.run()).build();
-            columnLayout.addChild(cancelButton);
+            columnLayout.addChild(cancelButton, 5, 0);
         }
 
         // Add layout widgets
         this.layout.visitWidgets(this::addRenderableWidget);
         this.layout.arrangeElements();
+    }
+
+    @Override
+    public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+        this.renderDirtBackground(guiGraphics);
+        super.render(guiGraphics, i, j, f);
     }
 
     @Override

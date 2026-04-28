@@ -1,17 +1,21 @@
 package ca.modmonster.minegit.gui;
 
-import ca.modmonster.minegit.data.GitManager;
-import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
-import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+
+import ca.modmonster.minegit.backport.RalspinWidget;
+import ca.modmonster.minegit.data.GitManager;
 
 public class CloneScreen extends Screen {
     private static final Component REPO_LABEL = Component.translatable("minegit.clone.repo");
-    private static final ResourceLocation RALSPIN = new ResourceLocation("minegit", "ralspin");
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 60);
 
     private final Screen parent;
@@ -19,7 +23,7 @@ public class CloneScreen extends Screen {
     private final Runnable cloneSuccessCallback;
     private EditBox repoEdit;
     private Button testCredentialsButton;
-    private ImageWidget ralspinWidget;
+    private RalspinWidget ralspinWidget;
     private Button configureButton;
 
     public CloneScreen(Screen parent, Runnable closeCallback) {
@@ -36,23 +40,23 @@ public class CloneScreen extends Screen {
     @Override
     protected void init() {
         // Column layout
-        LinearLayout columnLayout = this.layout.addToContents(LinearLayout.vertical().spacing(8));
+        GridLayout columnLayout = this.layout.addToContents(new GridLayout().spacing(8));
         columnLayout.defaultCellSetting().alignHorizontallyCenter();
 
         // Menu title
         layout.addToHeader(new StringWidget(this.title, this.font));
 
         // Repo name text field
-        StringWidget usernameEditLabel = columnLayout.addChild(new StringWidget(REPO_LABEL, font));
+        StringWidget usernameEditLabel = columnLayout.addChild(new StringWidget(REPO_LABEL, font), 0, 0);
         usernameEditLabel.setAlpha(0.5f);
         repoEdit = new EditBox(font, 0, 0, 200, 20, REPO_LABEL);
         repoEdit.setMaxLength(39);
         repoEdit.setResponder(string -> updateButtonsStatus());
-        columnLayout.addChild(repoEdit);
+        columnLayout.addChild(repoEdit, 1, 0);
 
         // Clone button
         testCredentialsButton = Button.builder(Component.translatable("minegit.clone.confirm"), button -> doClone()).size(200, 20).build();
-        columnLayout.addChild(testCredentialsButton);
+        columnLayout.addChild(testCredentialsButton, 2, 0);
 
         // Add layout widgets
         this.layout.visitWidgets(this::addRenderableWidget);
@@ -72,14 +76,18 @@ public class CloneScreen extends Screen {
         addRenderableWidget(configureButton);
 
         // Ralsei go spinny
-        ralspinWidget = ImageWidget.sprite(42, 80, RALSPIN);
-        ralspinWidget.setPosition(width - 60, height - 80);
-        ralspinWidget.setTooltip(Tooltip.create(Component.literal("hiiiii!! ^-^")));
+        ralspinWidget = new RalspinWidget(width - 60, height - 80);
         addRenderableWidget(ralspinWidget);
 
         updateButtonsStatus();
         repositionElements();
         setInitialFocus(repoEdit);
+    }
+
+    @Override
+    public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+        this.renderDirtBackground(guiGraphics);
+        super.render(guiGraphics, i, j, f);
     }
 
     private void doClone() {

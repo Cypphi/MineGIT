@@ -1,20 +1,24 @@
 package ca.modmonster.minegit.gui;
 
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+
+import ca.modmonster.minegit.backport.RalspinWidget;
 import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.CryptoManager;
 import ca.modmonster.minegit.data.NetworkManager;
-import net.minecraft.client.gui.components.*;
-import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
-import net.minecraft.client.gui.layouts.LinearLayout;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 
 public class AccountLinkScreen extends Screen {
     private static final Component USERNAME_EDIT_LABEL = Component.translatable("minegit.link.username");
     private static final Component PAT_EDIT_LABEL = Component.translatable("minegit.link.pat");
-    private static final ResourceLocation RALSPIN = new ResourceLocation("minegit", "ralspin");
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 60);
 
     private final Screen parent;
@@ -22,7 +26,7 @@ public class AccountLinkScreen extends Screen {
     private EditBox usernameEdit;
     private EditBox patEdit;
     private Button testCredentialsButton;
-    private ImageWidget ralspinWidget;
+    private RalspinWidget ralspinWidget;
     private boolean requestInProgress = false;
     private StringWidget testCredentialsStatus;
 
@@ -39,37 +43,39 @@ public class AccountLinkScreen extends Screen {
     @Override
     protected void init() {
         // Column layout
-        LinearLayout columnLayout = this.layout.addToContents(LinearLayout.vertical().spacing(8));
+        GridLayout columnLayout = this.layout.addToContents(new GridLayout().spacing(8));
         columnLayout.defaultCellSetting().alignHorizontallyCenter();
 
         // Menu title
         layout.addToHeader(new StringWidget(this.title, this.font));
 
         // Username text field
-        StringWidget usernameEditLabel = columnLayout.addChild(new StringWidget(USERNAME_EDIT_LABEL, font));
+        StringWidget usernameEditLabel = columnLayout.addChild(new StringWidget(USERNAME_EDIT_LABEL, font), 0, 0);
         usernameEditLabel.setAlpha(0.5f);
         usernameEdit = new EditBox(font, 0, 0, 200, 20, USERNAME_EDIT_LABEL);
         usernameEdit.setMaxLength(39);
         usernameEdit.setResponder(string -> updateTestButtonStatus(false));
-        columnLayout.addChild(usernameEdit);
+        columnLayout.addChild(usernameEdit, 1, 0);
 
         // PAT text field
-        StringWidget patEditLabel = columnLayout.addChild(new StringWidget(PAT_EDIT_LABEL, font));
+        StringWidget patEditLabel = columnLayout.addChild(new StringWidget(PAT_EDIT_LABEL, font), 2, 0);
         patEditLabel.setAlpha(0.5f);
         patEdit = new EditBox(font, 0, 0, 200, 20, PAT_EDIT_LABEL);
         patEdit.setMaxLength(255);
         patEdit.setResponder(string -> updateTestButtonStatus(false));
-        columnLayout.addChild(patEdit);
+        columnLayout.addChild(patEdit, 3, 0);
 
         // Test credentials button
         testCredentialsButton = Button.builder(Component.translatable("minegit.link.test"), button -> testCredentials()).size(200, 20).build();
-        columnLayout.addChild(testCredentialsButton);
+        columnLayout.addChild(testCredentialsButton, 4, 0);
 
         // Test credentials status
         testCredentialsStatus = new StringWidget(Component.empty(), font);
-        columnLayout.addChild(testCredentialsStatus);
+        columnLayout.addChild(testCredentialsStatus, 5, 0);
 
         // Add layout widgets
+        columnLayout.arrangeElements();
+//        FrameLayout.alignInRectangle(columnLayout, 0, 0, this.width, this.height, 0.5F, 0.25F);
         this.layout.visitWidgets(this::addRenderableWidget);
         this.layout.arrangeElements();
 
@@ -81,9 +87,7 @@ public class AccountLinkScreen extends Screen {
         addRenderableWidget(backButton);
 
         // Ralsei go spinny
-        ralspinWidget = ImageWidget.sprite(42, 80, RALSPIN);
-        ralspinWidget.setPosition(width - 60, height - 80);
-        ralspinWidget.setTooltip(Tooltip.create(Component.literal("hiiiii!! ^-^")));
+        ralspinWidget = new RalspinWidget(width - 60, height - 80);
         addRenderableWidget(ralspinWidget);
 
         updateTestButtonStatus(false);
@@ -95,6 +99,12 @@ public class AccountLinkScreen extends Screen {
         if (pat != null) patEdit.setValue(pat);
 
         setInitialFocus(usernameEdit);
+    }
+
+    @Override
+    public void render(GuiGraphics guiGraphics, int i, int j, float f) {
+        this.renderDirtBackground(guiGraphics);
+        super.render(guiGraphics, i, j, f);
     }
 
     private void testCredentials() {

@@ -45,12 +45,13 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
     }
 
     @Override
-    public void renderBackground(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
+    public void renderBackground(@NotNull GuiGraphics guiGraphics) {
         renderDirtBackground(guiGraphics);
     }
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
+        this.renderDirtBackground(guiGraphics);
         super.render(guiGraphics, i, j, f);
 
         // Render progress bar
