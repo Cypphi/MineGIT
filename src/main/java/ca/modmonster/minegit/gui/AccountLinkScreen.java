@@ -43,7 +43,7 @@ public class AccountLinkScreen extends Screen {
         columnLayout.defaultCellSetting().alignHorizontallyCenter();
 
         // Menu title
-        layout.addTitleHeader(this.title, this.font);
+        layout.addToHeader(new StringWidget(this.title, this.font));
 
         // Username text field
         StringWidget usernameEditLabel = columnLayout.addChild(new StringWidget(USERNAME_EDIT_LABEL, font));
@@ -93,6 +93,8 @@ public class AccountLinkScreen extends Screen {
         usernameEdit.setValue(config.username);
         String pat = config.getPat();
         if (pat != null) patEdit.setValue(pat);
+
+        setInitialFocus(usernameEdit);
     }
 
     private void testCredentials() {
@@ -143,11 +145,6 @@ public class AccountLinkScreen extends Screen {
         ConfigManager.save(new Config(username, pat));
         minecraft.setScreen(parent);
         if (closeCallback != null) closeCallback.run();
-    }
-
-    @Override
-    protected void setInitialFocus() {
-        setInitialFocus(usernameEdit);
     }
 
     @Override

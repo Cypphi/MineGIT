@@ -1,20 +1,15 @@
 package ca.modmonster.minegit.gui;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.FocusableTextWidget;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-
 import org.eclipse.jgit.lib.ProgressMonitor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class GitProgressScreen extends Screen implements ProgressMonitor {
     public static final int PROGRESS_BAR_WIDTH = 128;
-
-    @Nullable
-    private FocusableTextWidget textWidget;
 
     @Nullable
     private StringWidget currentTaskWidget;
@@ -28,17 +23,12 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
 
     @Override
     protected void init() {
-        this.textWidget = this.addRenderableWidget(new FocusableTextWidget(this.width, this.title, this.font, 12));
         this.currentTaskWidget = this.addRenderableWidget(new StringWidget(Component.empty(), font));
         this.repositionElements();
     }
 
     @Override
     protected void repositionElements() {
-        if (this.textWidget != null) {
-            this.textWidget.setPosition(this.width / 2 - this.textWidget.getWidth() / 2, this.height / 2 - 9 / 2);
-        }
-
         if (this.currentTaskWidget != null) {
             this.currentTaskWidget.setPosition(this.width / 2 - this.currentTaskWidget.getWidth() / 2, this.height - 32);
         }
@@ -56,9 +46,7 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
 
     @Override
     public void renderBackground(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
-        this.renderPanorama(guiGraphics, f);
-        this.renderBlurredBackground(f);
-        this.renderMenuBackground(guiGraphics);
+        renderDirtBackground(guiGraphics);
     }
 
     @Override
@@ -73,12 +61,14 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
         if (progress > 1) progress = 1;
         int barPixels = (int) (PROGRESS_BAR_WIDTH * progress);
         guiGraphics.fill(barLeft, this.height - 16, barLeft + barPixels, this.height - 18, 0xFF80FF80);
+
+        // Draw message
+        guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 70, 16777215);
     }
 
     @Override
     public void start(int totalTasks) {}
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
     public void beginTask(String title, int totalWork) {
         if (currentTaskWidget != null) {

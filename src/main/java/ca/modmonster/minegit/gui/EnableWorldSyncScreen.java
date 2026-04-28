@@ -42,7 +42,7 @@ public class EnableWorldSyncScreen extends Screen {
         columnLayout.defaultCellSetting().alignHorizontallyCenter();
 
         // Menu title
-        layout.addTitleHeader(this.title, this.font);
+        layout.addToHeader(new StringWidget(this.title, this.font));
 
         // Confirmation message
         columnLayout.addChild(new StringWidget(Component.translatable("minegit.sync.enable.confirm.line1", level.getLevelName()), this.font));
@@ -66,7 +66,6 @@ public class EnableWorldSyncScreen extends Screen {
         this.layout.arrangeElements();
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void setupSync() {
         confirmButton.active = false;
         cancelButton.active = false;

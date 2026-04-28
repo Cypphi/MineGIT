@@ -38,7 +38,6 @@ public abstract class WorldListEntryMixin {
         GitManager.makeWritable(minecraft, summary.getLevelId());
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Inject(method = "joinWorld", at = @At("HEAD"), cancellable = true)
     private void beforeWorldJoin(CallbackInfo ci) {
         String worldId = summary.getLevelId();
@@ -78,9 +77,8 @@ public abstract class WorldListEntryMixin {
     }
 
     @Unique
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void doLoadWorld() {
-        minecraft.submit(() -> minecraft.createWorldOpenFlows().openWorld(summary.getLevelId(), this::returnToScreen));
+        minecraft.submit(() -> minecraft.createWorldOpenFlows().checkForBackupAndLoad(summary.getLevelId(), this::returnToScreen));
     }
 
     @Unique

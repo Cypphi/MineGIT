@@ -10,20 +10,19 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.quickplay.QuickPlay;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import oshi.util.Util;
 
 @Mixin(QuickPlay.class)
 public class QuickPlayMixin {
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Inject(method = "joinSingleplayerWorld", at = @At("HEAD"), cancellable = true)
     private static void joinSingleplayerWorld(final Minecraft minecraft, @Nullable final String identifier, CallbackInfo ci) {
-        if (StringUtil.isBlank(identifier) || !minecraft.getLevelSource().levelExists(identifier)) return;
+        if (Util.isBlank(identifier) || !minecraft.getLevelSource().levelExists(identifier)) return;
         if (!GitManager.syncEnabled(minecraft, identifier)) return;
         ci.cancel();
         GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_pull"));
@@ -59,10 +58,9 @@ public class QuickPlayMixin {
         }).start();
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Unique
     private static void doLoadWorld(final Minecraft minecraft, final String identifier) {
-        minecraft.submit(() -> minecraft.createWorldOpenFlows().openWorld(identifier, () -> minecraft.setScreen(new TitleScreen())));
+        minecraft.submit(() -> minecraft.createWorldOpenFlows().checkForBackupAndLoad(identifier, () -> minecraft.setScreen(new TitleScreen())));
     }
 
     @Unique

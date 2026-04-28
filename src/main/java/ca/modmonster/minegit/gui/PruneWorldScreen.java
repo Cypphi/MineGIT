@@ -38,7 +38,7 @@ public class PruneWorldScreen extends Screen {
         columnLayout.defaultCellSetting().alignHorizontallyCenter();
 
         // Menu title
-        layout.addTitleHeader(this.title, this.font);
+        layout.addToHeader(new StringWidget(this.title, this.font));
 
         // Confirmation message
         descriptionWidget = new MultiLineTextWidget(Component.translatable("minegit.prune.description"), this.font).setMaxWidth(this.width - 50);
@@ -62,7 +62,6 @@ public class PruneWorldScreen extends Screen {
         this.layout.arrangeElements();
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void doPrune(ProgressMonitor progress) {
         String worldId = levelAccess.getLevelId();
         boolean ok = GitManager.prune(minecraft, worldId, progress);
@@ -75,7 +74,6 @@ public class PruneWorldScreen extends Screen {
         minecraft.submit(() -> this.callback.accept(true));
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void pullThenPrune() {
         levelAccess.safeClose();
         String worldId = levelAccess.getLevelId();

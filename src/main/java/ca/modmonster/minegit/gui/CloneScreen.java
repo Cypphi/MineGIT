@@ -40,7 +40,7 @@ public class CloneScreen extends Screen {
         columnLayout.defaultCellSetting().alignHorizontallyCenter();
 
         // Menu title
-        layout.addTitleHeader(this.title, this.font);
+        layout.addToHeader(new StringWidget(this.title, this.font));
 
         // Repo name text field
         StringWidget usernameEditLabel = columnLayout.addChild(new StringWidget(REPO_LABEL, font));
@@ -79,9 +79,9 @@ public class CloneScreen extends Screen {
 
         updateButtonsStatus();
         repositionElements();
+        setInitialFocus(repoEdit);
     }
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     private void doClone() {
         GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.clone.in_progress"));
         minecraft.setScreen(progressScreen);
@@ -119,11 +119,6 @@ public class CloneScreen extends Screen {
     public void onClose() {
         minecraft.setScreen(parent);
         if (closeCallback != null) closeCallback.run();
-    }
-
-    @Override
-    protected void setInitialFocus() {
-        setInitialFocus(repoEdit);
     }
 
     @Override

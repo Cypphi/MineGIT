@@ -42,7 +42,9 @@ dependencies {
     include "org.eclipse.jgit:org.eclipse.jgit:7.6.0.202603022253-r"
 
     // Mod Menu
-    modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+    modImplementation ("com.terraformersmc:modmenu:${project.modmenu_version}") {
+		exclude group: "eu.pb4", module: "placeholder-api"
+	}
 }
 
 processResources {

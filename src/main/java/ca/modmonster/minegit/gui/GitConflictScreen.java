@@ -4,6 +4,7 @@ import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.SyncResult;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
+import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
@@ -31,7 +32,6 @@ public class GitConflictScreen extends Screen {
 
     private MultiLineTextWidget descriptionWidget;
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     @Override
     protected void init() {
         // Get latest commit dates of remote and local
@@ -43,7 +43,7 @@ public class GitConflictScreen extends Screen {
         columnLayout.defaultCellSetting().alignHorizontallyCenter();
 
         // Menu title
-        layout.addTitleHeader(this.title, this.font);
+        layout.addToHeader(new StringWidget(this.title, this.font));
 
         // Confirmation message
         descriptionWidget = new MultiLineTextWidget(Component.translatable("minegit.sync.conflict.description"), this.font).setMaxWidth(this.width - 50);
