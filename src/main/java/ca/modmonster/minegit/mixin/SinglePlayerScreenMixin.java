@@ -1,13 +1,7 @@
 package ca.modmonster.minegit.mixin;
 
-import ca.modmonster.minegit.data.Config;
-import ca.modmonster.minegit.data.ConfigManager;
-import ca.modmonster.minegit.data.GitManager;
-import ca.modmonster.minegit.gui.AccountLinkScreen;
-import ca.modmonster.minegit.gui.CloneScreen;
-import ca.modmonster.minegit.gui.EnableWorldSyncScreen;
-import ca.modmonster.minegit.widget.WorldSyncButtonState;
 import com.mojang.blaze3d.platform.InputConstants;
+
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
@@ -23,6 +17,14 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import ca.modmonster.minegit.data.Config;
+import ca.modmonster.minegit.data.ConfigManager;
+import ca.modmonster.minegit.data.GitManager;
+import ca.modmonster.minegit.gui.AccountLinkScreen;
+import ca.modmonster.minegit.gui.CloneScreen;
+import ca.modmonster.minegit.gui.EnableWorldSyncScreen;
+import ca.modmonster.minegit.widget.WorldSyncButtonState;
 
 @Mixin(SelectWorldScreen.class)
 public class SinglePlayerScreenMixin extends Screen {
@@ -117,19 +119,23 @@ public class SinglePlayerScreenMixin extends Screen {
 
     @Override
     public boolean keyPressed(KeyEvent event) {
-        if (event.key() == InputConstants.KEY_LALT) altHeld = true;
-        if (worldSyncButton != null) {
-            worldSyncButton.active = true;
-            worldSyncButton.setMessage(Component.literal("☁"));
-            worldSyncButton.setTooltip(Tooltip.create(Component.translatable("minegit.link.setup.open")));
+        if (event.key() == InputConstants.KEY_LALT) {
+            altHeld = true;
+            if (worldSyncButton != null) {
+                worldSyncButton.active = true;
+                worldSyncButton.setMessage(Component.literal("☁"));
+                worldSyncButton.setTooltip(Tooltip.create(Component.translatable("minegit.link.setup.open")));
+            }
         }
         return super.keyPressed(event);
     }
 
     @Override
     public boolean keyReleased(KeyEvent event) {
-        if (event.key() == InputConstants.KEY_LALT) altHeld = false;
-        updateWorldSyncButton();
+        if (event.key() == InputConstants.KEY_LALT) {
+            altHeld = false;
+            updateWorldSyncButton();
+        }
         return super.keyReleased(event);
     }
 }
