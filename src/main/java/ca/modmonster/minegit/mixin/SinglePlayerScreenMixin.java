@@ -7,6 +7,7 @@ import ca.modmonster.minegit.gui.AccountLinkScreen;
 import ca.modmonster.minegit.gui.CloneScreen;
 import ca.modmonster.minegit.gui.EnableWorldSyncScreen;
 import ca.modmonster.minegit.widget.WorldSyncButtonState;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
@@ -43,11 +44,15 @@ public class SinglePlayerScreenMixin extends Screen {
     @Unique @Nullable
     private LevelSummary hoveredLevel;
 
+    @Unique
+    private boolean altHeld;
+
     @Inject(at = @At("TAIL"), method = "init", remap = false)
 	private void init(CallbackInfo info) {
         // Add world sync button
         worldSyncButton = Button.builder(Component.literal("☁"), button -> {
-            if (worldSyncButtonState == WorldSyncButtonState.SETUP) {
+            if (worldSyncButtonState == WorldSyncButtonState.SETUP || altHeld) {
+                altHeld = false;
                 this.minecraft.setScreen(new AccountLinkScreen(this, () -> {
                     if (this.list != null) returnToScreen();
                     updateWorldSyncButton();
@@ -97,6 +102,7 @@ public class SinglePlayerScreenMixin extends Screen {
     @Unique
     private void updateWorldSyncButton() {
         if (worldSyncButton == null) return;
+        if (altHeld) return;
         Config config = ConfigManager.getCurrentConfig();
         if (config.username.isBlank() || config.getPat().isBlank()) {
             // Set the world sync button to configuration state
@@ -111,6 +117,25 @@ public class SinglePlayerScreenMixin extends Screen {
         }
 
         worldSyncButtonState.apply(worldSyncButton);
+        if (cloneButton != null) cloneButton.active = worldSyncButtonState != WorldSyncButtonState.SETUP;
+    }
+
+    @Override
+    public boolean keyPressed(int i, int j, int k) {
+        if (i == InputConstants.KEY_LALT) altHeld = true;
+        if (worldSyncButton != null) {
+            worldSyncButton.active = true;
+            worldSyncButton.setMessage(Component.literal("☁"));
+            worldSyncButton.setTooltip(Tooltip.create(Component.translatable("minegit.link.setup.open")));
+        }
+        return super.keyPressed(i, j, k);
+    }
+
+    @Override
+    public boolean keyReleased(int i, int j, int k) {
+        if (i == InputConstants.KEY_LALT) altHeld = false;
+        updateWorldSyncButton();
+        return super.keyReleased(i, j, k);
     }
 
     @Unique
