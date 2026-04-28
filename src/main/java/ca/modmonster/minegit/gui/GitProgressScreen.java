@@ -57,7 +57,7 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
     @Override
     public void renderBackground(@NotNull GuiGraphics guiGraphics, int i, int j, float f) {
         this.renderPanorama(guiGraphics, f);
-        this.renderBlurredBackground(guiGraphics);
+        this.renderBlurredBackground();
         this.renderMenuBackground(guiGraphics);
     }
 
