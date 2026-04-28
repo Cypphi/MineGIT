@@ -14,7 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 public class AccountLinkScreen extends Screen {
     private static final Component USERNAME_EDIT_LABEL = Component.translatable("minegit.link.username");
     private static final Component PAT_EDIT_LABEL = Component.translatable("minegit.link.pat");
-    private static final ResourceLocation RALSPIN = ResourceLocation.fromNamespaceAndPath("minegit", "ralspin");
+    private static final ResourceLocation RALSPIN = new ResourceLocation("minegit", "ralspin");
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 60);
 
     private final Screen parent;

@@ -11,7 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class CloneScreen extends Screen {
     private static final Component REPO_LABEL = Component.translatable("minegit.clone.repo");
-    private static final ResourceLocation RALSPIN = ResourceLocation.fromNamespaceAndPath("minegit", "ralspin");
+    private static final ResourceLocation RALSPIN = new ResourceLocation("minegit", "ralspin");
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 60);
 
     private final Screen parent;
