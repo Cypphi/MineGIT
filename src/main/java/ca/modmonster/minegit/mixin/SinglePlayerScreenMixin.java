@@ -22,6 +22,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SelectWorldScreen.class)
 public class SinglePlayerScreenMixin extends Screen {
@@ -81,9 +82,10 @@ public class SinglePlayerScreenMixin extends Screen {
 	}
 
     @Inject(at = @At("TAIL"), method = "updateButtonStatus", remap = false)
-    private void updateButtonStatus(LevelSummary levelSummary, CallbackInfo ci) {
+    private void updateButtonStatus(boolean bl, boolean bl2, CallbackInfo ci) {
         if (worldSyncButton == null) return;
-        hoveredLevel = levelSummary;
+        if (list == null) return;
+        list.getSelectedOpt().ifPresent((level) -> hoveredLevel = ((WorldListEntryAccessor) (Object) level).getSummary());
         updateWorldSyncButton();
     }
 
@@ -120,21 +122,24 @@ public class SinglePlayerScreenMixin extends Screen {
         if (cloneButton != null) cloneButton.active = worldSyncButtonState != WorldSyncButtonState.SETUP;
     }
 
-    @Override
-    public boolean keyPressed(int i, int j, int k) {
-        if (i == InputConstants.KEY_LALT) altHeld = true;
-        if (worldSyncButton != null) {
-            worldSyncButton.active = true;
-            worldSyncButton.setMessage(Component.literal("☁"));
-            worldSyncButton.setTooltip(Tooltip.create(Component.translatable("minegit.link.setup.open")));
+    @Inject(at = @At("HEAD"), method = "keyPressed")
+    public void keyPressed(int i, int j, int k, CallbackInfoReturnable<Boolean> cir) {
+        if (i == InputConstants.KEY_LALT) {
+            altHeld = true;
+            if (worldSyncButton != null) {
+                worldSyncButton.active = true;
+                worldSyncButton.setMessage(Component.literal("☁"));
+                worldSyncButton.setTooltip(Tooltip.create(Component.translatable("minegit.link.setup.open")));
+            }
         }
-        return super.keyPressed(i, j, k);
     }
 
     @Override
     public boolean keyReleased(int i, int j, int k) {
-        if (i == InputConstants.KEY_LALT) altHeld = false;
-        updateWorldSyncButton();
+        if (i == InputConstants.KEY_LALT) {
+            altHeld = false;
+            updateWorldSyncButton();
+        }
         return super.keyReleased(i, j, k);
     }
 

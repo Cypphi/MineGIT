@@ -1,5 +1,6 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.MineGIT;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.SyncResult;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
@@ -14,6 +15,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.eclipse.jgit.lib.ProgressMonitor;
+
+import java.io.IOException;
 
 public class PruneWorldScreen extends Screen {
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 60);
@@ -67,15 +70,19 @@ public class PruneWorldScreen extends Screen {
         boolean ok = GitManager.prune(minecraft, worldId, progress);
         if (minecraft == null) return;
         if (ok) {
-            SystemToast.add(minecraft.getToasts(), new SystemToast.SystemToastId(), Component.translatable("minegit.prune.complete"), null);
+            SystemToast.add(minecraft.getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION, Component.translatable("minegit.prune.complete"), null);
         } else {
-            SystemToast.add(minecraft.getToasts(), new SystemToast.SystemToastId(), Component.translatable("minegit.prune.failed"), null);
+            SystemToast.add(minecraft.getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION, Component.translatable("minegit.prune.failed"), null);
         }
         minecraft.submit(() -> this.callback.accept(true));
     }
 
     private void pullThenPrune() {
-        levelAccess.safeClose();
+        try {
+            levelAccess.close();
+        } catch (IOException e) {
+            MineGIT.LOGGER.warn("Failed to unlock access to level {}", levelAccess.getLevelId(), e);
+        }
         String worldId = levelAccess.getLevelId();
 
         GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.prune.in_progress"));

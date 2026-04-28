@@ -60,7 +60,7 @@ public class QuickPlayMixin {
 
     @Unique
     private static void doLoadWorld(final Minecraft minecraft, final String identifier) {
-        minecraft.submit(() -> minecraft.createWorldOpenFlows().checkForBackupAndLoad(identifier, () -> minecraft.setScreen(new TitleScreen())));
+        minecraft.submit(() -> minecraft.createWorldOpenFlows().loadLevel(new TitleScreen(), identifier));
     }
 
     @Unique

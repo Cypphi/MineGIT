@@ -60,7 +60,7 @@ public class GitConflictScreen extends Screen {
                     minecraft.submit(resolvedCallback);
                 } else {
                     minecraft.submit(() -> {
-                        SystemToast.add(minecraft.getToasts(), new SystemToast.SystemToastId(), Component.translatable("minegit.sync.conflict.failed"), null);
+                        SystemToast.add(minecraft.getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION, Component.translatable("minegit.sync.conflict.failed"), null);
                         if (cancelCallback != null) {
                             cancelCallback.run();
                         } else {
@@ -82,7 +82,7 @@ public class GitConflictScreen extends Screen {
                     minecraft.submit(resolvedCallback);
                 } else {
                     minecraft.submit(() -> {
-                        SystemToast.add(minecraft.getToasts(), new SystemToast.SystemToastId(), Component.translatable("minegit.sync.conflict.failed"), null);
+                        SystemToast.add(minecraft.getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION, Component.translatable("minegit.sync.conflict.failed"), null);
                         if (cancelCallback != null) {
                             cancelCallback.run();
                         } else {

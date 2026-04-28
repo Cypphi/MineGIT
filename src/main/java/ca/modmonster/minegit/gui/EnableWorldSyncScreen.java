@@ -81,7 +81,7 @@ public class EnableWorldSyncScreen extends Screen {
             if (statusCode != 201) {
                 // OOPS! ERROR!!
                 minecraft.submit(() -> {
-                    SystemToast.add(minecraft.getToasts(), new SystemToast.SystemToastId(), Component.translatable("minegit.sync.enable.create_repo.error", statusCode), null);
+                    SystemToast.add(minecraft.getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION, Component.translatable("minegit.sync.enable.create_repo.error", statusCode), null);
                     openSetupButton.visible = true;
                     cancelButton.active = true;
 
@@ -99,14 +99,14 @@ public class EnableWorldSyncScreen extends Screen {
             boolean ok = GitManager.init(minecraft, level.getLevelId(), repoUrl, progressScreen);
             if (!ok) {
                 minecraft.submit(() -> {
-                    SystemToast.add(minecraft.getToasts(), new SystemToast.SystemToastId(), Component.translatable("minegit.sync.enable.git_init.error"), null);
+                    SystemToast.add(minecraft.getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION, Component.translatable("minegit.sync.enable.git_init.error"), null);
                     minecraft.setScreen(this);
                     cancelButton.active = true;
                 });
                 return;
             }
 
-            SystemToast.add(minecraft.getToasts(), new SystemToast.SystemToastId(), Component.translatable("minegit.sync.enable.complete"), null);
+            SystemToast.add(minecraft.getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION, Component.translatable("minegit.sync.enable.complete"), null);
             minecraft.submit(this::onClose);
         }).start();
     }

@@ -26,11 +26,17 @@ public abstract class WorldListEntryMixin {
 
     @Shadow
     @Final
-    LevelSummary summary;
+    private LevelSummary summary;
 
     @Shadow
     @Final
     private SelectWorldScreen screen;
+
+    @Shadow
+    public abstract void joinWorld();
+
+    @Unique
+    private boolean showGitBeforeJoin = true;
 
     @Inject(method = "doDeleteWorld", at = @At("HEAD"))
     private void beforeWorldDelete(CallbackInfo ci) {
@@ -40,6 +46,7 @@ public abstract class WorldListEntryMixin {
 
     @Inject(method = "joinWorld", at = @At("HEAD"), cancellable = true)
     private void beforeWorldJoin(CallbackInfo ci) {
+        if (!showGitBeforeJoin) return;
         String worldId = summary.getLevelId();
         if (!GitManager.syncEnabled(minecraft, worldId)) return;
         ci.cancel();
@@ -78,7 +85,11 @@ public abstract class WorldListEntryMixin {
 
     @Unique
     private void doLoadWorld() {
-        minecraft.submit(() -> minecraft.createWorldOpenFlows().checkForBackupAndLoad(summary.getLevelId(), this::returnToScreen));
+        minecraft.submit(() -> {
+            showGitBeforeJoin = false;
+            joinWorld();
+            showGitBeforeJoin = true;
+        });
     }
 
     @Unique
