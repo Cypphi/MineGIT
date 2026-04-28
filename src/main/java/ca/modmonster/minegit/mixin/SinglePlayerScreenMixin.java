@@ -7,11 +7,13 @@ import ca.modmonster.minegit.gui.AccountLinkScreen;
 import ca.modmonster.minegit.gui.CloneScreen;
 import ca.modmonster.minegit.gui.EnableWorldSyncScreen;
 import ca.modmonster.minegit.widget.WorldSyncButtonState;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelSummary;
 import org.jetbrains.annotations.Nullable;
@@ -43,11 +45,15 @@ public class SinglePlayerScreenMixin extends Screen {
     @Unique @Nullable
     private LevelSummary hoveredLevel;
 
+    @Unique
+    private boolean altHeld;
+
     @Inject(at = @At("TAIL"), method = "init", remap = false)
 	private void init(CallbackInfo info) {
         // Add world sync button
         worldSyncButton = Button.builder(Component.literal("☁"), button -> {
-            if (worldSyncButtonState == WorldSyncButtonState.SETUP) {
+            if (worldSyncButtonState == WorldSyncButtonState.SETUP || altHeld) {
+                altHeld = false;
                 this.minecraft.setScreen(new AccountLinkScreen(this, () -> {
                     if (this.list != null) this.list.returnToScreen();
                     updateWorldSyncButton();
@@ -91,6 +97,7 @@ public class SinglePlayerScreenMixin extends Screen {
     @Unique
     private void updateWorldSyncButton() {
         if (worldSyncButton == null) return;
+        if (altHeld) return;
         Config config = ConfigManager.getCurrentConfig();
         if (config.username.isBlank() || config.getPat().isBlank()) {
             // Set the world sync button to configuration state
@@ -105,5 +112,24 @@ public class SinglePlayerScreenMixin extends Screen {
         }
 
         worldSyncButtonState.apply(worldSyncButton);
+        if (cloneButton != null) cloneButton.active = worldSyncButtonState != WorldSyncButtonState.SETUP;
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        if (event.key() == InputConstants.KEY_LALT) altHeld = true;
+        if (worldSyncButton != null) {
+            worldSyncButton.active = true;
+            worldSyncButton.setMessage(Component.literal("☁"));
+            worldSyncButton.setTooltip(Tooltip.create(Component.translatable("minegit.link.setup.open")));
+        }
+        return super.keyPressed(event);
+    }
+
+    @Override
+    public boolean keyReleased(KeyEvent event) {
+        if (event.key() == InputConstants.KEY_LALT) altHeld = false;
+        updateWorldSyncButton();
+        return super.keyReleased(event);
     }
 }
