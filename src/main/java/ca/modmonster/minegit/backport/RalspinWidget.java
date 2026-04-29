@@ -2,7 +2,6 @@ package ca.modmonster.minegit.backport;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.Util;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
@@ -25,7 +24,8 @@ public class RalspinWidget extends AbstractWidget {
     }
 
     @Override
-    public void renderWidget(PoseStack pose, int i, int j, float f) {
+    public void render(PoseStack pose, int i, int j, float f) {
+        super.render(pose, i, j, f);
         long time = Util.getMillis() / 50;
         int frame = (int) ((time / FRAME_TIME) % FRAME_COUNT);
 
@@ -44,6 +44,11 @@ public class RalspinWidget extends AbstractWidget {
                 FRAME_WIDTH, FRAME_HEIGHT * FRAME_COUNT
         );
         pose.popPose();
+    }
+
+    @Override
+    public void renderButton(PoseStack poseStack, int i, int j, float f) {
+
     }
 
     @Override

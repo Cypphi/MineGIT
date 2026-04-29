@@ -82,18 +82,18 @@ public class SinglePlayerScreenMixin extends Screen {
 	}
 
     @Inject(at = @At("TAIL"), method = "updateButtonStatus", remap = false)
-    private void updateButtonStatus(boolean bl, boolean bl2, CallbackInfo ci) {
+    private void updateButtonStatus(boolean bl, CallbackInfo ci) {
         if (worldSyncButton == null) return;
         if (list == null) return;
         list.getSelectedOpt().ifPresent((level) -> hoveredLevel = ((WorldListEntryAccessor) (Object) level).getSummary());
         updateWorldSyncButton();
     }
 
-    @Override
-    protected void repositionElements() {
-        doReposition();
-        super.repositionElements();
-    }
+//    @Override
+//    protected void rebuildWidgets() {
+//        doReposition();
+//        super.rebuildWidgets();
+//    }
 
     @Unique
     protected void doReposition() {

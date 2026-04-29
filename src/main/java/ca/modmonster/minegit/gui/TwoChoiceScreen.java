@@ -4,16 +4,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
-import net.minecraft.client.gui.components.StringWidget;
-import net.minecraft.client.gui.layouts.GridLayout;
-import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
-import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public class TwoChoiceScreen extends Screen {
-    private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 60);
-
     public TwoChoiceScreen(Component title, Component description, Component continueMessage, Component cancelMessage, Runnable continueCallback, Runnable cancelCallback) {
         super(title);
         this.description = description;
@@ -29,46 +23,29 @@ public class TwoChoiceScreen extends Screen {
     private final Runnable continueCallback;
     private final Runnable cancelCallback;
 
-    private MultiLineTextWidget descriptionWidget;
-
     @Override
     protected void init() {
-        // Column layout
-        GridLayout columnLayout = this.layout.addToContents(new GridLayout().spacing(8));
-        columnLayout.defaultCellSetting().alignHorizontallyCenter();
-
-        // Menu title
-        layout.addToHeader(new StringWidget(this.title, this.font));
-
         // Confirmation message
-        descriptionWidget = new MultiLineTextWidget(description, this.font).setMaxWidth(this.width - 50);
-        columnLayout.addChild(descriptionWidget, 0, 0);
-        columnLayout.addChild(new SpacerElement(200, 20), 1, 0);
+        MultiLineTextWidget descriptionWidget = MultiLineTextWidget.createCentered(this.width - 50, this.font, description);
+        descriptionWidget.setPosition((this.width - descriptionWidget.getWidth()) / 2, 90);
+        addRenderableWidget(descriptionWidget);
 
         // Continue button
-        GridLayout buttonRowLayout = columnLayout.addChild(new GridLayout().spacing(8), 2, 0);
         Button continueButton = Button.builder(continueMessage, button -> continueCallback.run()).build();
-        buttonRowLayout.addChild(continueButton, 0, 0);
+        continueButton.setPosition(width / 2 - 152, 98 + descriptionWidget.getHeight());
+        addRenderableWidget(continueButton);
 
         // Cancel button
         Button cancelButton = Button.builder(cancelMessage, button -> cancelCallback.run()).build();
-        buttonRowLayout.addChild(cancelButton, 0, 1);
-
-        // Add layout widgets
-        this.layout.visitWidgets(this::addRenderableWidget);
-        this.layout.arrangeElements();
+        cancelButton.setPosition(width / 2 + 2, 98 + descriptionWidget.getHeight());
+        addRenderableWidget(cancelButton);
     }
 
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        this.renderDirtBackground(poseStack);
+        this.renderDirtBackground(i);
         super.render(poseStack, i, j, f);
-    }
-
-    @Override
-    protected void repositionElements() {
-        if (descriptionWidget != null) descriptionWidget.setMaxWidth(this.width - 50);
-        layout.arrangeElements();
+        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 50, 16777215);
     }
 
     @Override

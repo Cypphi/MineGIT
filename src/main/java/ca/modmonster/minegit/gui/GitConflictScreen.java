@@ -1,28 +1,19 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.data.GitManager;
+import ca.modmonster.minegit.data.SyncResult;
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
-import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.components.toasts.SystemToast;
-import net.minecraft.client.gui.layouts.GridLayout;
-import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
-import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 
-import ca.modmonster.minegit.data.GitManager;
-import ca.modmonster.minegit.data.SyncResult;
-
 public class GitConflictScreen extends Screen {
-    private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 60);
-
     public GitConflictScreen(@NotNull Runnable resolvedCallback, @Nullable Runnable cancelCallback, @NotNull Path worldFolder) {
         super(Component.translatable("minegit.sync.conflict.title"));
         this.resolvedCallback = resolvedCallback;
@@ -34,25 +25,16 @@ public class GitConflictScreen extends Screen {
     private final @Nullable Runnable cancelCallback;
     private final @NotNull Path worldFolder;
 
-    private MultiLineTextWidget descriptionWidget;
-
     @Override
     protected void init() {
         // Get latest commit dates of remote and local
         String remoteCommitDate = GitManager.getLatestRemoteCommitDate(worldFolder);
         String localCommitDate = GitManager.getLatestLocalCommitDate(worldFolder);
 
-        // Column layout
-        GridLayout columnLayout = this.layout.addToContents(new GridLayout().spacing(2));
-        columnLayout.defaultCellSetting().alignHorizontallyCenter();
-
-        // Menu title
-        layout.addToHeader(new StringWidget(this.title, this.font));
-
         // Confirmation message
-        descriptionWidget = new MultiLineTextWidget(Component.translatable("minegit.sync.conflict.description"), this.font).setMaxWidth(this.width - 50);
-        columnLayout.addChild(descriptionWidget, 0, 0);
-        columnLayout.addChild(new SpacerElement(200, 14), 1, 0);
+        MultiLineTextWidget descriptionWidget = MultiLineTextWidget.createCentered(this.width - 50, this.font, Component.translatable("minegit.sync.conflict.description"));
+        descriptionWidget.setPosition((this.width - descriptionWidget.getWidth()) / 2, 90);
+        addRenderableWidget(descriptionWidget);
 
         // Remote button
         Button remoteButton = Button.builder(Component.translatable("minegit.sync.conflict.remote").append(" - " + remoteCommitDate), button -> {
@@ -74,7 +56,8 @@ public class GitConflictScreen extends Screen {
                 }
             }).start();
         }).width(240).build();
-        columnLayout.addChild(remoteButton, 2, 0);
+        remoteButton.setPosition(this.width / 2 - 120, 108 + descriptionWidget.getHeight());
+        addRenderableWidget(remoteButton);
 
         // Local button
         Button localButton = Button.builder(Component.translatable("minegit.sync.conflict.local").append(" - " + localCommitDate), button -> {
@@ -96,30 +79,22 @@ public class GitConflictScreen extends Screen {
                 }
             }).start();
         }).width(240).build();
-        columnLayout.addChild(localButton, 3, 0);
+        localButton.setPosition(this.width / 2 - 120, 130 + descriptionWidget.getHeight());
+        addRenderableWidget(localButton);
 
         // Cancel button
         if (cancelCallback != null) {
-            columnLayout.addChild(new SpacerElement(200, 6), 4, 0);
             Button cancelButton = Button.builder(Component.translatable("minegit.sync.conflict.cancel"), button -> cancelCallback.run()).build();
-            columnLayout.addChild(cancelButton, 5, 0);
+            cancelButton.setPosition(this.width / 2 - 75, 156 + descriptionWidget.getHeight());
+            addRenderableWidget(cancelButton);
         }
-
-        // Add layout widgets
-        this.layout.visitWidgets(this::addRenderableWidget);
-        this.layout.arrangeElements();
     }
 
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        this.renderDirtBackground(poseStack);
+        this.renderDirtBackground(i);
         super.render(poseStack, i, j, f);
-    }
-
-    @Override
-    protected void repositionElements() {
-        if (descriptionWidget != null) descriptionWidget.setMaxWidth(this.width - 50);
-        layout.arrangeElements();
+        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 50, 16777215);
     }
 
     @Override

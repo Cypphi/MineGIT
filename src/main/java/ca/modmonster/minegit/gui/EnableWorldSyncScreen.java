@@ -1,35 +1,28 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.MineGIT;
+import ca.modmonster.minegit.data.Config;
+import ca.modmonster.minegit.data.ConfigManager;
+import ca.modmonster.minegit.data.GitManager;
+import ca.modmonster.minegit.data.NetworkManager;
 import com.google.gson.JsonParser;
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.components.toasts.SystemToast;
-import net.minecraft.client.gui.layouts.GridLayout;
-import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelSummary;
 
 import java.net.http.HttpResponse;
 
-import ca.modmonster.minegit.MineGIT;
-import ca.modmonster.minegit.data.Config;
-import ca.modmonster.minegit.data.ConfigManager;
-import ca.modmonster.minegit.data.GitManager;
-import ca.modmonster.minegit.data.NetworkManager;
-
 public class EnableWorldSyncScreen extends Screen {
-    private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 60);
-
     private final Screen parent;
     private final LevelSummary level;
     private final Runnable closeCallback;
 
     private Button confirmButton;
     private Button cancelButton;
-    private Button openSetupButton;
+    private boolean showOpenSetupButton = false;
 
     public EnableWorldSyncScreen(Screen parent, LevelSummary level, Runnable closeCallback) {
         super(Component.translatable("minegit.sync.enable.title"));
@@ -40,39 +33,29 @@ public class EnableWorldSyncScreen extends Screen {
 
     @Override
     protected void init() {
-        // Column layout
-        GridLayout columnLayout = this.layout.addToContents(new GridLayout().spacing(8));
-        columnLayout.defaultCellSetting().alignHorizontallyCenter();
-
-        // Menu title
-        layout.addToHeader(new StringWidget(this.title, this.font));
-
-        // Confirmation message
-        columnLayout.addChild(new StringWidget(Component.translatable("minegit.sync.enable.confirm.line1", level.getLevelName()), this.font), 0, 0);
-        columnLayout.addChild(new StringWidget(Component.translatable("minegit.sync.enable.confirm.line2"), this.font), 1, 0);
-
         // Confirm button
-        GridLayout buttonRowLayout = columnLayout.addChild(new GridLayout().spacing(8), 2, 0);
         confirmButton = Button.builder(Component.translatable("minegit.sync.enable.confirm.ok"), button -> setupSync()).build();
-        buttonRowLayout.addChild(confirmButton, 0, 0);
+        confirmButton.setPosition(width / 2 - 152, 124);
+        addRenderableWidget(confirmButton);
 
         // Cancel button
         cancelButton = Button.builder(Component.translatable("minegit.sync.enable.confirm.cancel"), button -> onClose()).build();
-        buttonRowLayout.addChild(cancelButton, 0, 1);
+        cancelButton.setPosition(width / 2 + 2, 124);
+        addRenderableWidget(cancelButton);
 
-        openSetupButton = Button.builder(Component.translatable("minegit.link.setup.open"), button -> minecraft.setScreen(new AccountLinkScreen(this.parent, closeCallback))).build();
-        openSetupButton.visible = false;
-        columnLayout.addChild(openSetupButton, 3, 0);
-
-        // Add layout widgets
-        this.layout.visitWidgets(this::addRenderableWidget);
-        this.layout.arrangeElements();
+        Button openSetupButton = Button.builder(Component.translatable("minegit.link.setup.open"), button -> minecraft.setScreen(new AccountLinkScreen(this.parent, closeCallback))).build();
+        openSetupButton.setPosition(width / 2 - 75, 152);
+        openSetupButton.visible = showOpenSetupButton;
+        addRenderableWidget(openSetupButton);
     }
 
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        this.renderDirtBackground(poseStack);
+        this.renderDirtBackground(i);
         super.render(poseStack, i, j, f);
+        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 50, 16777215);
+        drawCenteredString(poseStack, this.font, Component.translatable("minegit.sync.enable.confirm.line1", level.getLevelName()), this.width / 2, 90, 16777215);
+        drawCenteredString(poseStack, this.font, Component.translatable("minegit.sync.enable.confirm.line2"), this.width / 2, 103, 16777215);
     }
 
     private void setupSync() {
@@ -91,7 +74,7 @@ public class EnableWorldSyncScreen extends Screen {
                 // OOPS! ERROR!!
                 minecraft.submit(() -> {
                     SystemToast.add(minecraft.getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION, Component.translatable("minegit.sync.enable.create_repo.error", statusCode), null);
-                    openSetupButton.visible = true;
+                    showOpenSetupButton = true;
                     cancelButton.active = true;
 
                     if (response != null) MineGIT.LOGGER.error(response.body());
@@ -124,10 +107,5 @@ public class EnableWorldSyncScreen extends Screen {
     public void onClose() {
         minecraft.setScreen(parent);
         if (closeCallback != null) closeCallback.run();
-    }
-
-    @Override
-    protected void repositionElements() {
-        layout.arrangeElements();
     }
 }

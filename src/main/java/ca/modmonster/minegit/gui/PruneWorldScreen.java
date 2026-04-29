@@ -1,35 +1,24 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.MineGIT;
+import ca.modmonster.minegit.data.GitManager;
+import ca.modmonster.minegit.data.SyncResult;
 import com.mojang.blaze3d.vertex.PoseStack;
-
+import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
-import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.components.toasts.SystemToast;
-import net.minecraft.client.gui.layouts.GridLayout;
-import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
-import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelStorageSource;
-
 import org.eclipse.jgit.lib.ProgressMonitor;
 
 import java.io.IOException;
 
-import ca.modmonster.minegit.MineGIT;
-import ca.modmonster.minegit.data.GitManager;
-import ca.modmonster.minegit.data.SyncResult;
-import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
-
 public class PruneWorldScreen extends Screen {
-    private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 60);
-
     private final Screen parent;
     private final LevelStorageSource.LevelStorageAccess levelAccess;
     private final BooleanConsumer callback;
-
-    private MultiLineTextWidget descriptionWidget;
 
     public PruneWorldScreen(Screen parent, LevelStorageSource.LevelStorageAccess levelAccess, BooleanConsumer callback) {
         super(Component.translatable("minegit.prune.title"));
@@ -40,39 +29,27 @@ public class PruneWorldScreen extends Screen {
 
     @Override
     protected void init() {
-        // Column layout
-        GridLayout columnLayout = this.layout.addToContents(new GridLayout().spacing(8));
-        columnLayout.defaultCellSetting().alignHorizontallyCenter();
-
-        // Menu title
-        layout.addToHeader(new StringWidget(this.title, this.font));
-
         // Confirmation message
-        descriptionWidget = new MultiLineTextWidget(Component.translatable("minegit.prune.description"), this.font).setMaxWidth(this.width - 50);
-        columnLayout.addChild(descriptionWidget, 0, 0);
-        columnLayout.addChild(new SpacerElement(200, 20), 1, 0);
+        MultiLineTextWidget descriptionWidget = MultiLineTextWidget.createCentered(this.width - 50, this.font, Component.translatable("minegit.prune.description"));
+        descriptionWidget.setPosition((this.width - descriptionWidget.getWidth()) / 2, 90);
+        addRenderableWidget(descriptionWidget);
 
         // Confirm button
-        GridLayout buttonRowLayout = columnLayout.addChild(new GridLayout().spacing(8), 2, 0);
         Button confirmButton = Button.builder(Component.translatable("minegit.prune.confirm"), button -> pullThenPrune()).build();
-        buttonRowLayout.addChild(confirmButton, 0, 0);
+        confirmButton.setPosition(this.width / 2 - 152, 98 + descriptionWidget.getHeight());
+        addRenderableWidget(confirmButton);
 
         // Cancel button
         Button cancelButton = Button.builder(Component.translatable("minegit.prune.cancel"), button -> onClose()).build();
-        buttonRowLayout.addChild(cancelButton, 0, 1);
-
-        StringWidget statusWidget = new StringWidget(Component.empty(), this.font);
-        columnLayout.addChild(statusWidget, 3, 0);
-
-        // Add layout widgets
-        this.layout.visitWidgets(this::addRenderableWidget);
-        this.layout.arrangeElements();
+        cancelButton.setPosition(this.width / 2 + 2, 98 + descriptionWidget.getHeight());
+        addRenderableWidget(cancelButton);
     }
 
     @Override
     public void render(PoseStack poseStack, int i, int j, float f) {
-        this.renderDirtBackground(poseStack);
+        this.renderDirtBackground(i);
         super.render(poseStack, i, j, f);
+        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 50, 16777215);
     }
 
     private void doPrune(ProgressMonitor progress) {
@@ -126,12 +103,6 @@ public class PruneWorldScreen extends Screen {
                     break;
             }
         }).start();
-    }
-
-    @Override
-    protected void repositionElements() {
-        if (descriptionWidget != null) descriptionWidget.setMaxWidth(this.width - 50);
-        layout.arrangeElements();
     }
 
     @Override

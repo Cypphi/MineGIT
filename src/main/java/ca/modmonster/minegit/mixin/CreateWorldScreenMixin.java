@@ -1,23 +1,21 @@
 package ca.modmonster.minegit.mixin;
 
+import ca.modmonster.minegit.data.Config;
+import ca.modmonster.minegit.data.ConfigManager;
+import ca.modmonster.minegit.gui.AccountLinkScreen;
+import ca.modmonster.minegit.gui.CloneScreen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.network.chat.Component;
-
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import ca.modmonster.minegit.data.Config;
-import ca.modmonster.minegit.data.ConfigManager;
-import ca.modmonster.minegit.gui.AccountLinkScreen;
-import ca.modmonster.minegit.gui.CloneScreen;
 
 @Mixin(CreateWorldScreen.class)
 public abstract class CreateWorldScreenMixin extends Screen {
@@ -49,9 +47,8 @@ public abstract class CreateWorldScreenMixin extends Screen {
                     .size(20, 20)
                     .build();
         }
+        gitButton.setPosition(width / 2 - 178, height - 28);
         addRenderableWidget(gitButton);
-
-        repositionElements();
     }
 
     @Unique
@@ -82,10 +79,5 @@ public abstract class CreateWorldScreenMixin extends Screen {
             gitButton.setMessage(Component.literal("↓"));
             gitButton.setTooltip(Tooltip.create(Component.translatable("minegit.clone.title")));
         }
-    }
-
-    @Inject(at = @At("TAIL"), method = "repositionElements", remap = false)
-    protected void repositionElements(CallbackInfo ci) {
-        if (gitButton != null) gitButton.setPosition(width / 2 - 178, height - 28);
     }
 }

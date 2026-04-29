@@ -2,19 +2,16 @@ package ca.modmonster.minegit.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.eclipse.jgit.lib.ProgressMonitor;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class GitProgressScreen extends Screen implements ProgressMonitor {
     public static final int PROGRESS_BAR_WIDTH = 128;
 
-    @Nullable
-    private StringWidget currentTaskWidget;
-
+    private Component currentTask = CommonComponents.EMPTY;
     private int currentTaskWork = 0;
     private int currentTaskTotalWork = 1;
 
@@ -23,31 +20,13 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
     }
 
     @Override
-    protected void init() {
-        this.currentTaskWidget = this.addRenderableWidget(new StringWidget(Component.empty(), font));
-        this.repositionElements();
-    }
-
-    @Override
-    protected void repositionElements() {
-        if (this.currentTaskWidget != null) {
-            this.currentTaskWidget.setPosition(this.width / 2 - this.currentTaskWidget.getWidth() / 2, this.height - 32);
-        }
-    }
-
-    @Override
     public boolean shouldCloseOnEsc() {
         return false;
     }
 
     @Override
-    protected boolean shouldNarrateNavigation() {
-        return false;
-    }
-
-    @Override
     public void render(@NotNull PoseStack poseStack, int i, int j, float f) {
-        this.renderDirtBackground(poseStack);
+        this.renderDirtBackground(i);
         super.render(poseStack, i, j, f);
 
         // Render progress bar
@@ -61,6 +40,9 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
 
         // Draw message
         drawCenteredString(poseStack, this.font, this.title, this.width / 2, 70, 16777215);
+
+        // Draw status
+        drawCenteredString(poseStack, font, currentTask, this.width / 2, this.height - 32, 16777215);
     }
 
     @Override
@@ -68,14 +50,7 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
 
     @Override
     public void beginTask(String title, int totalWork) {
-        if (currentTaskWidget != null) {
-            minecraft.submit(() -> {
-                Component message = Component.literal(title);
-                currentTaskWidget.setMessage(message);
-                currentTaskWidget.setWidth(font.width(message));
-                repositionElements();
-            });
-        }
+        currentTask = Component.literal(title);
         currentTaskWork = 0;
         currentTaskTotalWork = totalWork != 0? totalWork : 1;
     }
