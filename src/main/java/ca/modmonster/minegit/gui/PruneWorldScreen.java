@@ -6,7 +6,7 @@ import ca.modmonster.minegit.data.SyncResult;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.MultiLineTextWidget;
+import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -20,6 +20,8 @@ public class PruneWorldScreen extends Screen {
     private final LevelStorageSource.LevelStorageAccess levelAccess;
     private final BooleanConsumer callback;
 
+    private MultiLineLabel descriptionWidget;
+
     public PruneWorldScreen(Screen parent, LevelStorageSource.LevelStorageAccess levelAccess, BooleanConsumer callback) {
         super(Component.translatable("minegit.prune.title"));
         this.parent = parent;
@@ -30,18 +32,15 @@ public class PruneWorldScreen extends Screen {
     @Override
     protected void init() {
         // Confirmation message
-        MultiLineTextWidget descriptionWidget = MultiLineTextWidget.createCentered(this.width - 50, this.font, Component.translatable("minegit.prune.description"));
-        descriptionWidget.setPosition((this.width - descriptionWidget.getWidth()) / 2, 90);
-        addRenderableWidget(descriptionWidget);
+        descriptionWidget = MultiLineLabel.create(this.font, Component.translatable("minegit.prune.description"), this.width - 50);
+        int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Confirm button
-        Button confirmButton = Button.builder(Component.translatable("minegit.prune.confirm"), button -> pullThenPrune()).build();
-        confirmButton.setPosition(this.width / 2 - 152, 98 + descriptionWidget.getHeight());
+        Button confirmButton = new Button(this.width / 2 - 152, 98 + descriptionHeight, 150, 20, Component.translatable("minegit.prune.confirm"), button -> pullThenPrune());
         addRenderableWidget(confirmButton);
 
         // Cancel button
-        Button cancelButton = Button.builder(Component.translatable("minegit.prune.cancel"), button -> onClose()).build();
-        cancelButton.setPosition(this.width / 2 + 2, 98 + descriptionWidget.getHeight());
+        Button cancelButton = new Button(this.width / 2 + 2, 98 + descriptionHeight, 150, 20, Component.translatable("minegit.prune.cancel"), button -> onClose());
         addRenderableWidget(cancelButton);
     }
 
@@ -50,6 +49,7 @@ public class PruneWorldScreen extends Screen {
         this.renderDirtBackground(i);
         super.render(poseStack, i, j, f);
         drawCenteredString(poseStack, this.font, this.title, this.width / 2, 50, 16777215);
+        descriptionWidget.renderCentered(poseStack, this.width / 2, 90);
     }
 
     private void doPrune(ProgressMonitor progress) {

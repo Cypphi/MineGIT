@@ -3,7 +3,7 @@ package ca.modmonster.minegit.gui;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.MultiLineTextWidget;
+import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -22,22 +22,20 @@ public class TwoChoiceScreen extends Screen {
     private final Component cancelMessage;
     private final Runnable continueCallback;
     private final Runnable cancelCallback;
+    private MultiLineLabel descriptionWidget;
 
     @Override
     protected void init() {
         // Confirmation message
-        MultiLineTextWidget descriptionWidget = MultiLineTextWidget.createCentered(this.width - 50, this.font, description);
-        descriptionWidget.setPosition((this.width - descriptionWidget.getWidth()) / 2, 90);
-        addRenderableWidget(descriptionWidget);
+        descriptionWidget = MultiLineLabel.create(this.font, description, this.width - 50);
+        int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Continue button
-        Button continueButton = Button.builder(continueMessage, button -> continueCallback.run()).build();
-        continueButton.setPosition(width / 2 - 152, 98 + descriptionWidget.getHeight());
+        Button continueButton = new Button(width / 2 - 152, 98 + descriptionHeight, 150, 20, continueMessage, button -> continueCallback.run());
         addRenderableWidget(continueButton);
 
         // Cancel button
-        Button cancelButton = Button.builder(cancelMessage, button -> cancelCallback.run()).build();
-        cancelButton.setPosition(width / 2 + 2, 98 + descriptionWidget.getHeight());
+        Button cancelButton = new Button(width / 2 + 2, 98 + descriptionHeight, 150, 20, cancelMessage, button -> cancelCallback.run());
         addRenderableWidget(cancelButton);
     }
 
@@ -46,6 +44,7 @@ public class TwoChoiceScreen extends Screen {
         this.renderDirtBackground(i);
         super.render(poseStack, i, j, f);
         drawCenteredString(poseStack, this.font, this.title, this.width / 2, 50, 16777215);
+        descriptionWidget.renderCentered(poseStack, this.width / 2, 90);
     }
 
     @Override

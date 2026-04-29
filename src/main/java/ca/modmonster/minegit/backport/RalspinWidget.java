@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -17,10 +16,10 @@ public class RalspinWidget extends AbstractWidget {
     private static final int FRAME_COUNT = 12;
     private static final int FRAME_TIME = 2;
     private static final int SCALE = 2;
+    public static final Component TOOLTIP = Component.literal("hiiiii!! ^-^");
 
     public RalspinWidget(final int x, final int y) {
         super(x, y, FRAME_WIDTH * SCALE, FRAME_HEIGHT * SCALE, CommonComponents.EMPTY);
-        setTooltip(Tooltip.create(Component.literal("hiiiii!! ^-^")));
     }
 
     @Override
@@ -33,7 +32,7 @@ public class RalspinWidget extends AbstractWidget {
         int v = frame * FRAME_HEIGHT;
 
         pose.pushPose();
-        pose.translate(getX(), getY(), 0);
+        pose.translate(x, y, 0);
         pose.scale(SCALE, SCALE, 1);
         RenderSystem.setShaderTexture(0, SPRITE);
         blit(
@@ -52,5 +51,5 @@ public class RalspinWidget extends AbstractWidget {
     }
 
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
+    public void updateNarration(NarrationElementOutput narrationElementOutput) {}
 }

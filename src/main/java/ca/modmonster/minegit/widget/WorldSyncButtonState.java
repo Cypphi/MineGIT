@@ -1,24 +1,20 @@
 package ca.modmonster.minegit.widget;
 
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 
-public class WorldSyncButtonState {
-    public static final WorldSyncButtonState SETUP = new WorldSyncButtonState(Component.literal("☁"), Component.translatable("minegit.link.setup"));
-    public static final WorldSyncButtonState ENABLE = new WorldSyncButtonState(Component.literal("☁"), Component.translatable("minegit.sync.enable"));
-    public static final WorldSyncButtonState WORLD_CONFIGURE = new WorldSyncButtonState(Component.literal("✔"), Component.translatable("minegit.sync.enabled"));
+import java.util.Arrays;
+import java.util.List;
 
-    public Component message;
-    public Tooltip tooltip;
+public enum WorldSyncButtonState {
+    SETUP(Component.literal("☁"), List.of(Component.translatable("minegit.link.setup"))),
+    ENABLE(Component.literal("☁"), Arrays.asList(Component.translatable("minegit.sync.enable"), Component.translatable("minegit.sync.alt_configure"))),
+    WORLD_CONFIGURE(Component.literal("✔"), Arrays.asList(Component.translatable("minegit.sync.enabled"), Component.translatable("minegit.sync.alt_configure")));
 
-    public WorldSyncButtonState(Component message, Component tooltip) {
+    public final Component message;
+    public final List<Component> tooltip;
+
+    WorldSyncButtonState(Component message, List<Component> tooltip) {
         this.message = message;
-        this.tooltip = Tooltip.create(tooltip);
-    }
-
-    public void apply(Button button) {
-        button.setMessage(message);
-        button.setTooltip(tooltip);
+        this.tooltip = tooltip;
     }
 }

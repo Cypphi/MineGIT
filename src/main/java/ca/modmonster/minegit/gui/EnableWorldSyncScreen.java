@@ -34,17 +34,14 @@ public class EnableWorldSyncScreen extends Screen {
     @Override
     protected void init() {
         // Confirm button
-        confirmButton = Button.builder(Component.translatable("minegit.sync.enable.confirm.ok"), button -> setupSync()).build();
-        confirmButton.setPosition(width / 2 - 152, 124);
+        confirmButton = new Button(width / 2 - 152, 124, 150, 20, Component.translatable("minegit.sync.enable.confirm.ok"), button -> setupSync());
         addRenderableWidget(confirmButton);
 
         // Cancel button
-        cancelButton = Button.builder(Component.translatable("minegit.sync.enable.confirm.cancel"), button -> onClose()).build();
-        cancelButton.setPosition(width / 2 + 2, 124);
+        cancelButton = new Button(width / 2 + 2, 124, 150, 20, Component.translatable("minegit.sync.enable.confirm.cancel"), button -> onClose());
         addRenderableWidget(cancelButton);
 
-        Button openSetupButton = Button.builder(Component.translatable("minegit.link.setup.open"), button -> minecraft.setScreen(new AccountLinkScreen(this.parent, closeCallback))).build();
-        openSetupButton.setPosition(width / 2 - 75, 152);
+        Button openSetupButton = new Button(width / 2 - 75, 152, 150, 20, Component.translatable("minegit.link.setup.open"), button -> minecraft.setScreen(new AccountLinkScreen(this.parent, closeCallback)));
         openSetupButton.visible = showOpenSetupButton;
         addRenderableWidget(openSetupButton);
     }

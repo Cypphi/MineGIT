@@ -36,9 +36,8 @@ public class EditWorldScreenMixin extends Screen {
         if (!GitManager.syncEnabled(minecraft, levelAccess.getLevelId())) return;
 
         // Add prune button
-        addRenderableWidget(Button.builder(Component.translatable("minegit.prune.button"), button ->
-                minecraft.setScreen(new PruneWorldScreen(this, levelAccess, callback)))
-                .bounds(this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20).build());
+        addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20, Component.translatable("minegit.prune.button"), button ->
+                minecraft.setScreen(new PruneWorldScreen(this, levelAccess, callback))));
 
         // Reposition existing buttons
         for (GuiEventListener child : this.children()) {
@@ -50,11 +49,11 @@ public class EditWorldScreenMixin extends Screen {
                 case "selectWorld.edit.backup" -> button.setWidth(80);
                 case "selectWorld.edit.backupFolder" -> {
                     button.setWidth(116);
-                    button.setX(this.width / 2 - 16);
-                    button.setY(this.height / 4 + 48 + 5);
+                    button.x = this.width / 2 - 16;
+                    button.y = this.height / 4 + 48 + 5;
                 }
-                case "selectWorld.edit.optimize" -> button.setY(this.height / 4 + 72 + 5);
-                case "selectWorld.edit.export_worldgen_settings" -> button.setY(this.height / 4 + 96 + 5);
+                case "selectWorld.edit.optimize" -> button.y = this.height / 4 + 72 + 5;
+                case "selectWorld.edit.export_worldgen_settings" -> button.y = this.height / 4 + 96 + 5;
             }
         }
     }

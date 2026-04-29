@@ -4,8 +4,8 @@ import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.gui.AccountLinkScreen;
 import ca.modmonster.minegit.gui.CloneScreen;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
@@ -24,6 +24,10 @@ public abstract class CreateWorldScreenMixin extends Screen {
     private Button gitButton;
 
     @Unique
+    @Nullable
+    private Component gitButtonTooltip;
+
+    @Unique
     private boolean needsSetup = false;
 
     protected CreateWorldScreenMixin(Component title) {
@@ -36,19 +40,21 @@ public abstract class CreateWorldScreenMixin extends Screen {
 
         if (needsSetup) {
             // Add setup button
-            gitButton = Button.builder(Component.literal("☁"), this::onGitButtonPress)
-                    .tooltip(Tooltip.create(Component.translatable("minegit.link.setup")))
-                    .size(20, 20)
-                    .build();
+            gitButton = new Button(width / 2 - 178, height - 28, 20, 20, Component.literal("☁"), this::onGitButtonPress);
+            gitButtonTooltip = Component.translatable("minegit.link.setup");
         } else {
             // Add clone button
-            gitButton = Button.builder(Component.literal("↓"), this::onGitButtonPress)
-                    .tooltip(Tooltip.create(Component.translatable("minegit.clone.title")))
-                    .size(20, 20)
-                    .build();
+            gitButton = new Button(width / 2 - 178, height - 28, 20, 20, Component.literal("↓"), this::onGitButtonPress);
+            gitButtonTooltip = Component.translatable("minegit.clone.title");
         }
-        gitButton.setPosition(width / 2 - 178, height - 28);
         addRenderableWidget(gitButton);
+    }
+
+    @Inject(at = @At("TAIL"), method = "render", remap = false)
+    private void render(PoseStack poseStack, final int mouseX, final int mouseY, final float a, CallbackInfo info) {
+        if (gitButton != null && gitButton.isHoveredOrFocused()) {
+            renderTooltip(poseStack, gitButtonTooltip, mouseX, mouseY);
+        }
     }
 
     @Unique
@@ -74,10 +80,10 @@ public abstract class CreateWorldScreenMixin extends Screen {
         checkNeedsSetup();
         if (needsSetup) {
             gitButton.setMessage(Component.literal("☁"));
-            gitButton.setTooltip(Tooltip.create(Component.translatable("minegit.link.setup")));
+            gitButtonTooltip = Component.translatable("minegit.link.setup");
         } else {
             gitButton.setMessage(Component.literal("↓"));
-            gitButton.setTooltip(Tooltip.create(Component.translatable("minegit.clone.title")));
+            gitButtonTooltip = Component.translatable("minegit.clone.title");
         }
     }
 }

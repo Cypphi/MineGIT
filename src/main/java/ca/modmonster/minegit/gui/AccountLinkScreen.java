@@ -8,13 +8,13 @@ import ca.modmonster.minegit.data.NetworkManager;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public class AccountLinkScreen extends Screen {
     private static final Component USERNAME_EDIT_LABEL = Component.translatable("minegit.link.username");
     private static final Component PAT_EDIT_LABEL = Component.translatable("minegit.link.pat");
+    private static final Component BACK_BUTTON_TOOLTIP = Component.translatable("minegit.link.back");
 
     private final Screen parent;
     private final Runnable closeCallback;
@@ -23,6 +23,8 @@ public class AccountLinkScreen extends Screen {
     private Button testCredentialsButton;
     private boolean requestInProgress = false;
     private Component testCredentialsStatus = null;
+    private Button backButton;
+    private RalspinWidget ralspinWidget;
 
     public AccountLinkScreen(Screen parent) {
         this(parent, null);
@@ -37,33 +39,27 @@ public class AccountLinkScreen extends Screen {
     @Override
     protected void init() {
         // Username text field
-        usernameEdit = new EditBox(font, 0, 0, 200, 20, USERNAME_EDIT_LABEL);
+        usernameEdit = new EditBox(font, this.width / 2 - 100, 107, 200, 20, USERNAME_EDIT_LABEL);
         usernameEdit.setMaxLength(39);
         usernameEdit.setResponder(string -> updateTestButtonStatus(false));
-        usernameEdit.setPosition(this.width / 2 - 100, 107);
         addRenderableWidget(usernameEdit);
 
         // PAT text field
-        patEdit = new EditBox(font, 0, 0, 200, 20, PAT_EDIT_LABEL);
+        patEdit = new EditBox(font, this.width / 2 - 100, 152, 200, 20, PAT_EDIT_LABEL);
         patEdit.setMaxLength(255);
         patEdit.setResponder(string -> updateTestButtonStatus(false));
-        patEdit.setPosition(this.width / 2 - 100, 152);
         addRenderableWidget(patEdit);
 
         // Test credentials button
-        testCredentialsButton = Button.builder(Component.translatable("minegit.link.test"), button -> testCredentials()).size(200, 20).build();
-        testCredentialsButton.setPosition(this.width / 2 - 100, 180);
+        testCredentialsButton = new Button(this.width / 2 - 100, 180, 200, 20, Component.translatable("minegit.link.test"), button -> testCredentials());
         addRenderableWidget(testCredentialsButton);
 
         // Back button
-        Button backButton = Button.builder(Component.literal("←"), button -> onClose())
-            .tooltip(Tooltip.create(Component.translatable("minegit.link.back")))
-            .bounds(6, 6, 20, 20)
-            .build();
+        backButton = new Button(6, 6, 20, 20, Component.literal("←"), button -> onClose());
         addRenderableWidget(backButton);
 
         // Ralsei go spinny
-        RalspinWidget ralspinWidget = new RalspinWidget(width - 60, height - 80);
+        ralspinWidget = new RalspinWidget(width - 60, height - 80);
         addRenderableWidget(ralspinWidget);
 
         updateTestButtonStatus(false);
@@ -85,6 +81,8 @@ public class AccountLinkScreen extends Screen {
         drawCenteredString(poseStack, this.font, USERNAME_EDIT_LABEL, this.width / 2, 90, -2130706433);
         drawCenteredString(poseStack, this.font, PAT_EDIT_LABEL, this.width / 2, 135, -2130706433);
         if (testCredentialsStatus != null) drawCenteredString(poseStack, this.font, testCredentialsStatus, this.width / 2, 208, 16777215);
+        if (backButton.isHoveredOrFocused()) renderTooltip(poseStack, BACK_BUTTON_TOOLTIP,  i, j);
+        if (ralspinWidget.isHoveredOrFocused()) renderTooltip(poseStack, RalspinWidget.TOOLTIP, i, j);
     }
 
     private void testCredentials() {

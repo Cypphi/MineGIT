@@ -4,7 +4,7 @@ import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.SyncResult;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.MultiLineTextWidget;
+import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -25,6 +25,8 @@ public class GitConflictScreen extends Screen {
     private final @Nullable Runnable cancelCallback;
     private final @NotNull Path worldFolder;
 
+    private MultiLineLabel descriptionWidget;
+
     @Override
     protected void init() {
         // Get latest commit dates of remote and local
@@ -32,12 +34,11 @@ public class GitConflictScreen extends Screen {
         String localCommitDate = GitManager.getLatestLocalCommitDate(worldFolder);
 
         // Confirmation message
-        MultiLineTextWidget descriptionWidget = MultiLineTextWidget.createCentered(this.width - 50, this.font, Component.translatable("minegit.sync.conflict.description"));
-        descriptionWidget.setPosition((this.width - descriptionWidget.getWidth()) / 2, 90);
-        addRenderableWidget(descriptionWidget);
+        descriptionWidget = MultiLineLabel.create(this.font, Component.translatable("minegit.sync.conflict.description"), this.width - 50);
+        int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Remote button
-        Button remoteButton = Button.builder(Component.translatable("minegit.sync.conflict.remote").append(" - " + remoteCommitDate), button -> {
+        Button remoteButton = new Button(this.width / 2 - 120, 108 + descriptionHeight, 240, 20, Component.translatable("minegit.sync.conflict.remote").append(" - " + remoteCommitDate), button -> {
             GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_pull"));
             minecraft.setScreen(progressScreen);
             new Thread(() -> {
@@ -55,12 +56,11 @@ public class GitConflictScreen extends Screen {
                     });
                 }
             }).start();
-        }).width(240).build();
-        remoteButton.setPosition(this.width / 2 - 120, 108 + descriptionWidget.getHeight());
+        });
         addRenderableWidget(remoteButton);
 
         // Local button
-        Button localButton = Button.builder(Component.translatable("minegit.sync.conflict.local").append(" - " + localCommitDate), button -> {
+        Button localButton = new Button(this.width / 2 - 120, 130 + descriptionHeight, 240, 20, Component.translatable("minegit.sync.conflict.local").append(" - " + localCommitDate), button -> {
             GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_push"));
             minecraft.setScreen(progressScreen);
             new Thread(() -> {
@@ -78,14 +78,12 @@ public class GitConflictScreen extends Screen {
                     });
                 }
             }).start();
-        }).width(240).build();
-        localButton.setPosition(this.width / 2 - 120, 130 + descriptionWidget.getHeight());
+        });
         addRenderableWidget(localButton);
 
         // Cancel button
         if (cancelCallback != null) {
-            Button cancelButton = Button.builder(Component.translatable("minegit.sync.conflict.cancel"), button -> cancelCallback.run()).build();
-            cancelButton.setPosition(this.width / 2 - 75, 156 + descriptionWidget.getHeight());
+            Button cancelButton = new Button(this.width / 2 - 75, 156 + descriptionHeight, 150, 20, Component.translatable("minegit.sync.conflict.cancel"), button -> cancelCallback.run());
             addRenderableWidget(cancelButton);
         }
     }
@@ -95,6 +93,7 @@ public class GitConflictScreen extends Screen {
         this.renderDirtBackground(i);
         super.render(poseStack, i, j, f);
         drawCenteredString(poseStack, this.font, this.title, this.width / 2, 50, 16777215);
+        descriptionWidget.renderCentered(poseStack, this.width / 2, 90);
     }
 
     @Override

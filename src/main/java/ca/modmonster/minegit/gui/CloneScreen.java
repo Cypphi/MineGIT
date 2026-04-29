@@ -5,19 +5,23 @@ import ca.modmonster.minegit.data.GitManager;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public class CloneScreen extends Screen {
     private static final Component REPO_LABEL = Component.translatable("minegit.clone.repo");
+    private static final Component BACK_BUTTON_TOOLTIP = Component.translatable("minegit.clone.back");
+    private static final Component CONFIGURE_BUTTON_TOOLTIP = Component.translatable("minegit.link.setup.open");
 
     private final Screen parent;
     private final Runnable closeCallback;
     private final Runnable cloneSuccessCallback;
     private EditBox repoEdit;
     private Button cloneButton;
+    private Button backButton;
+    private Button configureButton;
+    private RalspinWidget ralspinWidget;
 
     public CloneScreen(Screen parent, Runnable closeCallback) {
         this(parent, closeCallback, null);
@@ -33,33 +37,25 @@ public class CloneScreen extends Screen {
     @Override
     protected void init() {
         // Repo name text field
-        repoEdit = new EditBox(font, 0, 0, 200, 20, REPO_LABEL);
+        repoEdit = new EditBox(font, this.width / 2 - 100, 107, 200, 20, REPO_LABEL);
         repoEdit.setMaxLength(39);
         repoEdit.setResponder(string -> updateButtonsStatus());
-        repoEdit.setPosition(this.width / 2 - 100, 107);
         addRenderableWidget(repoEdit);
 
         // Clone button
-        cloneButton = Button.builder(Component.translatable("minegit.clone.confirm"), button -> doClone()).size(200, 20).build();
-        cloneButton.setPosition(this.width / 2 - 100, 135);
+        cloneButton = new Button(this.width / 2 - 100, 135, 200, 20, Component.translatable("minegit.clone.confirm"), button -> doClone());
         addRenderableWidget(cloneButton);
 
         // Back button
-        Button backButton = Button.builder(Component.literal("←"), button -> onClose())
-                .tooltip(Tooltip.create(Component.translatable("minegit.clone.back")))
-                .bounds(6, 6, 20, 20)
-                .build();
+        backButton = new Button(6, 6, 20, 20, Component.literal("←"), button -> onClose());
         addRenderableWidget(backButton);
 
         // Configure button
-        Button configureButton = Button.builder(Component.literal("☁"), button -> minecraft.setScreen(new AccountLinkScreen(this)))
-                .tooltip(Tooltip.create(Component.translatable("minegit.link.setup.open")))
-                .bounds(width - 26, 6, 20, 20)
-                .build();
+        configureButton = new Button(width - 26, 6, 20, 20, Component.literal("☁"), button -> minecraft.setScreen(new AccountLinkScreen(this)));
         addRenderableWidget(configureButton);
 
         // Ralsei go spinny
-        RalspinWidget ralspinWidget = new RalspinWidget(width - 60, height - 80);
+        ralspinWidget = new RalspinWidget(width - 60, height - 80);
         addRenderableWidget(ralspinWidget);
 
         updateButtonsStatus();
@@ -72,6 +68,9 @@ public class CloneScreen extends Screen {
         super.render(poseStack, i, j, f);
         drawCenteredString(poseStack, this.font, this.title, this.width / 2, 50, 16777215);
         drawCenteredString(poseStack, this.font, REPO_LABEL, this.width / 2, 90, -2130706433);
+        if (backButton.isHoveredOrFocused()) renderTooltip(poseStack, BACK_BUTTON_TOOLTIP, i, j);
+        if (configureButton.isHoveredOrFocused()) renderTooltip(poseStack, CONFIGURE_BUTTON_TOOLTIP, i, j);
+        if (ralspinWidget.isHoveredOrFocused()) renderTooltip(poseStack, RalspinWidget.TOOLTIP, i, j);
     }
 
     private void doClone() {
