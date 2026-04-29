@@ -10,7 +10,7 @@ import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.storage.LevelResource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(PauseScreen.class)
 public class PauseScreenMixin extends Screen {
     @Unique
-    private static final Component TOOLTIP = Component.translatable("minegit.exit_without_push");
+    private static final Component TOOLTIP = new TranslatableComponent("minegit.exit_without_push");
 
     protected PauseScreenMixin(Component title) {
         super(title);
@@ -35,7 +35,7 @@ public class PauseScreenMixin extends Screen {
         // Find the disconnect button
         for (GuiEventListener child : this.children()) {
             if (!(child instanceof Button button)) return;
-            if (!(button.getMessage().getContents() instanceof TranslatableContents translatable)) return;
+            if (!(button.getMessage() instanceof TranslatableComponent translatable)) return;
             String key = translatable.getKey();
             if (key.equals("menu.returnToMenu")) disconnectButton = button;
         }

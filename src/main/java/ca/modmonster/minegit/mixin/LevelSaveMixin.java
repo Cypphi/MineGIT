@@ -11,7 +11,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 import org.spongepowered.asm.mixin.Final;
@@ -49,7 +49,7 @@ public class LevelSaveMixin {
     @Unique
     private void doWorldSave(Path worldFolder) {
         minecraft.submit(() -> {
-            GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_push"));
+            GitProgressScreen progressScreen = new GitProgressScreen(new TranslatableComponent("minegit.sync.status.git_push"));
             minecraft.setScreen(progressScreen);
             new Thread(() -> {
                 SyncResult status = GitManager.push(worldFolder, progressScreen);
@@ -69,10 +69,10 @@ public class LevelSaveMixin {
                     case FAIL_NETWORK:
                         // Network error; show unreachable screen
                         minecraft.submit(() -> minecraft.setScreen(new TwoChoiceScreen(
-                                Component.translatable("minegit.sync.push_unreachable.title"),
-                                Component.translatable("minegit.sync.push_unreachable.description"),
-                                Component.translatable("minegit.sync.push_unreachable.retry"),
-                                Component.translatable("minegit.sync.push_unreachable.exit"),
+                                new TranslatableComponent("minegit.sync.push_unreachable.title"),
+                                new TranslatableComponent("minegit.sync.push_unreachable.description"),
+                                new TranslatableComponent("minegit.sync.push_unreachable.retry"),
+                                new TranslatableComponent("minegit.sync.push_unreachable.exit"),
                                 () -> doWorldSave(worldFolder),
                                 () -> minecraft.setScreen(null)
                         )));

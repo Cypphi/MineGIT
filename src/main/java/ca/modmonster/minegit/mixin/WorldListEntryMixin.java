@@ -8,7 +8,7 @@ import ca.modmonster.minegit.gui.TwoChoiceScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.storage.LevelSummary;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -26,7 +26,7 @@ public abstract class WorldListEntryMixin {
 
     @Shadow
     @Final
-    private LevelSummary summary;
+    LevelSummary summary;
 
     @Shadow
     @Final
@@ -50,7 +50,7 @@ public abstract class WorldListEntryMixin {
         String worldId = summary.getLevelId();
         if (!GitManager.syncEnabled(minecraft, worldId)) return;
         ci.cancel();
-        GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_pull"));
+        GitProgressScreen progressScreen = new GitProgressScreen(new TranslatableComponent("minegit.sync.status.git_pull"));
         minecraft.setScreen(progressScreen);
         new Thread(() -> {
             SyncResult status = GitManager.pull(GitManager.getPath(minecraft, worldId), progressScreen);
@@ -71,10 +71,10 @@ public abstract class WorldListEntryMixin {
                 case FAIL_NETWORK:
                     // Network error; show unreachable screen
                     minecraft.submit(() -> minecraft.setScreen(new TwoChoiceScreen(
-                            Component.translatable("minegit.sync.pull_unreachable.title"),
-                            Component.translatable("minegit.sync.pull_unreachable.description"),
-                            Component.translatable("minegit.sync.pull_unreachable.continue"),
-                            Component.translatable("minegit.sync.pull_unreachable.cancel"),
+                            new TranslatableComponent("minegit.sync.pull_unreachable.title"),
+                            new TranslatableComponent("minegit.sync.pull_unreachable.description"),
+                            new TranslatableComponent("minegit.sync.pull_unreachable.continue"),
+                            new TranslatableComponent("minegit.sync.pull_unreachable.cancel"),
                             this::doLoadWorld, // continue
                             this::returnToScreen // cancel
                     )));

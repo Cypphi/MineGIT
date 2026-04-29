@@ -5,8 +5,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 
 public class RalspinWidget extends AbstractWidget {
@@ -16,10 +16,10 @@ public class RalspinWidget extends AbstractWidget {
     private static final int FRAME_COUNT = 12;
     private static final int FRAME_TIME = 2;
     private static final int SCALE = 2;
-    public static final Component TOOLTIP = Component.literal("hiiiii!! ^-^");
+    public static final Component TOOLTIP = new TextComponent("hiiiii!! ^-^");
 
     public RalspinWidget(final int x, final int y) {
-        super(x, y, FRAME_WIDTH * SCALE, FRAME_HEIGHT * SCALE, CommonComponents.EMPTY);
+        super(x, y, FRAME_WIDTH * SCALE, FRAME_HEIGHT * SCALE, TextComponent.EMPTY);
     }
 
     @Override

@@ -10,6 +10,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -40,12 +42,12 @@ public abstract class CreateWorldScreenMixin extends Screen {
 
         if (needsSetup) {
             // Add setup button
-            gitButton = new Button(width / 2 - 178, height - 28, 20, 20, Component.literal("☁"), this::onGitButtonPress);
-            gitButtonTooltip = Component.translatable("minegit.link.setup");
+            gitButton = new Button(width / 2 - 178, height - 28, 20, 20, new TextComponent("☁"), this::onGitButtonPress);
+            gitButtonTooltip = new TranslatableComponent("minegit.link.setup");
         } else {
             // Add clone button
-            gitButton = new Button(width / 2 - 178, height - 28, 20, 20, Component.literal("↓"), this::onGitButtonPress);
-            gitButtonTooltip = Component.translatable("minegit.clone.title");
+            gitButton = new Button(width / 2 - 178, height - 28, 20, 20, new TextComponent("↓"), this::onGitButtonPress);
+            gitButtonTooltip = new TranslatableComponent("minegit.clone.title");
         }
         addRenderableWidget(gitButton);
     }
@@ -79,11 +81,11 @@ public abstract class CreateWorldScreenMixin extends Screen {
         if (gitButton == null) return;
         checkNeedsSetup();
         if (needsSetup) {
-            gitButton.setMessage(Component.literal("☁"));
-            gitButtonTooltip = Component.translatable("minegit.link.setup");
+            gitButton.setMessage(new TextComponent("☁"));
+            gitButtonTooltip = new TranslatableComponent("minegit.link.setup");
         } else {
-            gitButton.setMessage(Component.literal("↓"));
-            gitButtonTooltip = Component.translatable("minegit.clone.title");
+            gitButton.setMessage(new TextComponent("↓"));
+            gitButtonTooltip = new TranslatableComponent("minegit.clone.title");
         }
     }
 }

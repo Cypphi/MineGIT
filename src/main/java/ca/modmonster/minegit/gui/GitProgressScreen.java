@@ -1,17 +1,16 @@
 package ca.modmonster.minegit.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import org.eclipse.jgit.lib.ProgressMonitor;
 import org.jetbrains.annotations.NotNull;
 
 public class GitProgressScreen extends Screen implements ProgressMonitor {
     public static final int PROGRESS_BAR_WIDTH = 128;
 
-    private Component currentTask = CommonComponents.EMPTY;
+    private Component currentTask = TextComponent.EMPTY;
     private int currentTaskWork = 0;
     private int currentTaskTotalWork = 1;
 
@@ -50,7 +49,7 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
 
     @Override
     public void beginTask(String title, int totalWork) {
-        currentTask = Component.literal(title);
+        currentTask = new TextComponent(title);
         currentTaskWork = 0;
         currentTaskTotalWork = totalWork != 0? totalWork : 1;
     }
@@ -65,7 +64,4 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
 
     @Override
     public boolean isCancelled() {return false;}
-
-    @Override
-    public void showDuration(boolean enabled) {}
 }

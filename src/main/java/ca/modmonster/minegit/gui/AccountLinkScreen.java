@@ -10,11 +10,13 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class AccountLinkScreen extends Screen {
-    private static final Component USERNAME_EDIT_LABEL = Component.translatable("minegit.link.username");
-    private static final Component PAT_EDIT_LABEL = Component.translatable("minegit.link.pat");
-    private static final Component BACK_BUTTON_TOOLTIP = Component.translatable("minegit.link.back");
+    private static final Component USERNAME_EDIT_LABEL = new TranslatableComponent("minegit.link.username");
+    private static final Component PAT_EDIT_LABEL = new TranslatableComponent("minegit.link.pat");
+    private static final Component BACK_BUTTON_TOOLTIP = new TranslatableComponent("minegit.link.back");
 
     private final Screen parent;
     private final Runnable closeCallback;
@@ -31,7 +33,7 @@ public class AccountLinkScreen extends Screen {
     }
 
     public AccountLinkScreen(Screen parent, Runnable closeCallback) {
-        super(Component.translatable("minegit.link.title"));
+        super(new TranslatableComponent("minegit.link.title"));
         this.parent = parent;
         this.closeCallback = closeCallback;
     }
@@ -51,11 +53,11 @@ public class AccountLinkScreen extends Screen {
         addRenderableWidget(patEdit);
 
         // Test credentials button
-        testCredentialsButton = new Button(this.width / 2 - 100, 180, 200, 20, Component.translatable("minegit.link.test"), button -> testCredentials());
+        testCredentialsButton = new Button(this.width / 2 - 100, 180, 200, 20, new TranslatableComponent("minegit.link.test"), button -> testCredentials());
         addRenderableWidget(testCredentialsButton);
 
         // Back button
-        backButton = new Button(6, 6, 20, 20, Component.literal("←"), button -> onClose());
+        backButton = new Button(6, 6, 20, 20, new TextComponent("←"), button -> onClose());
         addRenderableWidget(backButton);
 
         // Ralsei go spinny
@@ -96,19 +98,19 @@ public class AccountLinkScreen extends Screen {
 
             switch (statusCode) {
                 case 200:
-                    testCredentialsStatus = Component.translatable("minegit.link.status.success");
+                    testCredentialsStatus = new TranslatableComponent("minegit.link.status.success");
                     updateTestButtonStatus(true);
                     break;
                 case 401:
-                    testCredentialsStatus = Component.translatable("minegit.link.status.error.pat");
+                    testCredentialsStatus = new TranslatableComponent("minegit.link.status.error.pat");
                     updateTestButtonStatus(true);
                     break;
                 case 404:
-                    testCredentialsStatus = Component.translatable("minegit.link.status.error.username");
+                    testCredentialsStatus = new TranslatableComponent("minegit.link.status.error.username");
                     updateTestButtonStatus(true);
                     break;
                 default:
-                    testCredentialsStatus = Component.translatable("minegit.link.status.error.generic", statusCode);
+                    testCredentialsStatus = new TranslatableComponent("minegit.link.status.error.generic", statusCode);
                     updateTestButtonStatus(true);
                     break;
             }

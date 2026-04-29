@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "ca.modmonster.minegit.mixin",
-  "compatibilityLevel": "JAVA_17",
+  "compatibilityLevel": "JAVA_16",
   "client": [
     "CreateWorldScreenMixin",
     "EditWorldScreenMixin",
@@ -9,6 +9,7 @@
     "PauseScreenMixin",
     "SelectWorldScreenAccessor",
     "SinglePlayerScreenMixin",
+    "SystemToastAccessor",
     "WorldListEntryAccessor",
     "WorldListEntryMixin"
   ],

@@ -370,10 +370,10 @@ public class GitManager {
                     .setMessage("World pruning - " + timestamp)
                     .call();
             // delete main branch
+            progressMonitor.beginTask("Deleting main branch", 0);
             git.branchDelete()
                     .setBranchNames(mainBranch)
                     .setForce(true)
-                    .setProgressMonitor(progressMonitor)
                     .call();
             progressMonitor.beginTask("Renaming temporary branch to main", 0);
             // rename temp branch to main

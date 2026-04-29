@@ -1,15 +1,15 @@
 package ca.modmonster.minegit.gui;
 
 import ca.modmonster.minegit.MineGIT;
+import ca.modmonster.minegit.backport.WideToast;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.SyncResult;
 import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
-import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.eclipse.jgit.lib.ProgressMonitor;
 
@@ -23,7 +23,7 @@ public class PruneWorldScreen extends Screen {
     private MultiLineLabel descriptionWidget;
 
     public PruneWorldScreen(Screen parent, LevelStorageSource.LevelStorageAccess levelAccess, BooleanConsumer callback) {
-        super(Component.translatable("minegit.prune.title"));
+        super(new TranslatableComponent("minegit.prune.title"));
         this.parent = parent;
         this.levelAccess = levelAccess;
         this.callback = callback;
@@ -32,15 +32,15 @@ public class PruneWorldScreen extends Screen {
     @Override
     protected void init() {
         // Confirmation message
-        descriptionWidget = MultiLineLabel.create(this.font, Component.translatable("minegit.prune.description"), this.width - 50);
+        descriptionWidget = MultiLineLabel.create(this.font, new TranslatableComponent("minegit.prune.description"), this.width - 50);
         int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Confirm button
-        Button confirmButton = new Button(this.width / 2 - 152, 98 + descriptionHeight, 150, 20, Component.translatable("minegit.prune.confirm"), button -> pullThenPrune());
+        Button confirmButton = new Button(this.width / 2 - 152, 98 + descriptionHeight, 150, 20, new TranslatableComponent("minegit.prune.confirm"), button -> pullThenPrune());
         addRenderableWidget(confirmButton);
 
         // Cancel button
-        Button cancelButton = new Button(this.width / 2 + 2, 98 + descriptionHeight, 150, 20, Component.translatable("minegit.prune.cancel"), button -> onClose());
+        Button cancelButton = new Button(this.width / 2 + 2, 98 + descriptionHeight, 150, 20, new TranslatableComponent("minegit.prune.cancel"), button -> onClose());
         addRenderableWidget(cancelButton);
     }
 
@@ -57,9 +57,9 @@ public class PruneWorldScreen extends Screen {
         boolean ok = GitManager.prune(minecraft, worldId, progress);
         if (minecraft == null) return;
         if (ok) {
-            SystemToast.add(minecraft.getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION, Component.translatable("minegit.prune.complete"), null);
+            minecraft.getToasts().addToast(WideToast.get(font, new TranslatableComponent("minegit.prune.complete")));
         } else {
-            SystemToast.add(minecraft.getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION, Component.translatable("minegit.prune.failed"), null);
+            minecraft.getToasts().addToast(WideToast.get(font, new TranslatableComponent("minegit.prune.failed")));
         }
         minecraft.submit(() -> this.callback.accept(true));
     }
@@ -72,7 +72,7 @@ public class PruneWorldScreen extends Screen {
         }
         String worldId = levelAccess.getLevelId();
 
-        GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.prune.in_progress"));
+        GitProgressScreen progressScreen = new GitProgressScreen(new TranslatableComponent("minegit.prune.in_progress"));
         minecraft.setScreen(progressScreen);
         new Thread(() -> {
             SyncResult status = GitManager.pull(GitManager.getPath(minecraft, worldId), progressScreen);
@@ -93,10 +93,10 @@ public class PruneWorldScreen extends Screen {
                 case FAIL_NETWORK:
                     // Network error; show unreachable screen
                     minecraft.submit(() -> minecraft.setScreen(new TwoChoiceScreen(
-                            Component.translatable("minegit.sync.pull_unreachable.title"),
-                            Component.translatable("minegit.sync.pull_unreachable.description"),
-                            Component.translatable("minegit.sync.pull_unreachable.continue"),
-                            Component.translatable("minegit.sync.pull_unreachable.cancel"),
+                            new TranslatableComponent("minegit.sync.pull_unreachable.title"),
+                            new TranslatableComponent("minegit.sync.pull_unreachable.description"),
+                            new TranslatableComponent("minegit.sync.pull_unreachable.continue"),
+                            new TranslatableComponent("minegit.sync.pull_unreachable.cancel"),
                             () -> doPrune(progressScreen),
                             this::onClose
                     )));

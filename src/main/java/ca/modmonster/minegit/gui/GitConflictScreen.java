@@ -1,13 +1,13 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.backport.WideToast;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.SyncResult;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineLabel;
-import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,7 +15,7 @@ import java.nio.file.Path;
 
 public class GitConflictScreen extends Screen {
     public GitConflictScreen(@NotNull Runnable resolvedCallback, @Nullable Runnable cancelCallback, @NotNull Path worldFolder) {
-        super(Component.translatable("minegit.sync.conflict.title"));
+        super(new TranslatableComponent("minegit.sync.conflict.title"));
         this.resolvedCallback = resolvedCallback;
         this.cancelCallback = cancelCallback;
         this.worldFolder = worldFolder;
@@ -34,12 +34,12 @@ public class GitConflictScreen extends Screen {
         String localCommitDate = GitManager.getLatestLocalCommitDate(worldFolder);
 
         // Confirmation message
-        descriptionWidget = MultiLineLabel.create(this.font, Component.translatable("minegit.sync.conflict.description"), this.width - 50);
+        descriptionWidget = MultiLineLabel.create(this.font, new TranslatableComponent("minegit.sync.conflict.description"), this.width - 50);
         int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Remote button
-        Button remoteButton = new Button(this.width / 2 - 120, 108 + descriptionHeight, 240, 20, Component.translatable("minegit.sync.conflict.remote").append(" - " + remoteCommitDate), button -> {
-            GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_pull"));
+        Button remoteButton = new Button(this.width / 2 - 120, 108 + descriptionHeight, 240, 20, new TranslatableComponent("minegit.sync.conflict.remote").append(" - " + remoteCommitDate), button -> {
+            GitProgressScreen progressScreen = new GitProgressScreen(new TranslatableComponent("minegit.sync.status.git_pull"));
             minecraft.setScreen(progressScreen);
             new Thread(() -> {
                 boolean ok = GitManager.forcePull(worldFolder, progressScreen) == SyncResult.SUCCESS;
@@ -47,7 +47,7 @@ public class GitConflictScreen extends Screen {
                     minecraft.submit(resolvedCallback);
                 } else {
                     minecraft.submit(() -> {
-                        SystemToast.add(minecraft.getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION, Component.translatable("minegit.sync.conflict.failed"), null);
+                        minecraft.getToasts().addToast(WideToast.get(font, new TranslatableComponent("minegit.sync.conflict.failed")));
                         if (cancelCallback != null) {
                             cancelCallback.run();
                         } else {
@@ -60,8 +60,8 @@ public class GitConflictScreen extends Screen {
         addRenderableWidget(remoteButton);
 
         // Local button
-        Button localButton = new Button(this.width / 2 - 120, 130 + descriptionHeight, 240, 20, Component.translatable("minegit.sync.conflict.local").append(" - " + localCommitDate), button -> {
-            GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_push"));
+        Button localButton = new Button(this.width / 2 - 120, 130 + descriptionHeight, 240, 20, new TranslatableComponent("minegit.sync.conflict.local").append(" - " + localCommitDate), button -> {
+            GitProgressScreen progressScreen = new GitProgressScreen(new TranslatableComponent("minegit.sync.status.git_push"));
             minecraft.setScreen(progressScreen);
             new Thread(() -> {
                 boolean ok = GitManager.forcePush(worldFolder, progressScreen) == SyncResult.SUCCESS;
@@ -69,7 +69,7 @@ public class GitConflictScreen extends Screen {
                     minecraft.submit(resolvedCallback);
                 } else {
                     minecraft.submit(() -> {
-                        SystemToast.add(minecraft.getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION, Component.translatable("minegit.sync.conflict.failed"), null);
+                        minecraft.getToasts().addToast(WideToast.get(font, new TranslatableComponent("minegit.sync.conflict.failed")));
                         if (cancelCallback != null) {
                             cancelCallback.run();
                         } else {
@@ -83,7 +83,7 @@ public class GitConflictScreen extends Screen {
 
         // Cancel button
         if (cancelCallback != null) {
-            Button cancelButton = new Button(this.width / 2 - 75, 156 + descriptionHeight, 150, 20, Component.translatable("minegit.sync.conflict.cancel"), button -> cancelCallback.run());
+            Button cancelButton = new Button(this.width / 2 - 75, 156 + descriptionHeight, 150, 20, new TranslatableComponent("minegit.sync.conflict.cancel"), button -> cancelCallback.run());
             addRenderableWidget(cancelButton);
         }
     }

@@ -8,7 +8,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.EditWorldScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,13 +36,13 @@ public class EditWorldScreenMixin extends Screen {
         if (!GitManager.syncEnabled(minecraft, levelAccess.getLevelId())) return;
 
         // Add prune button
-        addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20, Component.translatable("minegit.prune.button"), button ->
+        addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20, new TranslatableComponent("minegit.prune.button"), button ->
                 minecraft.setScreen(new PruneWorldScreen(this, levelAccess, callback))));
 
         // Reposition existing buttons
         for (GuiEventListener child : this.children()) {
             if (!(child instanceof Button button)) return;
-            if (!(button.getMessage().getContents() instanceof TranslatableContents translatable)) return;
+            if (!(button.getMessage() instanceof TranslatableComponent translatable)) return;
             String key = translatable.getKey();
 
             switch (key) {
