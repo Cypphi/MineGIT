@@ -10,8 +10,7 @@
     "SelectWorldScreenAccessor",
     "SinglePlayerScreenMixin",
     "WorldListEntryAccessor",
-    "WorldListEntryMixin",
-    "WorldSelectionListInvoker"
+    "WorldListEntryMixin"
   ],
   "injectors": {
     "defaultRequire": 1

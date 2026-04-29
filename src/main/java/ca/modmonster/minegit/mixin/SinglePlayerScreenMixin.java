@@ -147,8 +147,6 @@ public class SinglePlayerScreenMixin extends Screen {
     @Unique
     private void returnToScreen() {
         // disgusting
-        WorldSelectionList list = ((SelectWorldScreenAccessor) this).getLevelList();
-        ((WorldSelectionListInvoker) list).invokeReloadWorldList();
         minecraft.setScreen(this);
     }
 }

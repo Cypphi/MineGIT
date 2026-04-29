@@ -94,9 +94,6 @@ public abstract class WorldListEntryMixin {
 
     @Unique
     private void returnToScreen() {
-        // disgusting
-        WorldSelectionList list = ((SelectWorldScreenAccessor) screen).getLevelList();
-        ((WorldSelectionListInvoker) list).invokeReloadWorldList();
         minecraft.setScreen(screen);
     }
 }
