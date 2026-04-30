@@ -44,25 +44,25 @@ public class AccountLinkScreen extends Screen {
         usernameEdit = new EditBox(font, this.width / 2 - 100, 107, 200, 20, USERNAME_EDIT_LABEL);
         usernameEdit.setMaxLength(39);
         usernameEdit.setResponder(string -> updateTestButtonStatus(false));
-        addRenderableWidget(usernameEdit);
+        this.children.add(usernameEdit);
 
         // PAT text field
         patEdit = new EditBox(font, this.width / 2 - 100, 152, 200, 20, PAT_EDIT_LABEL);
         patEdit.setMaxLength(255);
         patEdit.setResponder(string -> updateTestButtonStatus(false));
-        addRenderableWidget(patEdit);
+        this.children.add(patEdit);
 
         // Test credentials button
         testCredentialsButton = new Button(this.width / 2 - 100, 180, 200, 20, new TranslatableComponent("minegit.link.test"), button -> testCredentials());
-        addRenderableWidget(testCredentialsButton);
+        addButton(testCredentialsButton);
 
         // Back button
         backButton = new Button(6, 6, 20, 20, new TextComponent("←"), button -> onClose());
-        addRenderableWidget(backButton);
+        addButton(backButton);
 
         // Ralsei go spinny
         ralspinWidget = new RalspinWidget(width - 60, height - 80);
-        addRenderableWidget(ralspinWidget);
+        this.children.add(ralspinWidget);
 
         updateTestButtonStatus(false);
 
@@ -82,9 +82,18 @@ public class AccountLinkScreen extends Screen {
         drawCenteredString(poseStack, this.font, this.title, this.width / 2, 50, 16777215);
         drawCenteredString(poseStack, this.font, USERNAME_EDIT_LABEL, this.width / 2, 90, -2130706433);
         drawCenteredString(poseStack, this.font, PAT_EDIT_LABEL, this.width / 2, 135, -2130706433);
+        ralspinWidget.render(poseStack, i, j, f);
+        usernameEdit.render(poseStack, i, j, f);
+        patEdit.render(poseStack, i, j, f);
         if (testCredentialsStatus != null) drawCenteredString(poseStack, this.font, testCredentialsStatus, this.width / 2, 208, 16777215);
-        if (backButton.isHoveredOrFocused()) renderTooltip(poseStack, BACK_BUTTON_TOOLTIP,  i, j);
-        if (ralspinWidget.isHoveredOrFocused()) renderTooltip(poseStack, RalspinWidget.TOOLTIP, i, j);
+        if (backButton.isHovered()) renderTooltip(poseStack, BACK_BUTTON_TOOLTIP,  i, j);
+        if (ralspinWidget.isHovered()) renderTooltip(poseStack, RalspinWidget.TOOLTIP, i, j);
+    }
+
+    @Override
+    public void tick() {
+        usernameEdit.tick();
+        patEdit.tick();
     }
 
     private void testCredentials() {
@@ -118,7 +127,7 @@ public class AccountLinkScreen extends Screen {
     }
 
     private void updateTestButtonStatus(boolean forceDisable) {
-        testCredentialsButton.active = !forceDisable && !requestInProgress && !usernameEdit.getValue().isBlank() && !patEdit.getValue().isBlank();
+        testCredentialsButton.active = !forceDisable && !requestInProgress && !usernameEdit.getValue().replace(" ", "").isEmpty() && !patEdit.getValue().replace(" ", "").isEmpty();
     }
 
     @Override

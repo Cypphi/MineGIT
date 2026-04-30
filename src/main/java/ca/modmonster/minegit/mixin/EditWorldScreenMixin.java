@@ -36,24 +36,32 @@ public class EditWorldScreenMixin extends Screen {
         if (!GitManager.syncEnabled(minecraft, levelAccess.getLevelId())) return;
 
         // Add prune button
-        addRenderableWidget(new Button(this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20, new TranslatableComponent("minegit.prune.button"), button ->
+        addButton(new Button(this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20, new TranslatableComponent("minegit.prune.button"), button ->
                 minecraft.setScreen(new PruneWorldScreen(this, levelAccess, callback))));
 
         // Reposition existing buttons
         for (GuiEventListener child : this.children()) {
-            if (!(child instanceof Button button)) return;
-            if (!(button.getMessage() instanceof TranslatableComponent translatable)) return;
+            if (!(child instanceof Button)) return;
+            Button button = (Button) child;
+            if (!(button.getMessage() instanceof TranslatableComponent)) return;
+            TranslatableComponent translatable = (TranslatableComponent) button.getMessage();
             String key = translatable.getKey();
 
             switch (key) {
-                case "selectWorld.edit.backup" -> button.setWidth(80);
-                case "selectWorld.edit.backupFolder" -> {
+                case "selectWorld.edit.backup":
+                    button.setWidth(80);
+                    break;
+                case "selectWorld.edit.backupFolder":
                     button.setWidth(116);
                     button.x = this.width / 2 - 16;
                     button.y = this.height / 4 + 48 + 5;
-                }
-                case "selectWorld.edit.optimize" -> button.y = this.height / 4 + 72 + 5;
-                case "selectWorld.edit.export_worldgen_settings" -> button.y = this.height / 4 + 96 + 5;
+                    break;
+                case "selectWorld.edit.optimize":
+                    button.y = this.height / 4 + 72 + 5;
+                    break;
+                case "selectWorld.edit.export_worldgen_settings":
+                    button.y = this.height / 4 + 96 + 5;
+                    break;
             }
         }
     }

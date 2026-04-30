@@ -26,7 +26,7 @@ public abstract class WorldListEntryMixin {
 
     @Shadow
     @Final
-    LevelSummary summary;
+    private LevelSummary summary;
 
     @Shadow
     @Final
@@ -38,7 +38,7 @@ public abstract class WorldListEntryMixin {
     @Unique
     private boolean showGitBeforeJoin = true;
 
-    @Inject(method = "doDeleteWorld", at = @At("HEAD"))
+    @Inject(method = "deleteWorld", at = @At("HEAD"))
     private void beforeWorldDelete(CallbackInfo ci) {
         // Make .git folder writable
         GitManager.makeWritable(minecraft, summary.getLevelId());
@@ -94,6 +94,8 @@ public abstract class WorldListEntryMixin {
 
     @Unique
     private void returnToScreen() {
+        WorldSelectionList list = ((SelectWorldScreenAccessor) this).getLevelList();
+        ((WorldSelectionListInvoker) list).invokeReloadWorldList(() -> ((SelectWorldScreenAccessor) this.screen).getEditBox().getValue(), true);
         minecraft.setScreen(screen);
     }
 }

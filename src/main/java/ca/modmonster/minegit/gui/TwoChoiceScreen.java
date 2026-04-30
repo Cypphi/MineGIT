@@ -32,11 +32,11 @@ public class TwoChoiceScreen extends Screen {
 
         // Continue button
         Button continueButton = new Button(width / 2 - 152, 98 + descriptionHeight, 150, 20, continueMessage, button -> continueCallback.run());
-        addRenderableWidget(continueButton);
+        addButton(continueButton);
 
         // Cancel button
         Button cancelButton = new Button(width / 2 + 2, 98 + descriptionHeight, 150, 20, cancelMessage, button -> cancelCallback.run());
-        addRenderableWidget(cancelButton);
+        addButton(cancelButton);
     }
 
     @Override

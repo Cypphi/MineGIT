@@ -16,7 +16,6 @@ public class CloneScreen extends Screen {
     private static final Component BACK_BUTTON_TOOLTIP = new TranslatableComponent("minegit.clone.back");
     private static final Component CONFIGURE_BUTTON_TOOLTIP = new TranslatableComponent("minegit.link.setup.open");
 
-    private final Screen parent;
     private final Runnable closeCallback;
     private final Runnable cloneSuccessCallback;
     private EditBox repoEdit;
@@ -25,13 +24,12 @@ public class CloneScreen extends Screen {
     private Button configureButton;
     private RalspinWidget ralspinWidget;
 
-    public CloneScreen(Screen parent, Runnable closeCallback) {
-        this(parent, closeCallback, null);
+    public CloneScreen(Runnable closeCallback) {
+        this(closeCallback, null);
     }
 
-    public CloneScreen(Screen parent, Runnable closeCallback, Runnable cloneSuccessCallback) {
+    public CloneScreen(Runnable closeCallback, Runnable cloneSuccessCallback) {
         super(new TranslatableComponent("minegit.clone.title"));
-        this.parent = parent;
         this.closeCallback = closeCallback;
         this.cloneSuccessCallback = cloneSuccessCallback;
     }
@@ -42,23 +40,23 @@ public class CloneScreen extends Screen {
         repoEdit = new EditBox(font, this.width / 2 - 100, 107, 200, 20, REPO_LABEL);
         repoEdit.setMaxLength(39);
         repoEdit.setResponder(string -> updateButtonsStatus());
-        addRenderableWidget(repoEdit);
+        this.children.add(repoEdit);
 
         // Clone button
         cloneButton = new Button(this.width / 2 - 100, 135, 200, 20, new TranslatableComponent("minegit.clone.confirm"), button -> doClone());
-        addRenderableWidget(cloneButton);
+        addButton(cloneButton);
 
         // Back button
         backButton = new Button(6, 6, 20, 20, new TextComponent("←"), button -> onClose());
-        addRenderableWidget(backButton);
+        addButton(backButton);
 
         // Configure button
         configureButton = new Button(width - 26, 6, 20, 20, new TextComponent("☁"), button -> minecraft.setScreen(new AccountLinkScreen(this)));
-        addRenderableWidget(configureButton);
+        addButton(configureButton);
 
         // Ralsei go spinny
         ralspinWidget = new RalspinWidget(width - 60, height - 80);
-        addRenderableWidget(ralspinWidget);
+        this.children.add(ralspinWidget);
 
         updateButtonsStatus();
         setInitialFocus(repoEdit);
@@ -70,9 +68,16 @@ public class CloneScreen extends Screen {
         super.render(poseStack, i, j, f);
         drawCenteredString(poseStack, this.font, this.title, this.width / 2, 50, 16777215);
         drawCenteredString(poseStack, this.font, REPO_LABEL, this.width / 2, 90, -2130706433);
-        if (backButton.isHoveredOrFocused()) renderTooltip(poseStack, BACK_BUTTON_TOOLTIP, i, j);
-        if (configureButton.isHoveredOrFocused()) renderTooltip(poseStack, CONFIGURE_BUTTON_TOOLTIP, i, j);
-        if (ralspinWidget.isHoveredOrFocused()) renderTooltip(poseStack, RalspinWidget.TOOLTIP, i, j);
+        repoEdit.render(poseStack, i, j, f);
+        ralspinWidget.render(poseStack, i, j, f);
+        if (backButton.isHovered()) renderTooltip(poseStack, BACK_BUTTON_TOOLTIP, i, j);
+        if (configureButton.isHovered()) renderTooltip(poseStack, CONFIGURE_BUTTON_TOOLTIP, i, j);
+        if (ralspinWidget.isHovered()) renderTooltip(poseStack, RalspinWidget.TOOLTIP, i, j);
+    }
+
+    @Override
+    public void tick() {
+        repoEdit.tick();
     }
 
     private void doClone() {
@@ -103,12 +108,11 @@ public class CloneScreen extends Screen {
     }
 
     private void updateButtonsStatus() {
-        cloneButton.active = !repoEdit.getValue().isBlank();
+        cloneButton.active = !repoEdit.getValue().replace(" ", "").isEmpty();
     }
 
     @Override
     public void onClose() {
-        minecraft.setScreen(parent);
         if (closeCallback != null) closeCallback.run();
     }
 }

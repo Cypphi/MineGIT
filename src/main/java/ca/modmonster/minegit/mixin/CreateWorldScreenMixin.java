@@ -49,12 +49,12 @@ public abstract class CreateWorldScreenMixin extends Screen {
             gitButton = new Button(width / 2 - 178, height - 28, 20, 20, new TextComponent("↓"), this::onGitButtonPress);
             gitButtonTooltip = new TranslatableComponent("minegit.clone.title");
         }
-        addRenderableWidget(gitButton);
+        addButton(gitButton);
     }
 
     @Inject(at = @At("TAIL"), method = "render", remap = false)
     private void render(PoseStack poseStack, final int mouseX, final int mouseY, final float a, CallbackInfo info) {
-        if (gitButton != null && gitButton.isHoveredOrFocused()) {
+        if (gitButton != null && gitButton.isHovered()) {
             renderTooltip(poseStack, gitButtonTooltip, mouseX, mouseY);
         }
     }
@@ -65,7 +65,7 @@ public abstract class CreateWorldScreenMixin extends Screen {
             this.minecraft.setScreen(new AccountLinkScreen(this, this::updateSetupButton));
         } else {
             this.minecraft.setScreen(
-                    new CloneScreen(this, null, () ->
+                    new CloneScreen(null, () ->
                             minecraft.setScreen(new SelectWorldScreen(null))));
         }
     }
@@ -73,7 +73,7 @@ public abstract class CreateWorldScreenMixin extends Screen {
     @Unique
     void checkNeedsSetup() {
         Config config = ConfigManager.getCurrentConfig();
-        needsSetup = config.username.isBlank() || config.getPat().isBlank();
+        needsSetup = config.username.replace(" ", "").isEmpty() || config.getPat().replace(" ", "").isEmpty();
     }
 
     @Unique

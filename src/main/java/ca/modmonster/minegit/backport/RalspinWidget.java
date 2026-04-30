@@ -1,10 +1,9 @@
 package ca.modmonster.minegit.backport;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -34,7 +33,7 @@ public class RalspinWidget extends AbstractWidget {
         pose.pushPose();
         pose.translate(x, y, 0);
         pose.scale(SCALE, SCALE, 1);
-        RenderSystem.setShaderTexture(0, SPRITE);
+        Minecraft.getInstance().getTextureManager().bind(SPRITE);
         blit(
                 pose,
                 0, 0,
@@ -49,7 +48,4 @@ public class RalspinWidget extends AbstractWidget {
     public void renderButton(PoseStack poseStack, int i, int j, float f) {
 
     }
-
-    @Override
-    public void updateNarration(NarrationElementOutput narrationElementOutput) {}
 }

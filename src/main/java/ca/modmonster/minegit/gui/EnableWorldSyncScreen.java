@@ -13,8 +13,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.storage.LevelSummary;
 
-import java.net.http.HttpResponse;
-
 public class EnableWorldSyncScreen extends Screen {
     private final Screen parent;
     private final LevelSummary level;
@@ -35,15 +33,15 @@ public class EnableWorldSyncScreen extends Screen {
     protected void init() {
         // Confirm button
         confirmButton = new Button(width / 2 - 152, 124, 150, 20, new TranslatableComponent("minegit.sync.enable.confirm.ok"), button -> setupSync());
-        addRenderableWidget(confirmButton);
+        addButton(confirmButton);
 
         // Cancel button
         cancelButton = new Button(width / 2 + 2, 124, 150, 20, new TranslatableComponent("minegit.sync.enable.confirm.cancel"), button -> onClose());
-        addRenderableWidget(cancelButton);
+        addButton(cancelButton);
 
         Button openSetupButton = new Button(width / 2 - 75, 152, 150, 20, new TranslatableComponent("minegit.link.setup.open"), button -> minecraft.setScreen(new AccountLinkScreen(this.parent, closeCallback)));
         openSetupButton.visible = showOpenSetupButton;
-        addRenderableWidget(openSetupButton);
+        addButton(openSetupButton);
     }
 
     @Override
@@ -65,7 +63,7 @@ public class EnableWorldSyncScreen extends Screen {
             // Create a repository on GitHub
             Config config = ConfigManager.getCurrentConfig();
             progressScreen.beginTask("Create GitHub repository", 0);
-            HttpResponse<String> response = NetworkManager.createRepo(config.getPat(), level.getLevelId(), level.getLevelName());
+            NetworkManager.HttpResponse response = NetworkManager.createRepo(config.getPat(), level.getLevelId(), level.getLevelName());
             int statusCode = response == null? -1 : response.statusCode();
             if (statusCode != 201) {
                 // OOPS! ERROR!!

@@ -57,7 +57,7 @@ public class GitConflictScreen extends Screen {
                 }
             }).start();
         });
-        addRenderableWidget(remoteButton);
+        addButton(remoteButton);
 
         // Local button
         Button localButton = new Button(this.width / 2 - 120, 130 + descriptionHeight, 240, 20, new TranslatableComponent("minegit.sync.conflict.local").append(" - " + localCommitDate), button -> {
@@ -79,12 +79,12 @@ public class GitConflictScreen extends Screen {
                 }
             }).start();
         });
-        addRenderableWidget(localButton);
+        addButton(localButton);
 
         // Cancel button
         if (cancelCallback != null) {
             Button cancelButton = new Button(this.width / 2 - 75, 156 + descriptionHeight, 150, 20, new TranslatableComponent("minegit.sync.conflict.cancel"), button -> cancelCallback.run());
-            addRenderableWidget(cancelButton);
+            addButton(cancelButton);
         }
     }
 

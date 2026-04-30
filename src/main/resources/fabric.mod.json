@@ -28,8 +28,8 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.19.2",
-		"minecraft": ">=1.17-beta.1 <=1.19-alpha.22.15.a",
-		"java": ">=16",
+		"minecraft": ">=1.16.5-alpha.20.30.a <=1.17-alpha.21.8.a",
+		"java": ">=8",
 		"fabric": "*"
 	},
 	"conflicts": {

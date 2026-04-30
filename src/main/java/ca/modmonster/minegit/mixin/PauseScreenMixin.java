@@ -2,7 +2,6 @@ package ca.modmonster.minegit.mixin;
 
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.QuitState;
-import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -34,8 +33,10 @@ public class PauseScreenMixin extends Screen {
     protected void createPauseMenu(CallbackInfo ci) {
         // Find the disconnect button
         for (GuiEventListener child : this.children()) {
-            if (!(child instanceof Button button)) return;
-            if (!(button.getMessage() instanceof TranslatableComponent translatable)) return;
+            if (!(child instanceof Button)) return;
+            Button button = (Button) child;
+            if (!(button.getMessage() instanceof TranslatableComponent)) return;
+            TranslatableComponent translatable = (TranslatableComponent) button.getMessage();
             String key = translatable.getKey();
             if (key.equals("menu.returnToMenu")) disconnectButton = button;
         }
@@ -50,7 +51,7 @@ public class PauseScreenMixin extends Screen {
         if (!GitManager.syncEnabled(server.getWorldPath(LevelResource.ROOT))) return;
         if (!QuitState.altQuit) return;
 
-        if (disconnectButton.isHoveredOrFocused()) {
+        if (disconnectButton.isHovered()) {
             // draw red border
             renderOutline(
                     poseStack,
@@ -76,13 +77,13 @@ public class PauseScreenMixin extends Screen {
 
     @Override
     public boolean keyPressed(int i, int j, int k) {
-        if (i == InputConstants.KEY_LALT) QuitState.altQuit = true;
+        if (i == 342) QuitState.altQuit = true;
         return super.keyPressed(i, j, k);
     }
 
     @Override
     public boolean keyReleased(int i, int j, int k) {
-        if (i == InputConstants.KEY_LALT) QuitState.altQuit = false;
+        if (i == 342) QuitState.altQuit = false;
         return super.keyReleased(i, j, k);
     }
 }
