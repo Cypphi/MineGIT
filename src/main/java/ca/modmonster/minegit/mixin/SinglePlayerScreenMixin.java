@@ -95,7 +95,7 @@ public class SinglePlayerScreenMixin extends Screen {
     @Inject(at = @At("TAIL"), method = "render", remap = false)
     public void render(PoseStack poseStack, int i, int j, float f, CallbackInfo ci) {
         if (cloneButton != null && cloneButton.isHovered()) renderTooltip(poseStack, CLONE_BUTTON_TOOLTIP, i, j);
-        if (worldSyncButtonTooltip != null && worldSyncButton != null &&  worldSyncButton.isHovered()) renderComponentTooltip(poseStack, worldSyncButtonTooltip, i, j);
+        if (worldSyncButtonTooltip != null && worldSyncButton != null &&  worldSyncButton.isHovered()) renderTooltip(poseStack, worldSyncButtonTooltip, i, j);
     }
 
     @Inject(at = @At("TAIL"), method = "updateButtonStatus", remap = false)
