@@ -65,7 +65,7 @@ public abstract class CreateWorldScreenMixin extends Screen {
             this.minecraft.setScreen(new AccountLinkScreen(this, this::updateSetupButton));
         } else {
             this.minecraft.setScreen(
-                    new CloneScreen(null, () ->
+                    new CloneScreen(() -> minecraft.setScreen(this), () ->
                             minecraft.setScreen(new SelectWorldScreen(null))));
         }
     }
