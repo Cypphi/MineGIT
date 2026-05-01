@@ -10,6 +10,7 @@ import ca.modmonster.minegit.widget.WorldSyncButtonState;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
@@ -34,6 +35,9 @@ public class SinglePlayerScreenMixin extends Screen {
 
     @Shadow
     private @Nullable WorldSelectionList list;
+
+    @Shadow
+    protected EditBox searchBox;
 
     protected SinglePlayerScreenMixin(Component title) {
         super(title);
@@ -146,7 +150,8 @@ public class SinglePlayerScreenMixin extends Screen {
 
     @Unique
     private void returnToScreen() {
-        // disgusting
+        WorldSelectionList list = ((SelectWorldScreenAccessor) this).getLevelList();
+        ((WorldSelectionListInvoker) list).invokeReloadWorldList(() -> searchBox.getValue(), true);
         minecraft.setScreen(this);
     }
 }

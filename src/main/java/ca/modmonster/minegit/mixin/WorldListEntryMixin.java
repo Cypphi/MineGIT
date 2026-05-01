@@ -94,6 +94,8 @@ public abstract class WorldListEntryMixin {
 
     @Unique
     private void returnToScreen() {
+        WorldSelectionList list = ((SelectWorldScreenAccessor) this).getLevelList();
+        ((WorldSelectionListInvoker) list).invokeReloadWorldList(() -> ((SelectWorldScreenAccessor) this.screen).getEditBox().getValue(), true);
         minecraft.setScreen(screen);
     }
 }
