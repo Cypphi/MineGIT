@@ -11,7 +11,8 @@
     "SinglePlayerScreenMixin",
     "SystemToastAccessor",
     "WorldListEntryAccessor",
-    "WorldListEntryMixin"
+    "WorldListEntryMixin",
+    "WorldSelectionListInvoker"
   ],
   "injectors": {
     "defaultRequire": 1
