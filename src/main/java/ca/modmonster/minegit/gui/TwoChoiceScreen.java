@@ -1,14 +1,12 @@
 package ca.modmonster.minegit.gui;
 
 import ca.modmonster.minegit.backport.MultiLineLabel;
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public class TwoChoiceScreen extends Screen {
-    public TwoChoiceScreen(Component title, Component description, Component continueMessage, Component cancelMessage, Runnable continueCallback, Runnable cancelCallback) {
+    public TwoChoiceScreen(Component title, String description, String continueMessage, String cancelMessage, Runnable continueCallback, Runnable cancelCallback) {
         super(title);
         this.description = description;
         this.continueMessage = continueMessage;
@@ -17,9 +15,9 @@ public class TwoChoiceScreen extends Screen {
         this.cancelCallback = cancelCallback;
     }
 
-    private final Component description;
-    private final Component continueMessage;
-    private final Component cancelMessage;
+    private final String description;
+    private final String continueMessage;
+    private final String cancelMessage;
     private final Runnable continueCallback;
     private final Runnable cancelCallback;
     private MultiLineLabel descriptionWidget;
@@ -40,11 +38,11 @@ public class TwoChoiceScreen extends Screen {
     }
 
     @Override
-    public void render(PoseStack poseStack, int i, int j, float f) {
+    public void render(int i, int j, float f) {
         this.renderDirtBackground(i);
-        super.render(poseStack, i, j, f);
-        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 50, 16777215);
-        descriptionWidget.renderCentered(poseStack, this.width / 2, 90);
+        super.render(i, j, f);
+        drawCenteredString(this.font, this.title.getString(), this.width / 2, 50, 16777215);
+        descriptionWidget.renderCentered(this.width / 2, 90);
     }
 
     @Override

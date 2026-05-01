@@ -5,26 +5,20 @@ import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.CryptoManager;
 import ca.modmonster.minegit.data.NetworkManager;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TranslatableComponent;
 
 public class AccountLinkScreen extends Screen {
-    private static final Component USERNAME_EDIT_LABEL = new TranslatableComponent("minegit.link.username");
-    private static final Component PAT_EDIT_LABEL = new TranslatableComponent("minegit.link.pat");
-    private static final Component BACK_BUTTON_TOOLTIP = new TranslatableComponent("minegit.link.back");
-
     private final Screen parent;
     private final Runnable closeCallback;
     private EditBox usernameEdit;
     private EditBox patEdit;
     private Button testCredentialsButton;
     private boolean requestInProgress = false;
-    private Component testCredentialsStatus = null;
+    private String testCredentialsStatus = null;
     private Button backButton;
     private RalspinWidget ralspinWidget;
 
@@ -41,23 +35,23 @@ public class AccountLinkScreen extends Screen {
     @Override
     protected void init() {
         // Username text field
-        usernameEdit = new EditBox(font, this.width / 2 - 100, 107, 200, 20, USERNAME_EDIT_LABEL);
+        usernameEdit = new EditBox(font, this.width / 2 - 100, 107, 200, 20, I18n.get("minegit.link.username"));
         usernameEdit.setMaxLength(39);
         usernameEdit.setResponder(string -> updateTestButtonStatus(false));
         this.children.add(usernameEdit);
 
         // PAT text field
-        patEdit = new EditBox(font, this.width / 2 - 100, 152, 200, 20, PAT_EDIT_LABEL);
+        patEdit = new EditBox(font, this.width / 2 - 100, 152, 200, 20, I18n.get("minegit.link.pat"));
         patEdit.setMaxLength(255);
         patEdit.setResponder(string -> updateTestButtonStatus(false));
         this.children.add(patEdit);
 
         // Test credentials button
-        testCredentialsButton = new Button(this.width / 2 - 100, 180, 200, 20, new TranslatableComponent("minegit.link.test"), button -> testCredentials());
+        testCredentialsButton = new Button(this.width / 2 - 100, 180, 200, 20, I18n.get("minegit.link.test"), button -> testCredentials());
         addButton(testCredentialsButton);
 
         // Back button
-        backButton = new Button(6, 6, 20, 20, new TextComponent("←"), button -> onClose());
+        backButton = new Button(6, 6, 20, 20, "←", button -> onClose());
         addButton(backButton);
 
         // Ralsei go spinny
@@ -73,21 +67,22 @@ public class AccountLinkScreen extends Screen {
         if (pat != null) patEdit.setValue(pat);
 
         setInitialFocus(usernameEdit);
+        usernameEdit.setFocus(true);
     }
 
     @Override
-    public void render(PoseStack poseStack, int i, int j, float f) {
+    public void render(int i, int j, float f) {
         this.renderDirtBackground(i);
-        super.render(poseStack, i, j, f);
-        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 50, 16777215);
-        drawCenteredString(poseStack, this.font, USERNAME_EDIT_LABEL, this.width / 2, 90, -2130706433);
-        drawCenteredString(poseStack, this.font, PAT_EDIT_LABEL, this.width / 2, 135, -2130706433);
-        ralspinWidget.render(poseStack, i, j, f);
-        usernameEdit.render(poseStack, i, j, f);
-        patEdit.render(poseStack, i, j, f);
-        if (testCredentialsStatus != null) drawCenteredString(poseStack, this.font, testCredentialsStatus, this.width / 2, 208, 16777215);
-        if (backButton.isHovered()) renderTooltip(poseStack, BACK_BUTTON_TOOLTIP,  i, j);
-        if (ralspinWidget.isHovered()) renderTooltip(poseStack, RalspinWidget.TOOLTIP, i, j);
+        super.render(i, j, f);
+        drawCenteredString(this.font, this.title.getString(), this.width / 2, 50, 16777215);
+        drawCenteredString(this.font, I18n.get("minegit.link.username"), this.width / 2, 90, -2130706433);
+        drawCenteredString(this.font, I18n.get("minegit.link.pat"), this.width / 2, 135, -2130706433);
+        ralspinWidget.render(i, j, f);
+        usernameEdit.render(i, j, f);
+        patEdit.render(i, j, f);
+        if (testCredentialsStatus != null) drawCenteredString(this.font, testCredentialsStatus, this.width / 2, 208, 16777215);
+        if (backButton.isHovered()) renderTooltip(I18n.get("minegit.link.back"),  i, j);
+        if (ralspinWidget.isHovered()) renderTooltip(RalspinWidget.TOOLTIP, i, j);
     }
 
     @Override
@@ -107,19 +102,19 @@ public class AccountLinkScreen extends Screen {
 
             switch (statusCode) {
                 case 200:
-                    testCredentialsStatus = new TranslatableComponent("minegit.link.status.success");
+                    testCredentialsStatus = I18n.get("minegit.link.status.success");
                     updateTestButtonStatus(true);
                     break;
                 case 401:
-                    testCredentialsStatus = new TranslatableComponent("minegit.link.status.error.pat");
+                    testCredentialsStatus = I18n.get("minegit.link.status.error.pat");
                     updateTestButtonStatus(true);
                     break;
                 case 404:
-                    testCredentialsStatus = new TranslatableComponent("minegit.link.status.error.username");
+                    testCredentialsStatus = I18n.get("minegit.link.status.error.username");
                     updateTestButtonStatus(true);
                     break;
                 default:
-                    testCredentialsStatus = new TranslatableComponent("minegit.link.status.error.generic", statusCode);
+                    testCredentialsStatus = I18n.get("minegit.link.status.error.generic", statusCode);
                     updateTestButtonStatus(true);
                     break;
             }

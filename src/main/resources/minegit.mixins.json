@@ -9,7 +9,7 @@
     "PauseScreenMixin",
     "SelectWorldScreenAccessor",
     "SinglePlayerScreenMixin",
-    "SystemToastAccessor",
+    "ToastComponentMixin",
     "WorldListEntryAccessor",
     "WorldListEntryMixin",
     "WorldSelectionListInvoker"

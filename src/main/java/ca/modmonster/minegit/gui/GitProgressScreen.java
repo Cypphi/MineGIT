@@ -1,16 +1,13 @@
 package ca.modmonster.minegit.gui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import org.eclipse.jgit.lib.ProgressMonitor;
-import org.jetbrains.annotations.NotNull;
 
 public class GitProgressScreen extends Screen implements ProgressMonitor {
     public static final int PROGRESS_BAR_WIDTH = 128;
 
-    private Component currentTask = TextComponent.EMPTY;
+    private String currentTask = "";
     private int currentTaskWork = 0;
     private int currentTaskTotalWork = 1;
 
@@ -24,24 +21,24 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
     }
 
     @Override
-    public void render(@NotNull PoseStack poseStack, int i, int j, float f) {
+    public void render(int i, int j, float f) {
         this.renderDirtBackground(i);
-        super.render(poseStack, i, j, f);
+        super.render(i, j, f);
 
         // Render progress bar
         int barLeft = this.width / 2 - PROGRESS_BAR_WIDTH / 2;
-        fill(poseStack, barLeft, this.height - 16, barLeft + PROGRESS_BAR_WIDTH, this.height - 18, 0xFFA0A0A0);
+        fill(barLeft, this.height - 16, barLeft + PROGRESS_BAR_WIDTH, this.height - 18, 0xFFA0A0A0);
 
         float progress = (float) currentTaskWork / currentTaskTotalWork;
         if (progress > 1) progress = 1;
         int barPixels = (int) (PROGRESS_BAR_WIDTH * progress);
-        fill(poseStack, barLeft, this.height - 16, barLeft + barPixels, this.height - 18, 0xFF80FF80);
+        fill(barLeft, this.height - 16, barLeft + barPixels, this.height - 18, 0xFF80FF80);
 
         // Draw message
-        drawCenteredString(poseStack, this.font, this.title, this.width / 2, 70, 16777215);
+        drawCenteredString(this.font, this.title.getString(), this.width / 2, 70, 16777215);
 
         // Draw status
-        drawCenteredString(poseStack, font, currentTask, this.width / 2, this.height - 32, 16777215);
+        drawCenteredString(font, currentTask, this.width / 2, this.height - 32, 16777215);
     }
 
     @Override
@@ -49,7 +46,7 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
 
     @Override
     public void beginTask(String title, int totalWork) {
-        currentTask = new TextComponent(title);
+        currentTask = title;
         currentTaskWork = 0;
         currentTaskTotalWork = totalWork != 0? totalWork : 1;
     }

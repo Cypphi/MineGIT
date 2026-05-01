@@ -8,6 +8,7 @@ import ca.modmonster.minegit.gui.TwoChoiceScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.storage.LevelSummary;
 import org.spongepowered.asm.mixin.Final;
@@ -72,9 +73,9 @@ public abstract class WorldListEntryMixin {
                     // Network error; show unreachable screen
                     minecraft.submit(() -> minecraft.setScreen(new TwoChoiceScreen(
                             new TranslatableComponent("minegit.sync.pull_unreachable.title"),
-                            new TranslatableComponent("minegit.sync.pull_unreachable.description"),
-                            new TranslatableComponent("minegit.sync.pull_unreachable.continue"),
-                            new TranslatableComponent("minegit.sync.pull_unreachable.cancel"),
+                            I18n.get("minegit.sync.pull_unreachable.description"),
+                            I18n.get("minegit.sync.pull_unreachable.continue"),
+                            I18n.get("minegit.sync.pull_unreachable.cancel"),
                             this::doLoadWorld, // continue
                             this::returnToScreen // cancel
                     )));

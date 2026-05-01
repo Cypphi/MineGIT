@@ -1,23 +1,26 @@
 package ca.modmonster.minegit.widget;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.client.resources.language.I18n;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 public enum WorldSyncButtonState {
-    SETUP(new TextComponent("☁"), Collections.singletonList(new TranslatableComponent("minegit.link.setup"))),
-    ENABLE(new TextComponent("☁"), Arrays.asList(new TranslatableComponent("minegit.sync.enable"), new TranslatableComponent("minegit.sync.alt_configure"))),
-    WORLD_CONFIGURE(new TextComponent("✔"), Arrays.asList(new TranslatableComponent("minegit.sync.enabled"), new TranslatableComponent("minegit.sync.alt_configure")));
+    SETUP("☁", () -> Collections.singletonList(I18n.get("minegit.link.setup"))),
+    ENABLE("☁", () -> Arrays.asList(I18n.get("minegit.sync.enable"), I18n.get("minegit.sync.alt_configure"))),
+    WORLD_CONFIGURE("✔", () -> Arrays.asList(I18n.get("minegit.sync.enabled"), I18n.get("minegit.sync.alt_configure")));
 
-    public final Component message;
-    public final List<Component> tooltip;
+    public final String message;
+    private final Supplier<List<String>> tooltip;
 
-    WorldSyncButtonState(Component message, List<Component> tooltip) {
+    WorldSyncButtonState(String message, Supplier<List<String>> tooltip) {
         this.message = message;
         this.tooltip = tooltip;
+    }
+
+    public final List<String> getTooltip() {
+        return tooltip.get();
     }
 }

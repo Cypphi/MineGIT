@@ -7,15 +7,13 @@ import ca.modmonster.minegit.gui.AccountLinkScreen;
 import ca.modmonster.minegit.gui.CloneScreen;
 import ca.modmonster.minegit.gui.EnableWorldSyncScreen;
 import ca.modmonster.minegit.widget.WorldSyncButtonState;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.storage.LevelSummary;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,7 +30,7 @@ import java.util.List;
 @Mixin(SelectWorldScreen.class)
 public class SinglePlayerScreenMixin extends Screen {
     @Unique
-    private static final Component CLONE_BUTTON_TOOLTIP = new TranslatableComponent("minegit.clone.title");
+    private String cloneButtonTooltip;
 
     @Shadow
     private @Nullable WorldSelectionList list;
@@ -51,7 +49,7 @@ public class SinglePlayerScreenMixin extends Screen {
     private Button worldSyncButton;
 
     @Unique @Nullable
-    private List<Component> worldSyncButtonTooltip;
+    private List<String> worldSyncButtonTooltip;
 
     @Unique
     private WorldSyncButtonState worldSyncButtonState = WorldSyncButtonState.SETUP;
@@ -64,8 +62,10 @@ public class SinglePlayerScreenMixin extends Screen {
 
     @Inject(at = @At("TAIL"), method = "init", remap = false)
 	private void init(CallbackInfo info) {
+        cloneButtonTooltip = I18n.get("minegit.clone.title");
+
         // Add world sync button
-        worldSyncButton = new Button(width / 2 - 178, height - 52, 20, 20, new TextComponent("☁"), button -> {
+        worldSyncButton = new Button(width / 2 - 178, height - 52, 20, 20, "☁", button -> {
             if (worldSyncButtonState == WorldSyncButtonState.SETUP || altHeld) {
                 altHeld = false;
                 this.minecraft.setScreen(new AccountLinkScreen(this, () -> {
@@ -83,7 +83,7 @@ public class SinglePlayerScreenMixin extends Screen {
         addButton(worldSyncButton);
 
         // Add clone button
-        cloneButton = new Button(width / 2 - 178, height - 28, 20, 20, new TextComponent("↓"), button -> this.minecraft.setScreen(new CloneScreen(() -> {
+        cloneButton = new Button(width / 2 - 178, height - 28, 20, 20, "↓", button -> this.minecraft.setScreen(new CloneScreen(() -> {
             if (this.list != null) returnToScreen();
             updateWorldSyncButton();
         })));
@@ -93,9 +93,9 @@ public class SinglePlayerScreenMixin extends Screen {
 	}
 
     @Inject(at = @At("TAIL"), method = "render", remap = false)
-    public void render(PoseStack poseStack, int i, int j, float f, CallbackInfo ci) {
-        if (cloneButton != null && cloneButton.isHovered()) renderTooltip(poseStack, CLONE_BUTTON_TOOLTIP, i, j);
-        if (worldSyncButtonTooltip != null && worldSyncButton != null &&  worldSyncButton.isHovered()) renderTooltip(poseStack, worldSyncButtonTooltip, i, j);
+    public void render(int i, int j, float f, CallbackInfo ci) {
+        if (cloneButton != null && cloneButton.isHovered()) renderTooltip(cloneButtonTooltip, i, j);
+        if (worldSyncButtonTooltip != null && worldSyncButton != null &&  worldSyncButton.isHovered()) renderTooltip(worldSyncButtonTooltip, i, j);
     }
 
     @Inject(at = @At("TAIL"), method = "updateButtonStatus", remap = false)
@@ -124,7 +124,7 @@ public class SinglePlayerScreenMixin extends Screen {
         }
 
         worldSyncButton.setMessage(worldSyncButtonState.message);
-        worldSyncButtonTooltip = worldSyncButtonState.tooltip;
+        worldSyncButtonTooltip = worldSyncButtonState.getTooltip();
         if (cloneButton != null) cloneButton.active = worldSyncButtonState != WorldSyncButtonState.SETUP;
     }
 
@@ -134,8 +134,8 @@ public class SinglePlayerScreenMixin extends Screen {
             altHeld = true;
             if (worldSyncButton != null) {
                 worldSyncButton.active = true;
-                worldSyncButton.setMessage(new TextComponent("☁"));
-                worldSyncButtonTooltip = Collections.singletonList(new TranslatableComponent("minegit.link.setup.open"));
+                worldSyncButton.setMessage("☁");
+                worldSyncButtonTooltip = Collections.singletonList(I18n.get("minegit.link.setup.open"));
             }
         }
     }
