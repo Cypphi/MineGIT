@@ -48,9 +48,7 @@ dependencies {
 	include "org.apache.logging.log4j:log4j-slf4j-impl:2.17.1"
 
     // Mod Menu
-    modImplementation ("com.terraformersmc:modmenu:${project.modmenu_version}") {
-		exclude group: "eu.pb4", module: "placeholder-api"
-	}
+    modImplementation "io.github.prospector:modmenu:${project.modmenu_version}"
 }
 
 processResources {

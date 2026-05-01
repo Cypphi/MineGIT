@@ -1,6 +1,6 @@
 package ca.modmonster.minegit.backport;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -28,9 +28,10 @@ public class RalspinWidget extends AbstractWidget {
         int u = 0;
         int v = frame * FRAME_HEIGHT;
 
-        RenderSystem.pushMatrix();
-        RenderSystem.translatef(x, y, 0);
-        RenderSystem.scalef(SCALE, SCALE, 1);
+        GlStateManager.pushMatrix();
+        GlStateManager.translatef(x, y, 0);
+        GlStateManager.scalef(SCALE, SCALE, 1);
+        GlStateManager.color4f(1F, 1F, 1F, 1F);
         Minecraft.getInstance().getTextureManager().bind(SPRITE);
         blit(
                 0, 0,
@@ -38,7 +39,7 @@ public class RalspinWidget extends AbstractWidget {
                 FRAME_WIDTH, FRAME_HEIGHT,
                 FRAME_WIDTH, FRAME_HEIGHT * FRAME_COUNT
         );
-        RenderSystem.popMatrix();
+        GlStateManager.popMatrix();
     }
 
     @Override
