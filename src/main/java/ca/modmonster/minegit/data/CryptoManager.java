@@ -1,10 +1,7 @@
 package ca.modmonster.minegit.data;
 
-import ca.modmonster.minegit.MineGIT;
-import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -13,6 +10,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+
+import ca.modmonster.minegit.MineGIT;
 
 public class CryptoManager {
     public static final boolean AES_AVAILABLE;
@@ -106,7 +108,7 @@ public class CryptoManager {
         }
 
         // Save a randomly generated key to a file
-        Path keyFilePath = FabricLoader.getInstance().getConfigDir().resolve(".minegit.key");
+        Path keyFilePath = Minecraft.getInstance().gameDir.toPath().resolve("config/.minegit.key");
         String fileKey = null;
         if (keyFilePath.toFile().exists()) {
             try {

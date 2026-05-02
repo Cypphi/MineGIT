@@ -1,13 +1,13 @@
 package ca.modmonster.minegit.gui;
 
-import ca.modmonster.minegit.backport.MultiLineLabel;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
 
-public class TwoChoiceScreen extends Screen {
-    public TwoChoiceScreen(Component title, String description, String continueMessage, String cancelMessage, Runnable continueCallback, Runnable cancelCallback) {
-        super(title);
+import ca.modmonster.minegit.backport.MultiLineLabel;
+
+public class TwoChoiceScreen extends GuiScreen {
+    public TwoChoiceScreen(String title, String description, String continueMessage, String cancelMessage, Runnable continueCallback, Runnable cancelCallback) {
+        this.title = title;
         this.description = description;
         this.continueMessage = continueMessage;
         this.cancelMessage = cancelMessage;
@@ -15,6 +15,7 @@ public class TwoChoiceScreen extends Screen {
         this.cancelCallback = cancelCallback;
     }
 
+    private final String title;
     private final String description;
     private final String continueMessage;
     private final String cancelMessage;
@@ -23,30 +24,40 @@ public class TwoChoiceScreen extends Screen {
     private MultiLineLabel descriptionWidget;
 
     @Override
-    protected void init() {
+    protected void initGui() {
         // Confirmation message
-        descriptionWidget = MultiLineLabel.create(this.font, description, this.width - 50);
+        descriptionWidget = MultiLineLabel.create(fontRenderer, description, this.width - 50);
         int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Continue button
-        Button continueButton = new Button(width / 2 - 152, 98 + descriptionHeight, 150, 20, continueMessage, button -> continueCallback.run());
+        GuiButton continueButton = new GuiButton(0, width / 2 - 152, 98 + descriptionHeight, 150, 20, continueMessage) {
+            @Override
+            public void onClick(double mouseX, double mouseY) {
+                continueCallback.run();
+            }
+        };
         addButton(continueButton);
 
         // Cancel button
-        Button cancelButton = new Button(width / 2 + 2, 98 + descriptionHeight, 150, 20, cancelMessage, button -> cancelCallback.run());
+        GuiButton cancelButton = new GuiButton(1, width / 2 + 2, 98 + descriptionHeight, 150, 20, cancelMessage) {
+            @Override
+            public void onClick(double mouseX, double mouseY) {
+                cancelCallback.run();
+            }
+        };
         addButton(cancelButton);
     }
 
     @Override
     public void render(int i, int j, float f) {
-        this.renderDirtBackground(i);
+        this.drawDefaultBackground();
         super.render(i, j, f);
-        drawCenteredString(this.font, this.title.getString(), this.width / 2, 50, 16777215);
+        drawCenteredString(fontRenderer, this.title, this.width / 2, 50, 16777215);
         descriptionWidget.renderCentered(this.width / 2, 90);
     }
 
     @Override
-    public boolean shouldCloseOnEsc() {
+    public boolean allowCloseWithEscape() {
         return false;
     }
 }

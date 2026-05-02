@@ -4,105 +4,112 @@ import ca.modmonster.minegit.backport.MultiLineLabel;
 import ca.modmonster.minegit.backport.WideToast;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.SyncResult;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.TranslatableComponent;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.resources.I18n;
 
 import java.nio.file.Path;
 
-public class GitConflictScreen extends Screen {
-    public GitConflictScreen(@NotNull Runnable resolvedCallback, @Nullable Runnable cancelCallback, @NotNull Path worldFolder) {
-        super(new TranslatableComponent("minegit.sync.conflict.title"));
+public class GitConflictScreen extends GuiScreen {
+    public GitConflictScreen(Runnable resolvedCallback, Runnable cancelCallback, Path worldFolder) {
         this.resolvedCallback = resolvedCallback;
         this.cancelCallback = cancelCallback;
         this.worldFolder = worldFolder;
     }
 
-    private final @NotNull Runnable resolvedCallback;
-    private final @Nullable Runnable cancelCallback;
-    private final @NotNull Path worldFolder;
+    private final Runnable resolvedCallback;
+    private final Runnable cancelCallback;
+    private final Path worldFolder;
 
     private MultiLineLabel descriptionWidget;
 
     @Override
-    protected void init() {
+    protected void initGui() {
         // Get latest commit dates of remote and local
         String remoteCommitDate = GitManager.getLatestRemoteCommitDate(worldFolder);
         String localCommitDate = GitManager.getLatestLocalCommitDate(worldFolder);
 
         // Confirmation message
-        descriptionWidget = MultiLineLabel.create(this.font, I18n.get("minegit.sync.conflict.description"), this.width - 50);
+        descriptionWidget = MultiLineLabel.create(fontRenderer, I18n.format("minegit.sync.conflict.description"), this.width - 50);
         int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Remote button
-        Button remoteButton = new Button(this.width / 2 - 120, 108 + descriptionHeight, 240, 20, I18n.get("minegit.sync.conflict.remote") + " - " + remoteCommitDate, button -> {
-            GitProgressScreen progressScreen = new GitProgressScreen(new TranslatableComponent("minegit.sync.status.git_pull"));
-            minecraft.setScreen(progressScreen);
-            new Thread(() -> {
-                boolean ok = GitManager.forcePull(worldFolder, progressScreen) == SyncResult.SUCCESS;
-                if (ok) {
-                    minecraft.submit(resolvedCallback);
-                } else {
-                    minecraft.submit(() -> {
-                        minecraft.getToasts().addToast(new WideToast(I18n.get("minegit.sync.conflict.failed")));
-                        if (cancelCallback != null) {
-                            cancelCallback.run();
-                        } else {
-                            minecraft.setScreen(null);
-                        }
-                    });
-                }
-            }).start();
-        });
+        GuiButton remoteButton = new GuiButton(0, this.width / 2 - 120, 108 + descriptionHeight, 240, 20, I18n.format("minegit.sync.conflict.remote") + " - " + remoteCommitDate) {
+            @Override
+            public void onClick(double mouseX, double mouseY) {
+                GitProgressScreen progressScreen = new GitProgressScreen(I18n.format("minegit.sync.status.git_pull"));
+                mc.displayGuiScreen(progressScreen);
+                new Thread(() -> {
+                    boolean ok = GitManager.forcePull(worldFolder, progressScreen) == SyncResult.SUCCESS;
+                    if (ok) {
+                        mc.addScheduledTask(resolvedCallback);
+                    } else {
+                        mc.addScheduledTask(() -> {
+                            mc.getToastGui().add(new WideToast(I18n.format("minegit.sync.conflict.failed")));
+                            if (cancelCallback != null) {
+                                cancelCallback.run();
+                            } else {
+                                mc.displayGuiScreen(null);
+                            }
+                        });
+                    }
+                }).start();
+            }
+        };
         addButton(remoteButton);
 
         // Local button
-        Button localButton = new Button(this.width / 2 - 120, 130 + descriptionHeight, 240, 20, I18n.get("minegit.sync.conflict.local") + " - " + localCommitDate, button -> {
-            GitProgressScreen progressScreen = new GitProgressScreen(new TranslatableComponent("minegit.sync.status.git_push"));
-            minecraft.setScreen(progressScreen);
-            new Thread(() -> {
-                boolean ok = GitManager.forcePush(worldFolder, progressScreen) == SyncResult.SUCCESS;
-                if (ok) {
-                    minecraft.submit(resolvedCallback);
-                } else {
-                    minecraft.submit(() -> {
-                        minecraft.getToasts().addToast(new WideToast(I18n.get("minegit.sync.conflict.failed")));
-                        if (cancelCallback != null) {
-                            cancelCallback.run();
-                        } else {
-                            minecraft.setScreen(null);
-                        }
-                    });
-                }
-            }).start();
-        });
+        GuiButton localButton = new GuiButton(1, this.width / 2 - 120, 130 + descriptionHeight, 240, 20, I18n.format("minegit.sync.conflict.local") + " - " + localCommitDate) {
+            @Override
+            public void onClick(double mouseX, double mouseY) {
+                GitProgressScreen progressScreen = new GitProgressScreen(I18n.format("minegit.sync.status.git_push"));
+                mc.displayGuiScreen(progressScreen);
+                new Thread(() -> {
+                    boolean ok = GitManager.forcePush(worldFolder, progressScreen) == SyncResult.SUCCESS;
+                    if (ok) {
+                        mc.addScheduledTask(resolvedCallback);
+                    } else {
+                        mc.addScheduledTask(() -> {
+                            mc.getToastGui().add(new WideToast(I18n.format("minegit.sync.conflict.failed")));
+                            if (cancelCallback != null) {
+                                cancelCallback.run();
+                            } else {
+                                mc.displayGuiScreen(null);
+                            }
+                        });
+                    }
+                }).start();
+            }
+        };
         addButton(localButton);
 
         // Cancel button
         if (cancelCallback != null) {
-            Button cancelButton = new Button(this.width / 2 - 75, 156 + descriptionHeight, 150, 20, I18n.get("minegit.sync.conflict.cancel"), button -> cancelCallback.run());
+            GuiButton cancelButton = new GuiButton(3, this.width / 2 - 75, 156 + descriptionHeight, 150, 20, I18n.format("minegit.sync.conflict.cancel")) {
+                @Override
+                public void onClick(double mouseX, double mouseY) {
+                    cancelCallback.run();
+                }
+            };
             addButton(cancelButton);
         }
     }
 
     @Override
     public void render(int i, int j, float f) {
-        this.renderDirtBackground(i);
+        this.drawDefaultBackground();
         super.render(i, j, f);
-        drawCenteredString(this.font, this.title.getString(), this.width / 2, 50, 16777215);
+        drawCenteredString(fontRenderer, I18n.format("minegit.sync.conflict.title"), this.width / 2, 50, 16777215);
         descriptionWidget.renderCentered(this.width / 2, 90);
     }
 
     @Override
-    public boolean shouldCloseOnEsc() {
+    public boolean allowCloseWithEscape() {
         return cancelCallback != null;
     }
 
     @Override
-    public void onClose() {
+    public void close() {
         if (cancelCallback != null) cancelCallback.run();
     }
 }

@@ -3,7 +3,7 @@ package ca.modmonster.minegit.data;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
 
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -14,7 +14,7 @@ import ca.modmonster.minegit.MineGIT;
 
 public class ConfigManager {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Path configPath = FabricLoader.getInstance().getConfigDir().resolve("minegit.json");
+    private static final Path configPath = Minecraft.getInstance().gameDir.toPath().resolve("config/minegit.json");
     private static Config currentConfig = null;
 
     public static void save(Config config) {

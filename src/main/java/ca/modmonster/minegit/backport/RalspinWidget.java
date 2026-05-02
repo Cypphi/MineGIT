@@ -1,12 +1,12 @@
 package ca.modmonster.minegit.backport;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.ResourceLocation;
 
-public class RalspinWidget extends AbstractWidget {
+public class RalspinWidget extends Gui implements IGuiEventListener {
     private static final ResourceLocation SPRITE = new ResourceLocation("minegit", "textures/gui/ralspin.png");
     private static final int FRAME_WIDTH = 21;
     private static final int FRAME_HEIGHT = 40;
@@ -15,14 +15,18 @@ public class RalspinWidget extends AbstractWidget {
     private static final int SCALE = 2;
     public static final String TOOLTIP = "hiiiii!! ^-^";
 
+    public final int x;
+    public final int y;
+    private boolean hovered;
+
     public RalspinWidget(final int x, final int y) {
-        super(x, y, FRAME_WIDTH * SCALE, FRAME_HEIGHT * SCALE, "");
+        this.x = x;
+        this.y = y;
     }
 
-    @Override
-    public void render(int i, int j, float f) {
-        super.render(i, j, f);
-        long time = Util.getMillis() / 50;
+    public void render(int mouseX, int mouseY) {
+        this.hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + FRAME_WIDTH * SCALE && mouseY < this.y + FRAME_HEIGHT * SCALE;
+        long time = System.currentTimeMillis() / 50;
         int frame = (int) ((time / FRAME_TIME) % FRAME_COUNT);
 
         int u = 0;
@@ -32,8 +36,8 @@ public class RalspinWidget extends AbstractWidget {
         GlStateManager.translatef(x, y, 0);
         GlStateManager.scalef(SCALE, SCALE, 1);
         GlStateManager.color4f(1F, 1F, 1F, 1F);
-        Minecraft.getInstance().getTextureManager().bind(SPRITE);
-        blit(
+        Minecraft.getInstance().getTextureManager().bindTexture(SPRITE);
+        Gui.drawModalRectWithCustomSizedTexture(
                 0, 0,
                 u, v,
                 FRAME_WIDTH, FRAME_HEIGHT,
@@ -42,8 +46,7 @@ public class RalspinWidget extends AbstractWidget {
         GlStateManager.popMatrix();
     }
 
-    @Override
-    public void renderButton(int i, int j, float f) {
-
+    public boolean isMouseOver() {
+        return hovered;
     }
 }

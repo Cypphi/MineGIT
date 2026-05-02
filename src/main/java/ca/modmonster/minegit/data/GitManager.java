@@ -1,7 +1,7 @@
 package ca.modmonster.minegit.data;
 
-import ca.modmonster.minegit.MineGIT;
 import net.minecraft.client.Minecraft;
+
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeCommand;
 import org.eclipse.jgit.api.PullResult;
@@ -32,6 +32,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+
+import ca.modmonster.minegit.MineGIT;
 
 public class GitManager {
     public static boolean syncEnabled(Minecraft minecraft, String worldId) {
@@ -287,7 +289,7 @@ public class GitManager {
     }
 
     public static Path getPath(Minecraft minecraft, String worldId) {
-        return minecraft.getLevelSource().getBaseDir().resolve(worldId);
+        return minecraft.gameDir.toPath().resolve("saves/" + worldId);
     }
 
     /**
