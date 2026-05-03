@@ -1,12 +1,12 @@
 buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net/' }
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
         mavenCentral()
         gradlePluginPortal()
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
     }
     dependencies {
-        classpath "net.minecraftforge.gradle:ForgeGradle:3.+"
+        classpath group: "net.minecraftforge.gradle", name: "ForgeGradle", version: "3.+", changing: true
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
         classpath 'com.github.johnrengelman.shadow:com.github.johnrengelman.shadow.gradle.plugin:1.2.3'
     }
@@ -62,6 +62,11 @@ repositories {
     maven { url = 'https://repo.spongepowered.org/maven/' }
 }
 
+configurations {
+    embed
+    implementation.extendsFrom(embed)
+}
+
 dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
@@ -86,11 +91,8 @@ dependencies {
     compile "org.eclipse.jgit:org.eclipse.jgit:5.13.5.202508271544-r"
 
     // Apply Mixin AP
-    compile ("org.spongepowered:mixin:0.7.4-SNAPSHOT") {
-        exclude module: "launchwrapper"
-        exclude module: "guava"
-        exclude module: "gson"
-        exclude module: "commons-io"
+    embed ("org.spongepowered:mixin:0.8.7") {
+        transitive = false
     }
 
     // For more info...
@@ -116,11 +118,12 @@ reobf {
 
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
+    from(configurations.embed.collect { it.isDirectory() ? it : zipTree(it)}) {
+        exclude "LICENSE.txt", "META-INF/*.txt", "META-INF/MANIFEST.MF", "META-INF/maven/**", "META-INF/*.RSA", "META-INF/*.SF"
+    }
     manifest {
         attributes([
             "MixinConfigs": "minegit.mixins.json",
-            "tweakClass": "org.spongepowered.asm.launch.MixinTweaker",
-            "TweakOrder": 0,
             "Specification-Title": "minegit",
             "Specification-Vendor": "modmonster",
             "Specification-Version": "1", // We are version 1 of ourselves
@@ -142,4 +145,10 @@ processResources {
 mixin {
 //    defaultObfuscationEnv searge
     add sourceSets.main, "minegit.mixins.refmap.json"
+}
+
+sourceSets {
+    main {
+        ext.refMap = "minegit.mixins.refmap.json"
+    }
 }
