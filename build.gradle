@@ -1,16 +1,19 @@
 buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net/' }
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
         mavenCentral()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply plugin: 'org.spongepowered.mixin'
 
 version = '1.5.2'
 group = 'ca.modmonster.minegit' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -35,21 +38,7 @@ minecraft {
         client {
             workingDirectory project.file('run')
 
-            // Recommended logging data for a userdev environment
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                minegit {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        server {
-            workingDirectory project.file('run')
+            args "--mixin", "minegit.mixins.json"
 
             // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
@@ -64,6 +53,12 @@ minecraft {
             }
         }
     }
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://maven.minecraftforge.net/' }
+    maven { url = 'https://repo.spongepowered.org/maven/' }
 }
 
 dependencies {
@@ -89,10 +84,12 @@ dependencies {
     // JGit
     compile "org.eclipse.jgit:org.eclipse.jgit:5.13.5.202508271544-r"
 
+    // Apply Mixin AP
+    compile fg.deobf('org.spongepowered:mixin:0.7.11-SNAPSHOT')
+
     // For more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
-
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
@@ -136,4 +133,8 @@ processResources {
     filesMatching("META-INF/mods.toml") {
         expand "file": [jarVersion: project.version]
     }
+}
+mixin {
+    add sourceSets.main, "minegit.refmap.json"
+    config "minegit.mixins.json"
 }
