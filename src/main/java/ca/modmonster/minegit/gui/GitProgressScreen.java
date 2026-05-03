@@ -1,6 +1,7 @@
 package ca.modmonster.minegit.gui;
 
 import net.minecraft.client.gui.GuiScreen;
+
 import org.eclipse.jgit.lib.ProgressMonitor;
 
 public class GitProgressScreen extends GuiScreen implements ProgressMonitor {
@@ -16,14 +17,9 @@ public class GitProgressScreen extends GuiScreen implements ProgressMonitor {
     }
 
     @Override
-    public boolean allowCloseWithEscape() {
-        return false;
-    }
-
-    @Override
-    public void render(int i, int j, float f) {
+    public void drawScreen(int i, int j, float f) {
         this.drawDefaultBackground();
-        super.render(i, j, f);
+        super.drawScreen(i, j, f);
 
         // Render progress bar
         int barLeft = this.width / 2 - PROGRESS_BAR_WIDTH / 2;
@@ -61,4 +57,7 @@ public class GitProgressScreen extends GuiScreen implements ProgressMonitor {
 
     @Override
     public boolean isCancelled() {return false;}
+
+    @Override
+    protected void keyTyped(char typedChar, int keyCode) {}
 }

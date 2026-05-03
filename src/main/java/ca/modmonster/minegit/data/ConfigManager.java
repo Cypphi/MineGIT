@@ -14,7 +14,7 @@ import ca.modmonster.minegit.MineGIT;
 
 public class ConfigManager {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Path configPath = Minecraft.getInstance().gameDir.toPath().resolve("config/minegit.json");
+    private static final Path configPath = Minecraft.getMinecraft().mcDataDir.toPath().resolve("config/minegit.json");
     private static Config currentConfig = null;
 
     public static void save(Config config) {

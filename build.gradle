@@ -2,13 +2,11 @@ buildscript {
     repositories {
         maven { url = 'https://maven.minecraftforge.net/' }
         mavenCentral()
-        gradlePluginPortal()
         maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
     }
     dependencies {
-        classpath group: "net.minecraftforge.gradle", name: "ForgeGradle", version: "3.+", changing: true
+        classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
-        classpath 'com.github.johnrengelman.shadow:com.github.johnrengelman.shadow.gradle.plugin:1.2.3'
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
@@ -16,7 +14,6 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
-apply plugin: 'com.github.johnrengelman.shadow'
 
 version = '1.5.2'
 group = 'ca.modmonster.minegit' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -30,10 +27,11 @@ minecraft {
     // stable_#            Stables are built at the discretion of the MCP team.
     // Use non-default mappings at your own risk. they may not always work.
     // Simply re-run your setup task after changing the mappings to update your workspace.
-    mappings channel: 'snapshot', version: '20180921-1.13'
+    //mappings channel: 'snapshot', version: '20171003-1.12'
+    mappings channel: 'snapshot', version: '20171003-1.12'
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
     
-    // accessTransformer = file('build/resources/main/META-INF/accesstransformer.cfg')
+    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     // Default run configurations.
     // These can be tweaked, removed, or duplicated as needed.
@@ -47,11 +45,7 @@ minecraft {
             // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
 
-            mods {
-                minegit {
-                    source sourceSets.main
-                }
-            }
+            arg '-torg.spongepowered.asm.launch.MixinTweaker'
         }
     }
 }
@@ -63,15 +57,15 @@ repositories {
 }
 
 configurations {
-    embed
-    implementation.extendsFrom(embed)
+    shade
+    compile.extendsFrom shade
 }
 
 dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.13.2-25.0.223'
+    minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2864'
 
     // You may put jars on which you depend on in ./libs or you may define them like so..
     // compile "some.group:artifact:version:classifier"
@@ -88,42 +82,30 @@ dependencies {
     // deobf 'com.mod-buildcraft:buildcraft:6.0.8:dev'
 
     // JGit
-    compile "org.eclipse.jgit:org.eclipse.jgit:5.13.5.202508271544-r"
+    shade "org.eclipse.jgit:org.eclipse.jgit:5.13.5.202508271544-r"
 
     // Apply Mixin AP
-    embed ("org.spongepowered:mixin:0.8.7") {
-        transitive = false
+    shade ("org.spongepowered:mixin:0.8.7") {
+        exclude module: 'guava'
+        exclude module: 'commons-io'
+        exclude module: 'gson'
     }
+    annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
+    testAnnotationProcessor "org.spongepowered:mixin:0.8.5:processor"
 
     // For more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 }
 
-shadowJar {
-    dependencies {
-        include(dependency("org.eclipse.jgit:org.eclipse.jgit"))
-        include(dependency("org.spongepowerd:mixin"))
-        exclude "LICENSE.txt"
-        classifier = "release"
-    }
-}
-
-reobf {
-    shadowJar {
-//        mappingType = "SEARGE"
-        classpath = sourceSets.main.compileClasspath
-    }
-}
-
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
-    from(configurations.embed.collect { it.isDirectory() ? it : zipTree(it)}) {
-        exclude "LICENSE.txt", "META-INF/*.txt", "META-INF/MANIFEST.MF", "META-INF/maven/**", "META-INF/*.RSA", "META-INF/*.SF"
-    }
     manifest {
         attributes([
-            "MixinConfigs": "minegit.mixins.json",
+            "ForceLoadAsMod": "true",
+            "FMLCorePluginContainsFMLMod": "true",
+            "TweakClass": "org.spongepowered.asm.launch.MixinTweaker",
+            "TweakOrder": "0",
             "Specification-Title": "minegit",
             "Specification-Vendor": "modmonster",
             "Specification-Version": "1", // We are version 1 of ourselves
@@ -133,22 +115,37 @@ jar {
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
-}
 
-build.dependsOn(shadowJar)
-
-processResources {
-    filesMatching("META-INF/mods.toml") {
-        expand "file": [jarVersion: project.version]
+    configurations.shade.each { dep ->
+        from(project.zipTree(dep)){
+            exclude 'META-INF', 'META-INF/**'
+        }
     }
 }
-mixin {
-//    defaultObfuscationEnv searge
-    add sourceSets.main, "minegit.mixins.refmap.json"
+
+jar.finalizedBy('reobfJar')
+
+sourceSets.each {
+    def dir = layout.buildDirectory.file("sourcesSets/$it.name").get().asFile
+    it.output.resourcesDir = dir
+    it.java.outputDir = dir
 }
 
-sourceSets {
-    main {
-        ext.refMap = "minegit.mixins.refmap.json"
+mixin {
+    // MixinGradle Settings
+    add sourceSets.main, 'minegit.mixins.refmap.json'
+    config 'minegit.mixins.json'
+}
+
+processResources {
+    inputs.property "version", version
+
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+        expand 'version': version
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
     }
 }

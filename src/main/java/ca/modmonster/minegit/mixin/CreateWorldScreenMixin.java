@@ -1,21 +1,26 @@
 package ca.modmonster.minegit.mixin;
 
-import ca.modmonster.minegit.data.Config;
-import ca.modmonster.minegit.data.ConfigManager;
-import ca.modmonster.minegit.gui.AccountLinkScreen;
-import ca.modmonster.minegit.gui.CloneScreen;
 import net.minecraft.client.gui.*;
 import net.minecraft.client.resources.I18n;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.io.IOException;
+
+import ca.modmonster.minegit.backport.ImageButton;
+import ca.modmonster.minegit.data.Config;
+import ca.modmonster.minegit.data.ConfigManager;
+import ca.modmonster.minegit.gui.AccountLinkScreen;
+import ca.modmonster.minegit.gui.CloneScreen;
+
 @Mixin(GuiCreateWorld.class)
 public abstract class CreateWorldScreenMixin extends GuiScreen {
     @Unique
-    private GuiButton mineGIT$gitButton;
+    private ImageButton mineGIT$gitButton;
 
     @Unique
     private String mineGIT$gitButtonTooltip;
@@ -29,28 +34,25 @@ public abstract class CreateWorldScreenMixin extends GuiScreen {
 
         if (mineGIT$needsSetup) {
             // Add setup button
-            mineGIT$gitButton = new GuiButton(children.size(), width / 2 - 178, height - 28, 20, 20, "☁") {
-                @Override
-                public void onClick(double mouseX, double mouseY) {
-                    mineGIT$onGitButtonPress();
-                }
-            };
+            mineGIT$gitButton = new ImageButton(100, width / 2 - 178, height - 28, ImageButton.ImageButtonTex.CLOUD);
             mineGIT$gitButtonTooltip = I18n.format("minegit.link.setup");
         } else {
             // Add clone button
-            mineGIT$gitButton = new GuiButton(children.size(), width / 2 - 178, height - 28, 20, 20, "↓") {
-                @Override
-                public void onClick(double mouseX, double mouseY) {
-                    mineGIT$onGitButtonPress();
-                }
-            };
+            mineGIT$gitButton = new ImageButton(100, width / 2 - 178, height - 28, ImageButton.ImageButtonTex.CLONE);
             mineGIT$gitButtonTooltip = I18n.format("minegit.clone.title");
         }
         addButton(mineGIT$gitButton);
     }
 
-    @Inject(at = @At("TAIL"), method = "render", remap = false)
-    private void render(final int mouseX, final int mouseY, final float a, CallbackInfo info) {
+    @Inject(at = @At("TAIL"), method = "actionPerformed")
+    protected void actionPerformed(GuiButton button, CallbackInfo ci) throws IOException {
+        if (button.id == 100) {
+            mineGIT$onGitButtonPress();
+        }
+    }
+
+    @Inject(at = @At("TAIL"), method = "drawScreen", remap = false)
+    private void drawScreen(final int mouseX, final int mouseY, final float a, CallbackInfo info) {
         if (mineGIT$gitButton != null && mineGIT$gitButton.isMouseOver()) {
             drawHoveringText(mineGIT$gitButtonTooltip, mouseX, mouseY);
         }
@@ -78,10 +80,10 @@ public abstract class CreateWorldScreenMixin extends GuiScreen {
         if (mineGIT$gitButton == null) return;
         mineGIT$checkNeedsSetup();
         if (mineGIT$needsSetup) {
-            mineGIT$gitButton.displayString = "☁";
+            mineGIT$gitButton.texture = ImageButton.ImageButtonTex.CLOUD;
             mineGIT$gitButtonTooltip = I18n.format("minegit.link.setup");
         } else {
-            mineGIT$gitButton.displayString = "↓";
+            mineGIT$gitButton.texture = ImageButton.ImageButtonTex.CLONE;
             mineGIT$gitButtonTooltip = I18n.format("minegit.clone.title");
         }
     }

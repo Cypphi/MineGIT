@@ -108,7 +108,7 @@ public class CryptoManager {
         }
 
         // Save a randomly generated key to a file
-        Path keyFilePath = Minecraft.getInstance().gameDir.toPath().resolve("config/.minegit.key");
+        Path keyFilePath = Minecraft.getMinecraft().mcDataDir.toPath().resolve("config/.minegit.key");
         String fileKey = null;
         if (keyFilePath.toFile().exists()) {
             try {

@@ -3,16 +3,15 @@
   "package": "ca.modmonster.minegit.mixin",
   "compatibilityLevel": "JAVA_8",
   "refmap": "minegit.mixins.refmap.json",
+  "minVersion": "0.8",
   "client": [
     "CreateWorldScreenMixin",
     "EditWorldScreenMixin",
     "LevelSaveMixin",
     "PauseScreenMixin",
-    "SelectWorldScreenAccessor",
     "SinglePlayerScreenMixin",
     "ToastComponentMixin",
     "WorldListEntryAccessor",
-    "WorldListEntryMixin",
-    "WorldSelectionListInvoker"
+    "WorldListEntryMixin"
   ]
 }

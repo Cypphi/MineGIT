@@ -22,9 +22,9 @@ public class WideToast implements IToast, ToastWidthAccessor {
         }
 
         toastComponent.getMinecraft().getTextureManager().bindTexture(TEXTURE_TOASTS);
-        GlStateManager.color3f(1.0F, 1.0F, 1.0F);
+        GlStateManager.color(1.0F, 1.0F, 1.0F);
         this.renderBackgroundRow(getWidth());
-        toastComponent.getMinecraft().fontRenderer.drawString(message, 18.0F, 12.0F, -256);
+        toastComponent.getMinecraft().fontRenderer.drawString(message, 18, 12, -256);
         return l - this.lastChanged < 5000L ? Visibility.SHOW : Visibility.HIDE;
     }
 
@@ -42,6 +42,6 @@ public class WideToast implements IToast, ToastWidthAccessor {
 
     @Override
     public int getWidth() {
-        return Math.max(Minecraft.getInstance().fontRenderer.getStringWidth(message) + 30, 160);
+        return Math.max(Minecraft.getMinecraft().fontRenderer.getStringWidth(message) + 30, 160);
     }
 }

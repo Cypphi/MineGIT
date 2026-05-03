@@ -1,20 +1,24 @@
 package ca.modmonster.minegit.gui;
 
-import ca.modmonster.minegit.backport.RalspinWidget;
-import ca.modmonster.minegit.backport.WideToast;
-import ca.modmonster.minegit.data.GitManager;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.client.resources.I18n;
+
+import java.io.IOException;
+
+import ca.modmonster.minegit.backport.ImageButton;
+import ca.modmonster.minegit.backport.RalspinWidget;
+import ca.modmonster.minegit.backport.WideToast;
+import ca.modmonster.minegit.data.GitManager;
 
 public class CloneScreen extends GuiScreen {
     private final Runnable closeCallback;
     private final Runnable cloneSuccessCallback;
     private GuiTextField repoEdit;
     private GuiButton cloneButton;
-    private GuiButton backButton;
-    private GuiButton configureButton;
+    private ImageButton backButton;
+    private ImageButton configureButton;
     private RalspinWidget ralspinWidget;
 
     public CloneScreen(Runnable closeCallback) {
@@ -27,87 +31,66 @@ public class CloneScreen extends GuiScreen {
     }
 
     @Override
-    protected void initGui() {
+    public void initGui() {
         // Repo name text field
         repoEdit = new GuiTextField(0, fontRenderer, this.width / 2 - 100, 107, 200, 20);
         repoEdit.setMaxStringLength(39);
-        this.children.add(repoEdit);
 
         // Clone button
-        cloneButton = new GuiButton(1, this.width / 2 - 100, 135, 200, 20, I18n.format("minegit.clone.confirm")) {
-            @Override
-            public void onClick(double mouseX, double mouseY) {
-                doClone();
-            }
-        };
+        cloneButton = new GuiButton(1, this.width / 2 - 100, 135, 200, 20, I18n.format("minegit.clone.confirm"));
         addButton(cloneButton);
 
         // Back button
-        backButton = new GuiButton(2, 6, 6, 20, 20, "←") {
-            @Override
-            public void onClick(double mouseX, double mouseY) {
-                close();
-            }
-        };
+        backButton = new ImageButton(2, 6, 6, ImageButton.ImageButtonTex.BACK);
         addButton(backButton);
 
         // Configure button
-        configureButton = new GuiButton(3, width - 26, 6, 20, 20, "☁") {
-            @Override
-            public void onClick(double mouseX, double mouseY) {
-                mc.displayGuiScreen(new AccountLinkScreen(CloneScreen.this));
-            }
-        };
+        configureButton = new ImageButton(3, width - 26, 6, ImageButton.ImageButtonTex.CLOUD);
         addButton(configureButton);
 
         // Ralsei go spinny
         ralspinWidget = new RalspinWidget(width - 60, height - 80);
-        this.children.add(ralspinWidget);
 
         updateButtonsStatus();
-        setFocused(repoEdit);
         repoEdit.setFocused(true);
     }
 
     @Override
-    public boolean charTyped(char i, int j) {
-        if (this.repoEdit.charTyped(i, j)) {
-            updateButtonsStatus();
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public boolean keyPressed(int i, int j, int k) {
-        if (this.repoEdit.keyPressed(i, j, k)) {
-            updateButtonsStatus();
-            return true;
-        } else if (i != 257 && i != 335) { // TODO: wtf is thissssssss
-            return false;
-        } else {
+    protected void actionPerformed(GuiButton button) {
+        if (button.id == 1) {
+            doClone();
+        } else if (button.id == 2) {
             close();
-            return true;
+        } else if (button.id == 3) {
+            mc.displayGuiScreen(new AccountLinkScreen(CloneScreen.this));
         }
     }
 
     @Override
-    public void render(int i, int j, float f) {
+    public void keyTyped(char i, int j) {
+        if (this.repoEdit.textboxKeyTyped(i, j)) {
+            updateButtonsStatus();
+        }
+        if (j == 1) close();
+    }
+
+    @Override
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+        this.repoEdit.mouseClicked(mouseX, mouseY, mouseButton);
+    }
+
+    @Override
+    public void drawScreen(int i, int j, float f) {
         this.drawDefaultBackground();
-        super.render(i, j, f);
+        super.drawScreen(i, j, f);
         drawCenteredString(fontRenderer, I18n.format("minegit.clone.title"), this.width / 2, 50, 16777215);
         drawCenteredString(fontRenderer, I18n.format("minegit.clone.repo"), this.width / 2, 90, -2130706433);
-        repoEdit.drawTextField(i, j, f);
+        repoEdit.drawTextBox();
         ralspinWidget.render(i, j);
         if (backButton.isMouseOver()) drawHoveringText(I18n.format("minegit.clone.back"), i, j);
         if (configureButton.isMouseOver()) drawHoveringText(I18n.format("minegit.link.setup.open"), i, j);
         if (ralspinWidget.isMouseOver()) drawHoveringText(RalspinWidget.TOOLTIP, i, j);
-    }
-
-    @Override
-    public void tick() {
-        repoEdit.tick();
     }
 
     private void doClone() {
@@ -141,7 +124,6 @@ public class CloneScreen extends GuiScreen {
         cloneButton.enabled = !repoEdit.getText().replace(" ", "").isEmpty();
     }
 
-    @Override
     public void close() {
         closeCallback.run();
     }

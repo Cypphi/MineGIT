@@ -1,57 +1,57 @@
 package ca.modmonster.minegit.gui;
 
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.resources.I18n;
+
+import org.eclipse.jgit.lib.ProgressMonitor;
+
 import ca.modmonster.minegit.backport.MultiLineLabel;
 import ca.modmonster.minegit.backport.WideToast;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.SyncResult;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiYesNoCallback;
-import net.minecraft.client.resources.I18n;
-import org.eclipse.jgit.lib.ProgressMonitor;
 
 public class PruneWorldScreen extends GuiScreen {
     private final GuiScreen parent;
     private final String levelId;
-    private final GuiYesNoCallback callback;
+    private final GuiScreen lastScreen;
 
     private MultiLineLabel descriptionWidget;
 
-    public PruneWorldScreen(GuiScreen parent, String levelId, GuiYesNoCallback callback) {
+    public PruneWorldScreen(GuiScreen parent, String levelId, GuiScreen lastScreen) {
         this.parent = parent;
         this.levelId = levelId;
-        this.callback = callback;
+        this.lastScreen = lastScreen;
     }
 
     @Override
-    protected void initGui() {
+    public void initGui() {
         // Confirmation message
         descriptionWidget = MultiLineLabel.create(fontRenderer, I18n.format("minegit.prune.description"), this.width - 50);
         int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Confirm button
-        GuiButton confirmButton = new GuiButton(0, this.width / 2 - 152, 98 + descriptionHeight, 150, 20, I18n.format("minegit.prune.confirm")) {
-            @Override
-            public void onClick(double mouseX, double mouseY) {
-                pullThenPrune();
-            }
-        };
+        GuiButton confirmButton = new GuiButton(0, this.width / 2 - 152, 98 + descriptionHeight, 150, 20, I18n.format("minegit.prune.confirm"));
         addButton(confirmButton);
 
         // Cancel button
-        GuiButton cancelButton = new GuiButton(1, this.width / 2 + 2, 98 + descriptionHeight, 150, 20, I18n.format("minegit.prune.cancel")) {
-            @Override
-            public void onClick(double mouseX, double mouseY) {
-                close();
-            }
-        };
+        GuiButton cancelButton = new GuiButton(1, this.width / 2 + 2, 98 + descriptionHeight, 150, 20, I18n.format("minegit.prune.cancel"));
         addButton(cancelButton);
     }
 
     @Override
-    public void render(int i, int j, float f) {
+    protected void actionPerformed(GuiButton button) {
+        if (button.id == 0) {
+            pullThenPrune();
+        } else if (button.id == 1) {
+            close();
+        }
+    }
+
+    @Override
+    public void drawScreen(int i, int j, float f) {
         this.drawDefaultBackground();
-        super.render(i, j, f);
+        super.drawScreen(i, j, f);
         drawCenteredString(fontRenderer, I18n.format("minegit.prune.title"), this.width / 2, 50, 16777215);
         descriptionWidget.renderCentered(this.width / 2, 90);
     }
@@ -64,7 +64,7 @@ public class PruneWorldScreen extends GuiScreen {
         } else {
             mc.getToastGui().add(new WideToast(I18n.format("minegit.prune.failed")));
         }
-        mc.addScheduledTask(() -> this.callback.confirmResult(true, 0));
+        mc.addScheduledTask(() -> mc.displayGuiScreen(lastScreen));
     }
 
     private void pullThenPrune() {
@@ -101,8 +101,12 @@ public class PruneWorldScreen extends GuiScreen {
         }).start();
     }
 
-    @Override
     public void close() {
         mc.displayGuiScreen(parent);
+    }
+
+    @Override
+    protected void keyTyped(char i, int j) {
+        if (j == 1) close();
     }
 }

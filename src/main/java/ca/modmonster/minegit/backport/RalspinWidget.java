@@ -2,11 +2,10 @@ package ca.modmonster.minegit.backport;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
 
-public class RalspinWidget extends Gui implements IGuiEventListener {
+public class RalspinWidget extends Gui {
     private static final ResourceLocation SPRITE = new ResourceLocation("minegit", "textures/gui/ralspin.png");
     private static final int FRAME_WIDTH = 21;
     private static final int FRAME_HEIGHT = 40;
@@ -33,10 +32,10 @@ public class RalspinWidget extends Gui implements IGuiEventListener {
         int v = frame * FRAME_HEIGHT;
 
         GlStateManager.pushMatrix();
-        GlStateManager.translatef(x, y, 0);
-        GlStateManager.scalef(SCALE, SCALE, 1);
-        GlStateManager.color4f(1F, 1F, 1F, 1F);
-        Minecraft.getInstance().getTextureManager().bindTexture(SPRITE);
+        GlStateManager.translate(x, y, 0);
+        GlStateManager.scale(SCALE, SCALE, 1);
+        GlStateManager.color(1F, 1F, 1F, 1F);
+        Minecraft.getMinecraft().getTextureManager().bindTexture(SPRITE);
         Gui.drawModalRectWithCustomSizedTexture(
                 0, 0,
                 u, v,

@@ -1,16 +1,18 @@
 package ca.modmonster.minegit.gui;
 
+import com.google.gson.JsonParser;
+
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.world.storage.WorldSummary;
+
 import ca.modmonster.minegit.MineGIT;
 import ca.modmonster.minegit.backport.WideToast;
 import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.NetworkManager;
-import com.google.gson.JsonParser;
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.world.storage.WorldSummary;
 
 public class EnableWorldSyncScreen extends GuiScreen {
     private final GuiScreen parent;
@@ -28,39 +30,35 @@ public class EnableWorldSyncScreen extends GuiScreen {
     }
 
     @Override
-    protected void initGui() {
+    public void initGui() {
         // Confirm button
-        confirmButton = new GuiButton(0, width / 2 - 152, 124, 150, 20, I18n.format("minegit.sync.enable.confirm.ok")) {
-            @Override
-            public void onClick(double mouseX, double mouseY) {
-                setupSync();
-            }
-        };
+        confirmButton = new GuiButton(0, width / 2 - 152, 124, 150, 20, I18n.format("minegit.sync.enable.confirm.ok"));
         addButton(confirmButton);
 
         // Cancel button
-        cancelButton = new GuiButton(1, width / 2 + 2, 124, 150, 20, I18n.format("minegit.sync.enable.confirm.cancel")) {
-            @Override
-            public void onClick(double mouseX, double mouseY) {
-                close();
-            }
-        };
+        cancelButton = new GuiButton(1, width / 2 + 2, 124, 150, 20, I18n.format("minegit.sync.enable.confirm.cancel"));
         addButton(cancelButton);
 
-        GuiButton openSetupButton = new GuiButton(2, width / 2 - 75, 152, 150, 20, I18n.format("minegit.link.setup.open")) {
-            @Override
-            public void onClick(double mouseX, double mouseY) {
-                mc.displayGuiScreen(new AccountLinkScreen(EnableWorldSyncScreen.this.parent, closeCallback));
-            }
-        };
+        GuiButton openSetupButton = new GuiButton(2, width / 2 - 75, 152, 150, 20, I18n.format("minegit.link.setup.open"));
         openSetupButton.visible = showOpenSetupButton;
         addButton(openSetupButton);
     }
 
     @Override
-    public void render(int i, int j, float f) {
+    protected void actionPerformed(GuiButton button) {
+        if (button.id == 0) {
+            setupSync();
+        } else if (button.id == 1) {
+            close();
+        } else if (button.id == 2) {
+            mc.displayGuiScreen(new AccountLinkScreen(EnableWorldSyncScreen.this.parent, closeCallback));
+        }
+    }
+
+    @Override
+    public void drawScreen(int i, int j, float f) {
         this.drawDefaultBackground();
-        super.render(i, j, f);
+        super.drawScreen(i, j, f);
         drawCenteredString(fontRenderer, I18n.format("minegit.sync.enable.title"), this.width / 2, 50, 16777215);
         drawCenteredString(fontRenderer, I18n.format("minegit.sync.enable.confirm.line1", level.getDisplayName()), this.width / 2, 90, 16777215);
         drawCenteredString(fontRenderer, I18n.format("minegit.sync.enable.confirm.line2"), this.width / 2, 103, 16777215);
@@ -111,9 +109,13 @@ public class EnableWorldSyncScreen extends GuiScreen {
         }).start();
     }
 
-    @Override
     public void close() {
         mc.displayGuiScreen(parent);
         if (closeCallback != null) closeCallback.run();
+    }
+
+    @Override
+    protected void keyTyped(char i, int j) {
+        if (j == 1) close();
     }
 }
