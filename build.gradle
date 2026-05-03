@@ -3,10 +3,12 @@ buildscript {
         maven { url = 'https://maven.minecraftforge.net/' }
         maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
         mavenCentral()
+        gradlePluginPortal()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath "net.minecraftforge.gradle:ForgeGradle:3.+"
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+        classpath 'com.github.johnrengelman.shadow:com.github.johnrengelman.shadow.gradle.plugin:1.2.3'
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
@@ -14,6 +16,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 version = '1.5.2'
 group = 'ca.modmonster.minegit' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
@@ -37,8 +40,6 @@ minecraft {
     runs {
         client {
             workingDirectory project.file('run')
-
-            args "--mixin", "minegit.mixins.json"
 
             // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
@@ -85,17 +86,41 @@ dependencies {
     compile "org.eclipse.jgit:org.eclipse.jgit:5.13.5.202508271544-r"
 
     // Apply Mixin AP
-    compile fg.deobf('org.spongepowered:mixin:0.7.11-SNAPSHOT')
+    compile ("org.spongepowered:mixin:0.7.4-SNAPSHOT") {
+        exclude module: "launchwrapper"
+        exclude module: "guava"
+        exclude module: "gson"
+        exclude module: "commons-io"
+    }
 
     // For more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 }
 
+shadowJar {
+    dependencies {
+        include(dependency("org.eclipse.jgit:org.eclipse.jgit"))
+        include(dependency("org.spongepowerd:mixin"))
+        exclude "LICENSE.txt"
+        classifier = "release"
+    }
+}
+
+reobf {
+    shadowJar {
+//        mappingType = "SEARGE"
+        classpath = sourceSets.main.compileClasspath
+    }
+}
+
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
     manifest {
         attributes([
+            "MixinConfigs": "minegit.mixins.json",
+            "tweakClass": "org.spongepowered.asm.launch.MixinTweaker",
+            "TweakOrder": 0,
             "Specification-Title": "minegit",
             "Specification-Vendor": "modmonster",
             "Specification-Version": "1", // We are version 1 of ourselves
@@ -107,27 +132,7 @@ jar {
     }
 }
 
-// Example configuration to allow publishing using the maven-publish task
-// we define a custom artifact that is sourced from the reobfJar output task
-// and then declare that to be published
-// Note you'll need to add a repository here
-def reobfFile = file("$buildDir/reobfJar/output.jar")
-def reobfArtifact = artifacts.add('default', reobfFile) {
-    type 'jar'
-    builtBy 'reobfJar'
-}
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact reobfArtifact
-        }
-    }
-    repositories {
-        maven {
-            url "file:///${project.projectDir}/mcmodsrepo"
-        }
-    }
-}
+build.dependsOn(shadowJar)
 
 processResources {
     filesMatching("META-INF/mods.toml") {
@@ -135,6 +140,6 @@ processResources {
     }
 }
 mixin {
-    add sourceSets.main, "minegit.refmap.json"
-    config "minegit.mixins.json"
+//    defaultObfuscationEnv searge
+    add sourceSets.main, "minegit.mixins.refmap.json"
 }

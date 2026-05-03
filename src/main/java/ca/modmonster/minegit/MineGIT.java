@@ -3,6 +3,8 @@ package ca.modmonster.minegit;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.asm.launch.MixinBootstrap;
+import org.spongepowered.asm.mixin.Mixins;
 
 // TODO: not pulling
 // TODO: showing mainmenu before push starts
@@ -12,4 +14,10 @@ import org.apache.logging.log4j.Logger;
 public class MineGIT {
 	public static final String MOD_ID = "minegit";
 	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
+
+	public MineGIT() {
+		LOGGER.info("MINEGIT STARTEING!!");
+		MixinBootstrap.init();
+		Mixins.addConfiguration("minegit.mixins.json");
+	}
 }
