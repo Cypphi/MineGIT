@@ -13,7 +13,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.text.TranslatableText;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,7 +30,7 @@ public class LevelSaveMixin {
     @Final
     private Minecraft minecraft;
 
-    @Inject(method = "stop", at = @At("TAIL"))
+    @Inject(method = "shutdown", at = @At("TAIL"))
     private void onWorldSaved(CallbackInfo ci) {
         if (QuitState.altQuit) {
             QuitState.altQuit = false;
@@ -48,37 +47,35 @@ public class LevelSaveMixin {
 
     @Unique
     private void doWorldSave(Path worldFolder) {
-        minecraft.execute(() -> {
-            GitProgressScreen progressScreen = new GitProgressScreen(new TranslatableText("minegit.sync.status.git_push"));
-            minecraft.openScreen(progressScreen);
-            new Thread(() -> {
-                SyncResult status = GitManager.push(worldFolder, progressScreen);
-                switch (status) {
-                    case SUCCESS:
-                        // Success; quit as normal
-                        minecraft.execute(() -> minecraft.openScreen(null));
-                        break;
-                    case FAIL_GENERIC:
-                        // Generic error; show option to keep local or cloud
-                        minecraft.execute(() -> minecraft.openScreen(new GitConflictScreen(
-                                () -> minecraft.openScreen(null),
-                                null,
-                                worldFolder
-                        )));
-                        break;
-                    case FAIL_NETWORK:
-                        // Network error; show unreachable screen
-                        minecraft.execute(() -> minecraft.openScreen(new TwoChoiceScreen(
-                                new TranslatableText("minegit.sync.push_unreachable.title"),
-                                I18n.translate("minegit.sync.push_unreachable.description"),
-                                I18n.translate("minegit.sync.push_unreachable.retry"),
-                                I18n.translate("minegit.sync.push_unreachable.exit"),
-                                () -> doWorldSave(worldFolder),
-                                () -> minecraft.openScreen(null)
-                        )));
-                        break;
-                }
-            }).start();
-        });
+        GitProgressScreen progressScreen = new GitProgressScreen(I18n.translate("minegit.sync.status.git_push"));
+        minecraft.openScreen(progressScreen);
+        new Thread(() -> {
+            SyncResult status = GitManager.push(worldFolder, progressScreen);
+            switch (status) {
+                case SUCCESS:
+                    // Success; quit as normal
+                    minecraft.executeTask(() -> minecraft.openScreen(null));
+                    break;
+                case FAIL_GENERIC:
+                    // Generic error; show option to keep local or cloud
+                    minecraft.executeTask(() -> minecraft.openScreen(new GitConflictScreen(
+                            () -> minecraft.openScreen(null),
+                            null,
+                            worldFolder
+                    )));
+                    break;
+                case FAIL_NETWORK:
+                    // Network error; show unreachable screen
+                    minecraft.executeTask(() -> minecraft.openScreen(new TwoChoiceScreen(
+                            I18n.translate("minegit.sync.push_unreachable.title"),
+                            I18n.translate("minegit.sync.push_unreachable.description"),
+                            I18n.translate("minegit.sync.push_unreachable.retry"),
+                            I18n.translate("minegit.sync.push_unreachable.exit"),
+                            () -> minecraft.executeTask(() -> doWorldSave(worldFolder)),
+                            () -> minecraft.openScreen(null)
+                    )));
+                    break;
+            }
+        }).start();
     }
 }

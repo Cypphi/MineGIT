@@ -6,6 +6,7 @@
     "CreateWorldScreenMixin",
     "EditWorldScreenMixin",
     "LevelSaveMixin",
+    "MinecraftMixin",
     "PauseScreenMixin",
     "SelectWorldScreenAccessor",
     "SinglePlayerScreenMixin",

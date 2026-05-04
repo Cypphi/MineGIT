@@ -1,9 +1,9 @@
 package ca.modmonster.minegit.backport;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toast.Toast;
 import net.minecraft.client.gui.toast.ToastGui;
+import net.minecraft.client.render.platform.GlStateManager;
 
 public class WideToast implements Toast, ToastWidthAccessor {
     private final String message;
@@ -22,7 +22,7 @@ public class WideToast implements Toast, ToastWidthAccessor {
         }
 
         toastComponent.getMinecraft().getTextureManager().bind(Toast.TOASTS_LOCATION);
-        GlStateManager.color(1.0F, 1.0F, 1.0F);
+        GlStateManager.color3f(1.0F, 1.0F, 1.0F);
         this.renderBackgroundRow(toastComponent, getWidth());
         toastComponent.getMinecraft().textRenderer.draw(message, 18.0F, 12.0F, -256);
         return l - this.lastChanged < 5000L ? Visibility.SHOW : Visibility.HIDE;

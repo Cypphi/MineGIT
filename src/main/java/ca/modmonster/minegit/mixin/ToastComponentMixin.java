@@ -1,7 +1,7 @@
 package ca.modmonster.minegit.mixin;
 
 import ca.modmonster.minegit.backport.ToastWidthAccessor;
-import net.minecraft.client.gui.toast.ToastGui;
+import net.minecraft.client.gui.toast.Toast;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 public class ToastComponentMixin {
     @Shadow
     @Final
-    private ToastGui toast;
+    private Toast toast;
 
     @ModifyConstant(method = "render", constant = @Constant(floatValue = 160.0f))
     private float replaceToastWidth(float original) {

@@ -1,18 +1,18 @@
 package ca.modmonster.minegit.gui;
 
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
 import org.eclipse.jgit.lib.ProgressMonitor;
 
 public class GitProgressScreen extends Screen implements ProgressMonitor {
     public static final int PROGRESS_BAR_WIDTH = 128;
 
+    private final String title;
     private String currentTask = "";
     private int currentTaskWork = 0;
     private int currentTaskTotalWork = 1;
 
-    public GitProgressScreen(Text component) {
-        super(component);
+    public GitProgressScreen(String title) {
+        this.title = title;
     }
 
     @Override
@@ -35,7 +35,7 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
         fill(barLeft, this.height - 16, barLeft + barPixels, this.height - 18, 0xFF80FF80);
 
         // Draw message
-        drawCenteredString(this.textRenderer, this.f_89436361.getString(), this.width / 2, 70, 16777215);
+        drawCenteredString(this.textRenderer, title, this.width / 2, 70, 16777215);
 
         // Draw status
         drawCenteredString(textRenderer, currentTask, this.width / 2, this.height - 32, 16777215);

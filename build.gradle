@@ -1,7 +1,11 @@
 plugins {
-	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
+	id 'fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 	id 'ploceus' version "${ploceus_version}"
+}
+
+loom {
+
 }
 
 ploceus {
@@ -24,20 +28,17 @@ dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings ploceus.featherMappings(project.feather_build)
+	signatures ploceus.sparrow(project.sparrow_build)
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	ploceus.dependOsl(project.osl_version)
 
     // JGit
     implementation "org.eclipse.jgit:org.eclipse.jgit:5.13.5.202508271544-r"
     include "org.eclipse.jgit:org.eclipse.jgit:5.13.5.202508271544-r"
 
-	// Route slf4j calls from jgit to log4j
-	implementation "org.slf4j:slf4j-api:1.7.36"
-	implementation "org.apache.logging.log4j:log4j-slf4j-impl:2.17.1"
-	include "org.slf4j:slf4j-api:1.7.36"
-	include "org.apache.logging.log4j:log4j-slf4j-impl:2.17.1"
+	// Mod Menu
+	modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
 }
 
 processResources {

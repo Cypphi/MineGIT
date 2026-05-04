@@ -5,10 +5,9 @@ import ca.modmonster.minegit.data.QuitState;
 import net.minecraft.client.gui.GuiEventListener;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.text.Text;
-import net.minecraft.unmapped.C_01559903;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,23 +16,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GameMenuScreen.class)
 public class PauseScreenMixin extends Screen {
-    protected PauseScreenMixin(Text title) {
-        super(title);
-    }
-
     @Unique
     private String tooltip;
 
     @Unique
-    private C_01559903 disconnectButton;
+    private ButtonWidget disconnectButton;
 
     @Inject(at = @At("TAIL"), method = "init", remap = false)
     protected void createPauseMenu(CallbackInfo ci) {
         // Find the disconnect button
         for (GuiEventListener child : this.children) {
-            if (!(child instanceof C_01559903)) return;
-            C_01559903 button = (C_01559903) child;
-            if (button.getMessage().equals(I18n.translate("menu.returnToMenu"))) disconnectButton = button;
+            if (!(child instanceof ButtonWidget)) return;
+            ButtonWidget button = (ButtonWidget) child;
+            if (button.message.equals(I18n.translate("menu.returnToMenu"))) disconnectButton = button;
         }
 
         tooltip = I18n.translate("minegit.exit_without_push");

@@ -1,8 +1,8 @@
 package ca.modmonster.minegit.backport;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.render.platform.GlStateManager;
 import net.minecraft.resource.Identifier;
 
 public class RalspinWidget extends ButtonWidget {
@@ -15,12 +15,12 @@ public class RalspinWidget extends ButtonWidget {
     public static final String TOOLTIP = "hiiiii!! ^-^";
 
     public RalspinWidget(final int x, final int y) {
-        super(x, y, FRAME_WIDTH * SCALE, FRAME_HEIGHT * SCALE, "");
+        super(999, x, y, FRAME_WIDTH * SCALE, FRAME_HEIGHT * SCALE, "");
     }
 
     @Override
     public void render(int i, int j, float f) {
-        super.render(i, j, f);
+        this.hovered = i >= this.x && j >= this.y && i < this.x + this.width && j < this.y + this.height;
         long time = System.currentTimeMillis() / 50;
         int frame = (int) ((time / FRAME_TIME) % FRAME_COUNT);
 
@@ -28,9 +28,9 @@ public class RalspinWidget extends ButtonWidget {
         int v = frame * FRAME_HEIGHT;
 
         GlStateManager.pushMatrix();
-        GlStateManager.translate(x, y, 0);
-        GlStateManager.scale(SCALE, SCALE, 1);
-        GlStateManager.color(1F, 1F, 1F, 1F);
+        GlStateManager.translatef(x, y, 0);
+        GlStateManager.scalef(SCALE, SCALE, 1);
+        GlStateManager.color4f(1F, 1F, 1F, 1F);
         Minecraft.getInstance().getTextureManager().bind(SPRITE);
         drawTexture(
                 0, 0,
@@ -39,10 +39,5 @@ public class RalspinWidget extends ButtonWidget {
                 FRAME_WIDTH, FRAME_HEIGHT * FRAME_COUNT
         );
         GlStateManager.popMatrix();
-    }
-
-    @Override
-    public void renderButton(int mouseX, int mouseY, float tickDelta) {
-
     }
 }

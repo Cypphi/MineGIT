@@ -1,21 +1,21 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.backport.ImageButton;
 import ca.modmonster.minegit.backport.RalspinWidget;
 import ca.modmonster.minegit.backport.WideToast;
 import ca.modmonster.minegit.data.GitManager;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.unmapped.C_01559903;
 
 public class CloneScreen extends Screen {
     private final Runnable closeCallback;
     private final Runnable cloneSuccessCallback;
     private TextFieldWidget repoEdit;
-    private C_01559903 cloneButton;
-    private C_01559903 backButton;
-    private C_01559903 configureButton;
+    private ButtonWidget cloneButton;
+    private ButtonWidget backButton;
+    private ButtonWidget configureButton;
     private RalspinWidget ralspinWidget;
 
     public CloneScreen(Runnable closeCallback) {
@@ -23,7 +23,6 @@ public class CloneScreen extends Screen {
     }
 
     public CloneScreen(Runnable closeCallback, Runnable cloneSuccessCallback) {
-        super(new TranslatableText("minegit.clone.title"));
         this.closeCallback = closeCallback;
         this.cloneSuccessCallback = cloneSuccessCallback;
     }
@@ -31,21 +30,35 @@ public class CloneScreen extends Screen {
     @Override
     protected void init() {
         // Repo name text field
-        repoEdit = new TextFieldWidget(textRenderer, this.width / 2 - 100, 107, 200, 20, I18n.translate("minegit.clone.repo"));
+        repoEdit = new TextFieldWidget(0, textRenderer, this.width / 2 - 100, 107, 200, 20);
         repoEdit.setMaxLength(39);
-        repoEdit.setResponder(string -> updateButtonsStatus());
         this.children.add(repoEdit);
 
         // Clone button
-        cloneButton = new C_01559903(this.width / 2 - 100, 135, 200, 20, I18n.translate("minegit.clone.confirm"), button -> doClone());
+        cloneButton = new ButtonWidget(1, this.width / 2 - 100, 135, 200, 20, I18n.translate("minegit.clone.confirm")) {
+            @Override
+            public void click(double mouseX, double mouseY) {
+                doClone();
+            }
+        };
         addButton(cloneButton);
 
         // Back button
-        backButton = new C_01559903(6, 6, 20, 20, "←", button -> close());
+        backButton = new ImageButton(2, 6, 6, ImageButton.ImageButtonTex.BACK) {
+            @Override
+            public void click(double mouseX, double mouseY) {
+                close();
+            }
+        };
         addButton(backButton);
 
         // Configure button
-        configureButton = new C_01559903(width - 26, 6, 20, 20, "☁", button -> minecraft.openScreen(new AccountLinkScreen(this)));
+        configureButton = new ImageButton(3, width - 26, 6, ImageButton.ImageButtonTex.CLOUD) {
+            @Override
+            public void click(double mouseX, double mouseY) {
+                minecraft.openScreen(new AccountLinkScreen(CloneScreen.this));
+            }
+        };
         addButton(configureButton);
 
         // Ralsei go spinny
@@ -58,10 +71,33 @@ public class CloneScreen extends Screen {
     }
 
     @Override
+    public boolean charTyped(char i, int j) {
+        if (this.repoEdit.charTyped(i, j)) {
+            updateButtonsStatus();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean keyPressed(int i, int j, int k) {
+        if (this.repoEdit.keyPressed(i, j, k)) {
+            updateButtonsStatus();
+            return true;
+        } else if (i != 257 && i != 335) {
+            return false;
+        } else {
+            close();
+            return true;
+        }
+    }
+
+    @Override
     public void render(int i, int j, float f) {
         this.drawBackgroundTexture(i);
         super.render(i, j, f);
-        drawCenteredString(textRenderer, this.f_89436361.getString(), this.width / 2, 50, 16777215);
+        drawCenteredString(textRenderer, I18n.translate("minegit.clone.title"), this.width / 2, 50, 16777215);
         drawCenteredString(textRenderer, I18n.translate("minegit.clone.repo"), this.width / 2, 90, -2130706433);
         repoEdit.render(i, j, f);
         ralspinWidget.render(i, j, f);
@@ -76,12 +112,12 @@ public class CloneScreen extends Screen {
     }
 
     private void doClone() {
-        GitProgressScreen progressScreen = new GitProgressScreen(new TranslatableText("minegit.clone.in_progress"));
+        GitProgressScreen progressScreen = new GitProgressScreen(I18n.translate("minegit.clone.in_progress"));
         minecraft.openScreen(progressScreen);
         new Thread(() -> {
             int result = GitManager.cloneRepo(minecraft, repoEdit.getText(), progressScreen);
 
-            minecraft.execute(() -> {
+            minecraft.executeTask(() -> {
                 if (result == 0) {
                     minecraft.getToasts().add(new WideToast(I18n.translate("minegit.clone.success")));
                     if (cloneSuccessCallback != null) {

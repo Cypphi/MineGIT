@@ -5,9 +5,8 @@ import ca.modmonster.minegit.backport.WideToast;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.SyncResult;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
-import net.minecraft.text.TranslatableText;
-import net.minecraft.unmapped.C_01559903;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,7 +14,6 @@ import java.nio.file.Path;
 
 public class GitConflictScreen extends Screen {
     public GitConflictScreen(@NotNull Runnable resolvedCallback, @Nullable Runnable cancelCallback, @NotNull Path worldFolder) {
-        super(new TranslatableText("minegit.sync.conflict.title"));
         this.resolvedCallback = resolvedCallback;
         this.cancelCallback = cancelCallback;
         this.worldFolder = worldFolder;
@@ -38,52 +36,63 @@ public class GitConflictScreen extends Screen {
         int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Remote button
-        C_01559903 remoteButton = new C_01559903(this.width / 2 - 120, 108 + descriptionHeight, 240, 20, I18n.translate("minegit.sync.conflict.remote") + " - " + remoteCommitDate, button -> {
-            GitProgressScreen progressScreen = new GitProgressScreen(new TranslatableText("minegit.sync.status.git_pull"));
-            minecraft.openScreen(progressScreen);
-            new Thread(() -> {
-                boolean ok = GitManager.forcePull(worldFolder, progressScreen) == SyncResult.SUCCESS;
-                if (ok) {
-                    minecraft.execute(resolvedCallback);
-                } else {
-                    minecraft.execute(() -> {
-                        minecraft.getToasts().add(new WideToast(I18n.translate("minegit.sync.conflict.failed")));
-                        if (cancelCallback != null) {
-                            cancelCallback.run();
-                        } else {
-                            minecraft.openScreen(null);
-                        }
-                    });
-                }
-            }).start();
-        });
+        ButtonWidget remoteButton = new ButtonWidget(0, this.width / 2 - 120, 108 + descriptionHeight, 240, 20, I18n.translate("minegit.sync.conflict.remote") + " - " + remoteCommitDate) {
+            @Override
+            public void click(double mouseX, double mouseY) {
+                GitProgressScreen progressScreen = new GitProgressScreen(I18n.translate("minegit.sync.status.git_pull"));
+                minecraft.openScreen(progressScreen);
+                new Thread(() -> {
+                    boolean ok = GitManager.forcePull(worldFolder, progressScreen) == SyncResult.SUCCESS;
+                    if (ok) {
+                        minecraft.executeTask(resolvedCallback);
+                    } else {
+                        minecraft.executeTask(() -> {
+                            minecraft.getToasts().add(new WideToast(I18n.translate("minegit.sync.conflict.failed")));
+                            if (cancelCallback != null) {
+                                cancelCallback.run();
+                            } else {
+                                minecraft.openScreen(null);
+                            }
+                        });
+                    }
+                }).start();
+            }
+        };
         addButton(remoteButton);
 
         // Local button
-        C_01559903 localButton = new C_01559903(this.width / 2 - 120, 130 + descriptionHeight, 240, 20, I18n.translate("minegit.sync.conflict.local") + " - " + localCommitDate, button -> {
-            GitProgressScreen progressScreen = new GitProgressScreen(new TranslatableText("minegit.sync.status.git_push"));
-            minecraft.openScreen(progressScreen);
-            new Thread(() -> {
-                boolean ok = GitManager.forcePush(worldFolder, progressScreen) == SyncResult.SUCCESS;
-                if (ok) {
-                    minecraft.execute(resolvedCallback);
-                } else {
-                    minecraft.execute(() -> {
-                        minecraft.getToasts().add(new WideToast(I18n.translate("minegit.sync.conflict.failed")));
-                        if (cancelCallback != null) {
-                            cancelCallback.run();
-                        } else {
-                            minecraft.openScreen(null);
-                        }
-                    });
-                }
-            }).start();
-        });
+        ButtonWidget localButton = new ButtonWidget(1, this.width / 2 - 120, 130 + descriptionHeight, 240, 20, I18n.translate("minegit.sync.conflict.local") + " - " + localCommitDate) {
+            @Override
+            public void click(double mouseX, double mouseY) {
+                GitProgressScreen progressScreen = new GitProgressScreen(I18n.translate("minegit.sync.status.git_push"));
+                minecraft.openScreen(progressScreen);
+                new Thread(() -> {
+                    boolean ok = GitManager.forcePush(worldFolder, progressScreen) == SyncResult.SUCCESS;
+                    if (ok) {
+                        minecraft.executeTask(resolvedCallback);
+                    } else {
+                        minecraft.executeTask(() -> {
+                            minecraft.getToasts().add(new WideToast(I18n.translate("minegit.sync.conflict.failed")));
+                            if (cancelCallback != null) {
+                                cancelCallback.run();
+                            } else {
+                                minecraft.openScreen(null);
+                            }
+                        });
+                    }
+                }).start();
+            }
+        };
         addButton(localButton);
 
         // Cancel button
         if (cancelCallback != null) {
-            C_01559903 cancelButton = new C_01559903(this.width / 2 - 75, 156 + descriptionHeight, 150, 20, I18n.translate("minegit.sync.conflict.cancel"), button -> cancelCallback.run());
+            ButtonWidget cancelButton = new ButtonWidget(2, this.width / 2 - 75, 156 + descriptionHeight, 150, 20, I18n.translate("minegit.sync.conflict.cancel")) {
+                @Override
+                public void click(double mouseX, double mouseY) {
+                    cancelCallback.run();
+                }
+            };
             addButton(cancelButton);
         }
     }
@@ -92,7 +101,7 @@ public class GitConflictScreen extends Screen {
     public void render(int i, int j, float f) {
         this.drawBackgroundTexture(i);
         super.render(i, j, f);
-        drawCenteredString(textRenderer, this.f_89436361.getString(), this.width / 2, 50, 16777215);
+        drawCenteredString(textRenderer, I18n.translate("minegit.sync.conflict.title"), this.width / 2, 50, 16777215);
         descriptionWidget.renderCentered(this.width / 2, 90);
     }
 
