@@ -4,7 +4,6 @@ import ca.modmonster.minegit.backport.MultiLineLabel;
 import ca.modmonster.minegit.backport.WideToast;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.SyncResult;
-import net.minecraft.client.gui.screen.ConfirmationListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
@@ -13,14 +12,12 @@ import org.eclipse.jgit.lib.ProgressMonitor;
 public class PruneWorldScreen extends Screen {
     private final Screen parent;
     private final String levelId;
-    private final ConfirmationListener callback;
 
     private MultiLineLabel descriptionWidget;
 
-    public PruneWorldScreen(Screen parent, String levelId, ConfirmationListener callback) {
+    public PruneWorldScreen(Screen parent, String levelId) {
         this.parent = parent;
         this.levelId = levelId;
-        this.callback = callback;
     }
 
     @Override
@@ -64,7 +61,7 @@ public class PruneWorldScreen extends Screen {
         } else {
             minecraft.getToasts().add(new WideToast(I18n.translate("minegit.prune.failed")));
         }
-        minecraft.executeTask(() -> this.callback.confirmResult(true, 0));
+        minecraft.executeTask(() -> minecraft.openScreen(parent));
     }
 
     private void pullThenPrune() {

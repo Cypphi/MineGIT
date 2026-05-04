@@ -8,12 +8,10 @@
     "LevelSaveMixin",
     "MinecraftMixin",
     "PauseScreenMixin",
-    "SelectWorldScreenAccessor",
     "SinglePlayerScreenMixin",
     "ToastComponentMixin",
     "WorldListEntryAccessor",
-    "WorldListEntryMixin",
-    "WorldSelectionListInvoker"
+    "WorldListEntryMixin"
   ],
   "injectors": {
     "defaultRequire": 1

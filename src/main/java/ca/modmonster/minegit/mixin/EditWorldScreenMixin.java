@@ -3,7 +3,6 @@ package ca.modmonster.minegit.mixin;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.gui.PruneWorldScreen;
 import net.minecraft.client.gui.GuiEventListener;
-import net.minecraft.client.gui.screen.ConfirmationListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.world.EditWorldScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -23,7 +22,7 @@ public class EditWorldScreenMixin extends Screen {
 
     @Shadow
     @Final
-    private ConfirmationListener parent;
+    private Screen parent;
 
     @Inject(at = @At(value = "TAIL"), method = "init")
     private void init(CallbackInfo ci) {
@@ -33,7 +32,7 @@ public class EditWorldScreenMixin extends Screen {
         addButton(new ButtonWidget(100, this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20, I18n.translate("minegit.prune.button")) {
             @Override
             public void click(double mouseX, double mouseY) {
-                minecraft.openScreen(new PruneWorldScreen(EditWorldScreenMixin.this, worldName, parent));
+                minecraft.openScreen(new PruneWorldScreen(EditWorldScreenMixin.this, worldName));
             }
         });
 

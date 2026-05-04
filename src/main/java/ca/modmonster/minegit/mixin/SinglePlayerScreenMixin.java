@@ -13,7 +13,6 @@ import net.minecraft.client.gui.screen.world.SelectWorldScreen;
 import net.minecraft.client.gui.screen.world.WorldSelectionEntry;
 import net.minecraft.client.gui.screen.world.WorldSelectionList;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.world.storage.WorldSaveInfo;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +22,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Collections;
 import java.util.List;
@@ -35,9 +33,6 @@ public class SinglePlayerScreenMixin extends Screen {
 
     @Shadow
     private @Nullable WorldSelectionList worldList;
-
-    @Shadow
-    protected TextFieldWidget f_33034138;
 
     @Unique @Nullable
     private ButtonWidget cloneButton;
@@ -135,8 +130,8 @@ public class SinglePlayerScreenMixin extends Screen {
         if (cloneButton != null) cloneButton.active = worldSyncButtonState != WorldSyncButtonState.SETUP;
     }
 
-    @Inject(at = @At("HEAD"), method = "keyPressed")
-    public void keyPressed(int i, int j, int k, CallbackInfoReturnable<Boolean> cir) {
+    @Override
+    public boolean keyPressed(int i, int j, int k) {
         if (i == 342) {
             altHeld = true;
             if (worldSyncButton != null) {
@@ -145,6 +140,7 @@ public class SinglePlayerScreenMixin extends Screen {
                 worldSyncButtonTooltip = Collections.singletonList(I18n.translate("minegit.link.setup.open"));
             }
         }
+        return false;
     }
 
     @Override
@@ -158,8 +154,6 @@ public class SinglePlayerScreenMixin extends Screen {
 
     @Unique
     private void returnToScreen() {
-        WorldSelectionList list = ((SelectWorldScreenAccessor) this).getLevelList();
-        ((WorldSelectionListInvoker) list).invokeReloadWorldList(() -> f_33034138.getText(), true);
         minecraft.openScreen(this);
     }
 }
