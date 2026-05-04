@@ -2,8 +2,8 @@ package ca.modmonster.minegit.gui;
 
 import ca.modmonster.minegit.backport.MultiLineLabel;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
+import net.minecraft.unmapped.C_01559903;
 
 public class TwoChoiceScreen extends Screen {
     public TwoChoiceScreen(Text title, String description, String continueMessage, String cancelMessage, Runnable continueCallback, Runnable cancelCallback) {
@@ -25,23 +25,23 @@ public class TwoChoiceScreen extends Screen {
     @Override
     protected void init() {
         // Confirmation message
-        descriptionWidget = MultiLineLabel.create(this.font, description, this.width - 50);
+        descriptionWidget = MultiLineLabel.create(this.textRenderer, description, this.width - 50);
         int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Continue button
-        ButtonWidget continueButton = new ButtonWidget(width / 2 - 152, 98 + descriptionHeight, 150, 20, continueMessage, button -> continueCallback.run());
+        C_01559903 continueButton = new C_01559903(width / 2 - 152, 98 + descriptionHeight, 150, 20, continueMessage, button -> continueCallback.run());
         addButton(continueButton);
 
         // Cancel button
-        ButtonWidget cancelButton = new ButtonWidget(width / 2 + 2, 98 + descriptionHeight, 150, 20, cancelMessage, button -> cancelCallback.run());
+        C_01559903 cancelButton = new C_01559903(width / 2 + 2, 98 + descriptionHeight, 150, 20, cancelMessage, button -> cancelCallback.run());
         addButton(cancelButton);
     }
 
     @Override
     public void render(int i, int j, float f) {
-        this.renderDirtBackground(i);
+        this.drawBackgroundTexture(i);
         super.render(i, j, f);
-        drawCenteredString(this.font, this.title.getString(), this.width / 2, 50, 16777215);
+        drawCenteredString(textRenderer, this.f_89436361.getString(), this.width / 2, 50, 16777215);
         descriptionWidget.renderCentered(this.width / 2, 90);
     }
 

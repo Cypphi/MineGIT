@@ -6,9 +6,9 @@ import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.SyncResult;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.unmapped.C_01559903;
 import org.eclipse.jgit.lib.ProgressMonitor;
 
 public class PruneWorldScreen extends Screen {
@@ -28,23 +28,23 @@ public class PruneWorldScreen extends Screen {
     @Override
     protected void init() {
         // Confirmation message
-        descriptionWidget = MultiLineLabel.create(this.font, I18n.translate("minegit.prune.description"), this.width - 50);
+        descriptionWidget = MultiLineLabel.create(textRenderer, I18n.translate("minegit.prune.description"), this.width - 50);
         int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Confirm button
-        ButtonWidget confirmButton = new ButtonWidget(this.width / 2 - 152, 98 + descriptionHeight, 150, 20, I18n.translate("minegit.prune.confirm"), button -> pullThenPrune());
+        C_01559903 confirmButton = new C_01559903(this.width / 2 - 152, 98 + descriptionHeight, 150, 20, I18n.translate("minegit.prune.confirm"), button -> pullThenPrune());
         addButton(confirmButton);
 
         // Cancel button
-        ButtonWidget cancelButton = new ButtonWidget(this.width / 2 + 2, 98 + descriptionHeight, 150, 20, I18n.translate("minegit.prune.cancel"), button -> onClose());
+        C_01559903 cancelButton = new C_01559903(this.width / 2 + 2, 98 + descriptionHeight, 150, 20, I18n.translate("minegit.prune.cancel"), button -> close());
         addButton(cancelButton);
     }
 
     @Override
     public void render(int i, int j, float f) {
-        this.renderDirtBackground(i);
+        this.drawBackgroundTexture(i);
         super.render(i, j, f);
-        drawCenteredString(this.font, this.title.getString(), this.width / 2, 50, 16777215);
+        drawCenteredString(textRenderer, this.f_89436361.getString(), this.width / 2, 50, 16777215);
         descriptionWidget.renderCentered(this.width / 2, 90);
     }
 
@@ -52,9 +52,9 @@ public class PruneWorldScreen extends Screen {
         boolean ok = GitManager.prune(minecraft, levelId, progress);
         if (minecraft == null) return;
         if (ok) {
-            minecraft.getToastManager().add(new WideToast(I18n.translate("minegit.prune.complete")));
+            minecraft.getToasts().add(new WideToast(I18n.translate("minegit.prune.complete")));
         } else {
-            minecraft.getToastManager().add(new WideToast(I18n.translate("minegit.prune.failed")));
+            minecraft.getToasts().add(new WideToast(I18n.translate("minegit.prune.failed")));
         }
         minecraft.execute(() -> this.callback.accept(true));
     }
@@ -74,7 +74,7 @@ public class PruneWorldScreen extends Screen {
                     // Generic error; show option to keep local or cloud
                     minecraft.execute(() -> minecraft.openScreen(new GitConflictScreen(
                             () -> doPrune(progressScreen),
-                            this::onClose,
+                            this::close,
                             GitManager.getPath(minecraft, levelId)
                     )));
                     break;
@@ -86,7 +86,7 @@ public class PruneWorldScreen extends Screen {
                             I18n.translate("minegit.sync.pull_unreachable.continue"),
                             I18n.translate("minegit.sync.pull_unreachable.cancel"),
                             () -> doPrune(progressScreen),
-                            this::onClose
+                            this::close
                     )));
                     break;
             }
@@ -94,7 +94,7 @@ public class PruneWorldScreen extends Screen {
     }
 
     @Override
-    public void onClose() {
+    public void close() {
         minecraft.openScreen(parent);
     }
 }

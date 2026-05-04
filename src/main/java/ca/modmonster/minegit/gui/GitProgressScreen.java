@@ -22,7 +22,7 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
 
     @Override
     public void render(int i, int j, float f) {
-        this.renderDirtBackground(i);
+        this.drawBackgroundTexture(i);
         super.render(i, j, f);
 
         // Render progress bar
@@ -35,10 +35,10 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
         fill(barLeft, this.height - 16, barLeft + barPixels, this.height - 18, 0xFF80FF80);
 
         // Draw message
-        drawCenteredString(this.font, this.title.getString(), this.width / 2, 70, 16777215);
+        drawCenteredString(this.textRenderer, this.f_89436361.getString(), this.width / 2, 70, 16777215);
 
         // Draw status
-        drawCenteredString(font, currentTask, this.width / 2, this.height - 32, 16777215);
+        drawCenteredString(textRenderer, currentTask, this.width / 2, this.height - 32, 16777215);
     }
 
     @Override

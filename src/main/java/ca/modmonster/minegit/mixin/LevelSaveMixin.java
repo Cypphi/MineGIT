@@ -9,7 +9,7 @@ import ca.modmonster.minegit.gui.GitProgressScreen;
 import ca.modmonster.minegit.gui.TwoChoiceScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
@@ -29,7 +29,7 @@ import java.nio.file.Path;
 public class LevelSaveMixin {
     @Shadow
     @Final
-    private MinecraftClient client;
+    private Minecraft minecraft;
 
     @Inject(method = "stop", at = @At("TAIL"))
     private void onWorldSaved(CallbackInfo ci) {
@@ -39,42 +39,42 @@ public class LevelSaveMixin {
         }
 
         MinecraftServer server = (MinecraftServer) (Object) this;
-        String levelId = server.getLevelName();
-        if (!GitManager.syncEnabled(client, levelId)) return;
+        String levelId = server.getWorldSaveName();
+        if (!GitManager.syncEnabled(minecraft, levelId)) return;
         MineGIT.LOGGER.info("Pushing current world to GitHub");
 
-        doWorldSave(GitManager.getPath(client, levelId));
+        doWorldSave(GitManager.getPath(minecraft, levelId));
     }
 
     @Unique
     private void doWorldSave(Path worldFolder) {
-        client.execute(() -> {
+        minecraft.execute(() -> {
             GitProgressScreen progressScreen = new GitProgressScreen(new TranslatableText("minegit.sync.status.git_push"));
-            client.openScreen(progressScreen);
+            minecraft.openScreen(progressScreen);
             new Thread(() -> {
                 SyncResult status = GitManager.push(worldFolder, progressScreen);
                 switch (status) {
                     case SUCCESS:
                         // Success; quit as normal
-                        client.execute(() -> client.openScreen(null));
+                        minecraft.execute(() -> minecraft.openScreen(null));
                         break;
                     case FAIL_GENERIC:
                         // Generic error; show option to keep local or cloud
-                        client.execute(() -> client.openScreen(new GitConflictScreen(
-                                () -> client.openScreen(null),
+                        minecraft.execute(() -> minecraft.openScreen(new GitConflictScreen(
+                                () -> minecraft.openScreen(null),
                                 null,
                                 worldFolder
                         )));
                         break;
                     case FAIL_NETWORK:
                         // Network error; show unreachable screen
-                        client.execute(() -> client.openScreen(new TwoChoiceScreen(
+                        minecraft.execute(() -> minecraft.openScreen(new TwoChoiceScreen(
                                 new TranslatableText("minegit.sync.push_unreachable.title"),
                                 I18n.translate("minegit.sync.push_unreachable.description"),
                                 I18n.translate("minegit.sync.push_unreachable.retry"),
                                 I18n.translate("minegit.sync.push_unreachable.exit"),
                                 () -> doWorldSave(worldFolder),
-                                () -> client.openScreen(null)
+                                () -> minecraft.openScreen(null)
                         )));
                         break;
                 }

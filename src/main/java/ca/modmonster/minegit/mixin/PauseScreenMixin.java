@@ -2,13 +2,13 @@ package ca.modmonster.minegit.mixin;
 
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.QuitState;
-import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.GuiEventListener;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.text.Text;
+import net.minecraft.unmapped.C_01559903;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,14 +25,14 @@ public class PauseScreenMixin extends Screen {
     private String tooltip;
 
     @Unique
-    private ButtonWidget disconnectButton;
+    private C_01559903 disconnectButton;
 
-    @Inject(at = @At("TAIL"), method = "initWidgets", remap = false)
+    @Inject(at = @At("TAIL"), method = "init", remap = false)
     protected void createPauseMenu(CallbackInfo ci) {
         // Find the disconnect button
-        for (Element child : this.children()) {
-            if (!(child instanceof ButtonWidget)) return;
-            ButtonWidget button = (ButtonWidget) child;
+        for (GuiEventListener child : this.children) {
+            if (!(child instanceof C_01559903)) return;
+            C_01559903 button = (C_01559903) child;
             if (button.getMessage().equals(I18n.translate("menu.returnToMenu"))) disconnectButton = button;
         }
 
@@ -42,10 +42,10 @@ public class PauseScreenMixin extends Screen {
     @Inject(at = @At("TAIL"), method = "render", remap = false)
     private void render(int mouseX, int mouseY, float f, CallbackInfo ci) {
         if (disconnectButton == null) return;
-        if (!minecraft.isInSingleplayer()) return;
+        if (!minecraft.isSingleplayer()) return;
         IntegratedServer server = minecraft.getServer();
         if (server == null) return;
-        if (!GitManager.syncEnabled(minecraft, server.getLevelName())) return;
+        if (!GitManager.syncEnabled(minecraft, server.getWorldSaveName())) return;
         if (!QuitState.altQuit) return;
 
         if (disconnectButton.isHovered()) {

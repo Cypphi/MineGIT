@@ -3,12 +3,12 @@ package ca.modmonster.minegit.mixin;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.gui.PruneWorldScreen;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
-import net.minecraft.client.gui.Element;
+import net.minecraft.client.gui.GuiEventListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.world.EditWorldScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.Text;
+import net.minecraft.unmapped.C_01559903;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -20,11 +20,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class EditWorldScreenMixin extends Screen {
     @Shadow
     @Final
-    private String levelName;
+    private String worldName;
 
     @Shadow
     @Final
-    private BooleanConsumer callback;
+    private BooleanConsumer parent;
 
     protected EditWorldScreenMixin(Text title) {
         super(title);
@@ -32,16 +32,16 @@ public class EditWorldScreenMixin extends Screen {
 
     @Inject(at = @At(value = "TAIL"), method = "init")
     private void init(CallbackInfo ci) {
-        if (!GitManager.syncEnabled(minecraft, levelName)) return;
+        if (!GitManager.syncEnabled(minecraft, worldName)) return;
 
         // Add prune button
-        addButton(new ButtonWidget(this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20, I18n.translate("minegit.prune.button"), button ->
-                minecraft.openScreen(new PruneWorldScreen(this, levelName, callback))));
+        addButton(new C_01559903(this.width / 2 - 100, this.height / 4 + 120 + 5, 200, 20, I18n.translate("minegit.prune.button"), button ->
+                minecraft.openScreen(new PruneWorldScreen(this, worldName, parent))));
 
         // Reposition existing buttons
-        for (Element child : this.children()) {
-            if (!(child instanceof ButtonWidget)) return;
-            ButtonWidget button = (ButtonWidget) child;
+        for (GuiEventListener child : this.children) {
+            if (!(child instanceof C_01559903)) return;
+            C_01559903 button = (C_01559903) child;
             String message = button.getMessage();
 
             if (message.equals(I18n.translate("selectWorld.edit.backup"))) {

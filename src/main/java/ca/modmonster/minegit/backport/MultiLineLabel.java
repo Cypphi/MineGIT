@@ -1,13 +1,13 @@
 package ca.modmonster.minegit.backport;
 
-import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.render.TextRenderer;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public interface MultiLineLabel {
     static MultiLineLabel create(TextRenderer font, String text, int i) {
-        return createFixed(font, font.wrapStringToWidthAsList(text, i).stream().map((formattedCharSequence) -> new MultiLineLabel.TextWithWidth(formattedCharSequence, font.getStringWidth(formattedCharSequence))).collect(Collectors.toList()));
+        return createFixed(font, font.split(text, i).stream().map((formattedCharSequence) -> new MultiLineLabel.TextWithWidth(formattedCharSequence, font.getWidth(formattedCharSequence))).collect(Collectors.toList()));
     }
 
     static MultiLineLabel createFixed(final TextRenderer font, final List<TextWithWidth> list) {

@@ -1,23 +1,23 @@
 package ca.modmonster.minegit.mixin;
 
 import ca.modmonster.minegit.backport.ToastWidthAccessor;
-import net.minecraft.client.toast.Toast;
+import net.minecraft.client.gui.toast.ToastGui;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
-@Mixin(targets = "net.minecraft.client.toast.ToastManager$Entry")
+@Mixin(targets = "net.minecraft.client.gui.toast.ToastGui$ToastInstance")
 public class ToastComponentMixin {
     @Shadow
     @Final
-    private Toast instance;
+    private ToastGui toast;
 
-    @ModifyConstant(method = "draw", constant = @Constant(floatValue = 160.0f))
+    @ModifyConstant(method = "render", constant = @Constant(floatValue = 160.0f))
     private float replaceToastWidth(float original) {
-        if (instance instanceof ToastWidthAccessor) {
-            return (float) ((ToastWidthAccessor) instance).getWidth();
+        if (toast instanceof ToastWidthAccessor) {
+            return (float) ((ToastWidthAccessor) toast).getWidth();
         }
         return original;
     }

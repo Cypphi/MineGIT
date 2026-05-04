@@ -7,9 +7,9 @@ import ca.modmonster.minegit.gui.CloneScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.world.CreateWorldScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.Text;
+import net.minecraft.unmapped.C_01559903;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class CreateWorldScreenMixin extends Screen {
     @Unique
     @Nullable
-    private ButtonWidget gitButton;
+    private C_01559903 gitButton;
 
     @Unique
     @Nullable
@@ -40,11 +40,11 @@ public abstract class CreateWorldScreenMixin extends Screen {
 
         if (needsSetup) {
             // Add setup button
-            gitButton = new ButtonWidget(width / 2 - 178, height - 28, 20, 20, "☁", this::onGitButtonPress);
+            gitButton = new C_01559903(width / 2 - 178, height - 28, 20, 20, "☁", this::onGitButtonPress);
             gitButtonTooltip = I18n.translate("minegit.link.setup");
         } else {
             // Add clone button
-            gitButton = new ButtonWidget(width / 2 - 178, height - 28, 20, 20, "↓", this::onGitButtonPress);
+            gitButton = new C_01559903(width / 2 - 178, height - 28, 20, 20, "↓", this::onGitButtonPress);
             gitButtonTooltip = I18n.translate("minegit.clone.title");
         }
         addButton(gitButton);
@@ -58,7 +58,7 @@ public abstract class CreateWorldScreenMixin extends Screen {
     }
 
     @Unique
-    void onGitButtonPress(ButtonWidget gitButton) {
+    void onGitButtonPress(C_01559903 gitButton) {
         if (needsSetup) {
             this.minecraft.openScreen(new AccountLinkScreen(this, this::updateSetupButton));
         } else {
