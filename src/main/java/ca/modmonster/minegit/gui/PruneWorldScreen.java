@@ -5,10 +5,10 @@ import ca.modmonster.minegit.backport.WideToast;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.SyncResult;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.TranslatableText;
 import org.eclipse.jgit.lib.ProgressMonitor;
 
 public class PruneWorldScreen extends Screen {
@@ -19,7 +19,7 @@ public class PruneWorldScreen extends Screen {
     private MultiLineLabel descriptionWidget;
 
     public PruneWorldScreen(Screen parent, String levelId, BooleanConsumer callback) {
-        super(new TranslatableComponent("minegit.prune.title"));
+        super(new TranslatableText("minegit.prune.title"));
         this.parent = parent;
         this.levelId = levelId;
         this.callback = callback;
@@ -28,15 +28,15 @@ public class PruneWorldScreen extends Screen {
     @Override
     protected void init() {
         // Confirmation message
-        descriptionWidget = MultiLineLabel.create(this.font, I18n.get("minegit.prune.description"), this.width - 50);
+        descriptionWidget = MultiLineLabel.create(this.font, I18n.translate("minegit.prune.description"), this.width - 50);
         int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Confirm button
-        Button confirmButton = new Button(this.width / 2 - 152, 98 + descriptionHeight, 150, 20, I18n.get("minegit.prune.confirm"), button -> pullThenPrune());
+        ButtonWidget confirmButton = new ButtonWidget(this.width / 2 - 152, 98 + descriptionHeight, 150, 20, I18n.translate("minegit.prune.confirm"), button -> pullThenPrune());
         addButton(confirmButton);
 
         // Cancel button
-        Button cancelButton = new Button(this.width / 2 + 2, 98 + descriptionHeight, 150, 20, I18n.get("minegit.prune.cancel"), button -> onClose());
+        ButtonWidget cancelButton = new ButtonWidget(this.width / 2 + 2, 98 + descriptionHeight, 150, 20, I18n.translate("minegit.prune.cancel"), button -> onClose());
         addButton(cancelButton);
     }
 
@@ -52,16 +52,16 @@ public class PruneWorldScreen extends Screen {
         boolean ok = GitManager.prune(minecraft, levelId, progress);
         if (minecraft == null) return;
         if (ok) {
-            minecraft.getToasts().addToast(new WideToast(I18n.get("minegit.prune.complete")));
+            minecraft.getToastManager().add(new WideToast(I18n.translate("minegit.prune.complete")));
         } else {
-            minecraft.getToasts().addToast(new WideToast(I18n.get("minegit.prune.failed")));
+            minecraft.getToastManager().add(new WideToast(I18n.translate("minegit.prune.failed")));
         }
-        minecraft.submit(() -> this.callback.accept(true));
+        minecraft.execute(() -> this.callback.accept(true));
     }
 
     private void pullThenPrune() {
-        GitProgressScreen progressScreen = new GitProgressScreen(new TranslatableComponent("minegit.prune.in_progress"));
-        minecraft.setScreen(progressScreen);
+        GitProgressScreen progressScreen = new GitProgressScreen(new TranslatableText("minegit.prune.in_progress"));
+        minecraft.openScreen(progressScreen);
         new Thread(() -> {
             SyncResult status = GitManager.pull(GitManager.getPath(minecraft, levelId), progressScreen);
             GitManager.makeWritable(minecraft, levelId);
@@ -72,7 +72,7 @@ public class PruneWorldScreen extends Screen {
                     break;
                 case FAIL_GENERIC:
                     // Generic error; show option to keep local or cloud
-                    minecraft.submit(() -> minecraft.setScreen(new GitConflictScreen(
+                    minecraft.execute(() -> minecraft.openScreen(new GitConflictScreen(
                             () -> doPrune(progressScreen),
                             this::onClose,
                             GitManager.getPath(minecraft, levelId)
@@ -80,11 +80,11 @@ public class PruneWorldScreen extends Screen {
                     break;
                 case FAIL_NETWORK:
                     // Network error; show unreachable screen
-                    minecraft.submit(() -> minecraft.setScreen(new TwoChoiceScreen(
-                            new TranslatableComponent("minegit.sync.pull_unreachable.title"),
-                            I18n.get("minegit.sync.pull_unreachable.description"),
-                            I18n.get("minegit.sync.pull_unreachable.continue"),
-                            I18n.get("minegit.sync.pull_unreachable.cancel"),
+                    minecraft.execute(() -> minecraft.openScreen(new TwoChoiceScreen(
+                            new TranslatableText("minegit.sync.pull_unreachable.title"),
+                            I18n.translate("minegit.sync.pull_unreachable.description"),
+                            I18n.translate("minegit.sync.pull_unreachable.continue"),
+                            I18n.translate("minegit.sync.pull_unreachable.cancel"),
                             () -> doPrune(progressScreen),
                             this::onClose
                     )));
@@ -95,6 +95,6 @@ public class PruneWorldScreen extends Screen {
 
     @Override
     public void onClose() {
-        minecraft.setScreen(parent);
+        minecraft.openScreen(parent);
     }
 }

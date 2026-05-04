@@ -7,13 +7,13 @@ import ca.modmonster.minegit.gui.AccountLinkScreen;
 import ca.modmonster.minegit.gui.CloneScreen;
 import ca.modmonster.minegit.gui.EnableWorldSyncScreen;
 import ca.modmonster.minegit.widget.WorldSyncButtonState;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
-import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.world.SelectWorldScreen;
+import net.minecraft.client.gui.screen.world.WorldListWidget;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.Text;
 import net.minecraft.world.level.storage.LevelSummary;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,20 +33,20 @@ public class SinglePlayerScreenMixin extends Screen {
     private String cloneButtonTooltip;
 
     @Shadow
-    private @Nullable WorldSelectionList list;
+    private @Nullable WorldListWidget levelList;
 
     @Shadow
-    protected EditBox searchBox;
+    protected TextFieldWidget searchBox;
 
-    protected SinglePlayerScreenMixin(Component title) {
+    protected SinglePlayerScreenMixin(Text title) {
         super(title);
     }
 
     @Unique @Nullable
-    private Button cloneButton;
+    private ButtonWidget cloneButton;
 
     @Unique @Nullable
-    private Button worldSyncButton;
+    private ButtonWidget worldSyncButton;
 
     @Unique @Nullable
     private List<String> worldSyncButtonTooltip;
@@ -62,19 +62,19 @@ public class SinglePlayerScreenMixin extends Screen {
 
     @Inject(at = @At("TAIL"), method = "init", remap = false)
 	private void init(CallbackInfo info) {
-        cloneButtonTooltip = I18n.get("minegit.clone.title");
+        cloneButtonTooltip = I18n.translate("minegit.clone.title");
 
         // Add world sync button
-        worldSyncButton = new Button(width / 2 - 178, height - 52, 20, 20, "☁", button -> {
+        worldSyncButton = new ButtonWidget(width / 2 - 178, height - 52, 20, 20, "☁", button -> {
             if (worldSyncButtonState == WorldSyncButtonState.SETUP || altHeld) {
                 altHeld = false;
-                this.minecraft.setScreen(new AccountLinkScreen(this, () -> {
-                    if (this.list != null) returnToScreen();
+                this.minecraft.openScreen(new AccountLinkScreen(this, () -> {
+                    if (this.levelList != null) returnToScreen();
                     updateWorldSyncButton();
                 }));
             } else if (worldSyncButtonState == WorldSyncButtonState.ENABLE) {
-                if (hoveredLevel != null) this.minecraft.setScreen(new EnableWorldSyncScreen(this, hoveredLevel, () -> {
-                    if (this.list != null) returnToScreen();
+                if (hoveredLevel != null) this.minecraft.openScreen(new EnableWorldSyncScreen(this, hoveredLevel, () -> {
+                    if (this.levelList != null) returnToScreen();
                     updateWorldSyncButton();
                 }));
             }
@@ -83,8 +83,8 @@ public class SinglePlayerScreenMixin extends Screen {
         addButton(worldSyncButton);
 
         // Add clone button
-        cloneButton = new Button(width / 2 - 178, height - 28, 20, 20, "↓", button -> this.minecraft.setScreen(new CloneScreen(() -> {
-            if (this.list != null) returnToScreen();
+        cloneButton = new ButtonWidget(width / 2 - 178, height - 28, 20, 20, "↓", button -> this.minecraft.openScreen(new CloneScreen(() -> {
+            if (this.levelList != null) returnToScreen();
             updateWorldSyncButton();
         })));
         addButton(cloneButton);
@@ -98,11 +98,11 @@ public class SinglePlayerScreenMixin extends Screen {
         if (worldSyncButtonTooltip != null && worldSyncButton != null &&  worldSyncButton.isHovered()) renderTooltip(worldSyncButtonTooltip, i, j);
     }
 
-    @Inject(at = @At("TAIL"), method = "updateButtonStatus", remap = false)
-    private void updateButtonStatus(boolean bl, CallbackInfo ci) {
+    @Inject(at = @At("TAIL"), method = "worldSelected", remap = false)
+    private void worldSelected(boolean bl, CallbackInfo ci) {
         if (worldSyncButton == null) return;
-        if (list == null) return;
-        list.getSelectedOpt().ifPresent((level) -> hoveredLevel = ((WorldListEntryAccessor) (Object) level).getSummary());
+        if (levelList == null) return;
+        hoveredLevel = !bl? null : ((WorldListEntryAccessor) (Object) levelList.getSelected()).getSummary();
         updateWorldSyncButton();
     }
 
@@ -115,7 +115,7 @@ public class SinglePlayerScreenMixin extends Screen {
             // Set the world sync button to configuration state
             worldSyncButtonState = WorldSyncButtonState.SETUP;
             this.worldSyncButton.active = true;
-        } else if (hoveredLevel != null && GitManager.syncEnabled(minecraft, hoveredLevel.getLevelId())) {
+        } else if (hoveredLevel != null && GitManager.syncEnabled(minecraft, hoveredLevel.getName())) {
             worldSyncButtonState = WorldSyncButtonState.WORLD_CONFIGURE;
             this.worldSyncButton.active = false;
         } else {
@@ -135,7 +135,7 @@ public class SinglePlayerScreenMixin extends Screen {
             if (worldSyncButton != null) {
                 worldSyncButton.active = true;
                 worldSyncButton.setMessage("☁");
-                worldSyncButtonTooltip = Collections.singletonList(I18n.get("minegit.link.setup.open"));
+                worldSyncButtonTooltip = Collections.singletonList(I18n.translate("minegit.link.setup.open"));
             }
         }
     }
@@ -151,8 +151,8 @@ public class SinglePlayerScreenMixin extends Screen {
 
     @Unique
     private void returnToScreen() {
-        WorldSelectionList list = ((SelectWorldScreenAccessor) this).getLevelList();
-        ((WorldSelectionListInvoker) list).invokeReloadWorldList(() -> searchBox.getValue(), true);
-        minecraft.setScreen(this);
+        WorldListWidget list = ((SelectWorldScreenAccessor) this).getLevelList();
+        ((WorldSelectionListInvoker) list).invokeReloadWorldList(() -> searchBox.getText(), true);
+        minecraft.openScreen(this);
     }
 }

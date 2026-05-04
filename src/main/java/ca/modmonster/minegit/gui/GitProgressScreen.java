@@ -1,7 +1,7 @@
 package ca.modmonster.minegit.gui;
 
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.text.Text;
 import org.eclipse.jgit.lib.ProgressMonitor;
 
 public class GitProgressScreen extends Screen implements ProgressMonitor {
@@ -11,7 +11,7 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
     private int currentTaskWork = 0;
     private int currentTaskTotalWork = 1;
 
-    public GitProgressScreen(Component component) {
+    public GitProgressScreen(Text component) {
         super(component);
     }
 

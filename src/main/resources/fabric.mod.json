@@ -18,10 +18,7 @@
 	"entrypoints": {
 		"client": [
 			"ca.modmonster.minegit.MineGIT"
-		],
-        "modmenu": [
-            "ca.modmonster.minegit.extra.ModMenuImplementation"
-        ]
+		]
 	},
 	"mixins": [
 		"minegit.mixins.json"

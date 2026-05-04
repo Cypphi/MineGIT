@@ -1,16 +1,16 @@
 package ca.modmonster.minegit.mixin;
 
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
-import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
+import net.minecraft.client.gui.screen.world.SelectWorldScreen;
+import net.minecraft.client.gui.screen.world.WorldListWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(SelectWorldScreen.class)
 public interface SelectWorldScreenAccessor {
-    @Accessor("list")
-    WorldSelectionList getLevelList();
+    @Accessor("levelList")
+    WorldListWidget getLevelList();
 
     @Accessor("searchBox")
-    EditBox getEditBox();
+    TextFieldWidget getEditBox();
 }

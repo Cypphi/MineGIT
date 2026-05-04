@@ -1,12 +1,12 @@
 package ca.modmonster.minegit.gui;
 
 import ca.modmonster.minegit.backport.MultiLineLabel;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.text.Text;
 
 public class TwoChoiceScreen extends Screen {
-    public TwoChoiceScreen(Component title, String description, String continueMessage, String cancelMessage, Runnable continueCallback, Runnable cancelCallback) {
+    public TwoChoiceScreen(Text title, String description, String continueMessage, String cancelMessage, Runnable continueCallback, Runnable cancelCallback) {
         super(title);
         this.description = description;
         this.continueMessage = continueMessage;
@@ -29,11 +29,11 @@ public class TwoChoiceScreen extends Screen {
         int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Continue button
-        Button continueButton = new Button(width / 2 - 152, 98 + descriptionHeight, 150, 20, continueMessage, button -> continueCallback.run());
+        ButtonWidget continueButton = new ButtonWidget(width / 2 - 152, 98 + descriptionHeight, 150, 20, continueMessage, button -> continueCallback.run());
         addButton(continueButton);
 
         // Cancel button
-        Button cancelButton = new Button(width / 2 + 2, 98 + descriptionHeight, 150, 20, cancelMessage, button -> cancelCallback.run());
+        ButtonWidget cancelButton = new ButtonWidget(width / 2 + 2, 98 + descriptionHeight, 150, 20, cancelMessage, button -> cancelCallback.run());
         addButton(cancelButton);
     }
 

@@ -13,25 +13,12 @@ repositories {
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
     mavenCentral()
-
-    maven {
-        name = "Terraformers"
-        url = "https://maven.terraformersmc.com/"
-    }
-}
-
-loom {
-	mods {
-		"minegit" {
-			sourceSet sourceSets.main
-		}
-	}
 }
 
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings loom.officialMojangMappings()
+	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
@@ -46,9 +33,6 @@ dependencies {
 	implementation "org.apache.logging.log4j:log4j-slf4j-impl:2.17.1"
 	include "org.slf4j:slf4j-api:1.7.36"
 	include "org.apache.logging.log4j:log4j-slf4j-impl:2.17.1"
-
-    // Mod Menu
-    modImplementation "io.github.prospector:modmenu:${project.modmenu_version}"
 }
 
 processResources {

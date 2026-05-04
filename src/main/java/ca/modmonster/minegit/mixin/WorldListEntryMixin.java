@@ -5,11 +5,11 @@ import ca.modmonster.minegit.data.SyncResult;
 import ca.modmonster.minegit.gui.GitConflictScreen;
 import ca.modmonster.minegit.gui.GitProgressScreen;
 import ca.modmonster.minegit.gui.TwoChoiceScreen;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
-import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
-import net.minecraft.client.resources.language.I18n;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.world.SelectWorldScreen;
+import net.minecraft.client.gui.screen.world.WorldListWidget;
+import net.minecraft.client.resource.language.I18n;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.world.level.storage.LevelSummary;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,43 +19,43 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(WorldSelectionList.WorldListEntry.class)
+@Mixin(WorldListWidget.Entry.class)
 public abstract class WorldListEntryMixin {
     @Shadow
     @Final
-    private Minecraft minecraft;
+    private MinecraftClient client;
 
     @Shadow
     @Final
-    private LevelSummary summary;
+    private LevelSummary level;
 
     @Shadow
     @Final
     private SelectWorldScreen screen;
 
     @Shadow
-    public abstract void joinWorld();
+    public abstract void play();
 
     @Unique
     private boolean showGitBeforeJoin = true;
 
-    @Inject(method = "deleteWorld", at = @At("HEAD"))
+    @Inject(method = "delete", at = @At("HEAD"))
     private void beforeWorldDelete(CallbackInfo ci) {
         // Make .git folder writable
-        GitManager.makeWritable(minecraft, summary.getLevelId());
+        GitManager.makeWritable(client, level.getName());
     }
 
-    @Inject(method = "joinWorld", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "play", at = @At("HEAD"), cancellable = true)
     private void beforeWorldJoin(CallbackInfo ci) {
         if (!showGitBeforeJoin) return;
-        String worldId = summary.getLevelId();
-        if (!GitManager.syncEnabled(minecraft, worldId)) return;
+        String worldId = level.getName();
+        if (!GitManager.syncEnabled(client, worldId)) return;
         ci.cancel();
-        GitProgressScreen progressScreen = new GitProgressScreen(new TranslatableComponent("minegit.sync.status.git_pull"));
-        minecraft.setScreen(progressScreen);
+        GitProgressScreen progressScreen = new GitProgressScreen(new TranslatableText("minegit.sync.status.git_pull"));
+        client.openScreen(progressScreen);
         new Thread(() -> {
-            SyncResult status = GitManager.pull(GitManager.getPath(minecraft, worldId), progressScreen);
-            GitManager.makeWritable(minecraft, worldId);
+            SyncResult status = GitManager.pull(GitManager.getPath(client, worldId), progressScreen);
+            GitManager.makeWritable(client, worldId);
             switch (status) {
                 case SUCCESS:
                     // Success; load world as normal
@@ -63,19 +63,19 @@ public abstract class WorldListEntryMixin {
                     break;
                 case FAIL_GENERIC:
                     // Generic error; show option to keep local or cloud
-                    minecraft.submit(() -> minecraft.setScreen(new GitConflictScreen(
+                    client.execute(() -> client.openScreen(new GitConflictScreen(
                             this::doLoadWorld,
                             this::returnToScreen,
-                            GitManager.getPath(minecraft, worldId)
+                            GitManager.getPath(client, worldId)
                     )));
                     break;
                 case FAIL_NETWORK:
                     // Network error; show unreachable screen
-                    minecraft.submit(() -> minecraft.setScreen(new TwoChoiceScreen(
-                            new TranslatableComponent("minegit.sync.pull_unreachable.title"),
-                            I18n.get("minegit.sync.pull_unreachable.description"),
-                            I18n.get("minegit.sync.pull_unreachable.continue"),
-                            I18n.get("minegit.sync.pull_unreachable.cancel"),
+                    client.execute(() -> client.openScreen(new TwoChoiceScreen(
+                            new TranslatableText("minegit.sync.pull_unreachable.title"),
+                            I18n.translate("minegit.sync.pull_unreachable.description"),
+                            I18n.translate("minegit.sync.pull_unreachable.continue"),
+                            I18n.translate("minegit.sync.pull_unreachable.cancel"),
                             this::doLoadWorld, // continue
                             this::returnToScreen // cancel
                     )));
@@ -86,17 +86,17 @@ public abstract class WorldListEntryMixin {
 
     @Unique
     private void doLoadWorld() {
-        minecraft.submit(() -> {
+        client.execute(() -> {
             showGitBeforeJoin = false;
-            joinWorld();
+            play();
             showGitBeforeJoin = true;
         });
     }
 
     @Unique
     private void returnToScreen() {
-        WorldSelectionList list = ((SelectWorldScreenAccessor) this).getLevelList();
-        ((WorldSelectionListInvoker) list).invokeReloadWorldList(() -> ((SelectWorldScreenAccessor) this.screen).getEditBox().getValue(), true);
-        minecraft.setScreen(screen);
+        WorldListWidget list = ((SelectWorldScreenAccessor) this).getLevelList();
+        ((WorldSelectionListInvoker) list).invokeReloadWorldList(() -> ((SelectWorldScreenAccessor) this.screen).getEditBox().getText(), true);
+        client.openScreen(screen);
     }
 }

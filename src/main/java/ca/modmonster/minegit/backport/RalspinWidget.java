@@ -1,13 +1,13 @@
 package ca.modmonster.minegit.backport;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.widget.AbstractButtonWidget;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 
-public class RalspinWidget extends AbstractWidget {
-    private static final ResourceLocation SPRITE = new ResourceLocation("minegit", "textures/gui/ralspin.png");
+public class RalspinWidget extends AbstractButtonWidget {
+    private static final Identifier SPRITE = new Identifier("minegit", "textures/gui/ralspin.png");
     private static final int FRAME_WIDTH = 21;
     private static final int FRAME_HEIGHT = 40;
     private static final int FRAME_COUNT = 12;
@@ -22,7 +22,7 @@ public class RalspinWidget extends AbstractWidget {
     @Override
     public void render(int i, int j, float f) {
         super.render(i, j, f);
-        long time = Util.getMillis() / 50;
+        long time = Util.getMeasuringTimeMs() / 50;
         int frame = (int) ((time / FRAME_TIME) % FRAME_COUNT);
 
         int u = 0;
@@ -32,7 +32,7 @@ public class RalspinWidget extends AbstractWidget {
         GlStateManager.translatef(x, y, 0);
         GlStateManager.scalef(SCALE, SCALE, 1);
         GlStateManager.color4f(1F, 1F, 1F, 1F);
-        Minecraft.getInstance().getTextureManager().bind(SPRITE);
+        MinecraftClient.getInstance().getTextureManager().bindTexture(SPRITE);
         blit(
                 0, 0,
                 u, v,

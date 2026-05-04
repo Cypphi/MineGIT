@@ -1,7 +1,7 @@
 package ca.modmonster.minegit.data;
 
 import ca.modmonster.minegit.MineGIT;
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeCommand;
 import org.eclipse.jgit.api.PullResult;
@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class GitManager {
-    public static boolean syncEnabled(Minecraft minecraft, String worldId) {
+    public static boolean syncEnabled(MinecraftClient minecraft, String worldId) {
         return syncEnabled(getPath(minecraft, worldId));
     }
 
@@ -219,7 +219,7 @@ public class GitManager {
         }
     }
 
-    public static boolean init(Minecraft minecraft, String worldId, String repoUrl, ProgressMonitor progressMonitor) {
+    public static boolean init(MinecraftClient minecraft, String worldId, String repoUrl, ProgressMonitor progressMonitor) {
         Path worldFolder = getPath(minecraft, worldId);
         Config config = ConfigManager.getCurrentConfig();
         try (Git git = Git.init().setDirectory(worldFolder.toFile()).call()) {
@@ -257,7 +257,7 @@ public class GitManager {
         }
     }
 
-    public static int cloneRepo(Minecraft minecraft, String repo, ProgressMonitor progressMonitor) {
+    public static int cloneRepo(MinecraftClient minecraft, String repo, ProgressMonitor progressMonitor) {
         progressMonitor.beginTask("Starting world clone", 0);
         Config config = ConfigManager.getCurrentConfig();
         String repoUrl = String.format("https://github.com/%s/%s.git", config.username, repo);
@@ -286,8 +286,8 @@ public class GitManager {
         }
     }
 
-    public static Path getPath(Minecraft minecraft, String worldId) {
-        return minecraft.getLevelSource().getBaseDir().resolve(worldId);
+    public static Path getPath(MinecraftClient minecraft, String worldId) {
+        return minecraft.getLevelStorage().getSavesDirectory().resolve(worldId);
     }
 
     /**
@@ -297,7 +297,7 @@ public class GitManager {
      * @param worldId The world ID containing the Git repo
      */
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static void makeWritable(Minecraft minecraft, String worldId) {
+    public static void makeWritable(MinecraftClient minecraft, String worldId) {
         Path root = getPath(minecraft, worldId).resolve(".git");
         if (!root.toFile().exists()) return;
 
@@ -343,7 +343,7 @@ public class GitManager {
         } catch (Exception ignored) {}
     }
 
-    public static boolean prune(Minecraft minecraft, String worldId, ProgressMonitor progressMonitor) {
+    public static boolean prune(MinecraftClient minecraft, String worldId, ProgressMonitor progressMonitor) {
         progressMonitor.beginTask("Opening world", 0);
         Path worldFolder = getPath(minecraft, worldId);
         Config config = ConfigManager.getCurrentConfig();
