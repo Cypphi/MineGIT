@@ -1,11 +1,11 @@
 package ca.modmonster.minegit.backport;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.GuiElement;
 import net.minecraft.client.render.platform.GlStateManager;
 import net.minecraft.resource.Identifier;
 
-public class RalspinWidget extends ButtonWidget {
+public class RalspinWidget extends GuiElement {
     private static final Identifier SPRITE = new Identifier("minegit", "textures/gui/ralspin.png");
     private static final int FRAME_WIDTH = 21;
     private static final int FRAME_HEIGHT = 40;
@@ -14,13 +14,17 @@ public class RalspinWidget extends ButtonWidget {
     private static final int SCALE = 2;
     public static final String TOOLTIP = "hiiiii!! ^-^";
 
+    public final int x;
+    public final int y;
+    private boolean hovered;
+
     public RalspinWidget(final int x, final int y) {
-        super(999, x, y, FRAME_WIDTH * SCALE, FRAME_HEIGHT * SCALE, "");
+        this.x = x;
+        this.y = y;
     }
 
-    @Override
-    public void render(int i, int j, float f) {
-        this.hovered = i >= this.x && j >= this.y && i < this.x + this.width && j < this.y + this.height;
+    public void render(int i, int j) {
+        this.hovered = i >= this.x && j >= this.y && i < this.x + FRAME_WIDTH * SCALE && j < this.y + FRAME_HEIGHT * SCALE;
         long time = System.currentTimeMillis() / 50;
         int frame = (int) ((time / FRAME_TIME) % FRAME_COUNT);
 
@@ -39,5 +43,9 @@ public class RalspinWidget extends ButtonWidget {
                 FRAME_WIDTH, FRAME_HEIGHT * FRAME_COUNT
         );
         GlStateManager.popMatrix();
+    }
+
+    public boolean isHovered() {
+        return hovered;
     }
 }

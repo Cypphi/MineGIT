@@ -4,7 +4,6 @@ import ca.modmonster.minegit.backport.MultiLineLabel;
 import ca.modmonster.minegit.backport.WideToast;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.SyncResult;
-import net.minecraft.client.gui.screen.ConfirmationListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
@@ -13,39 +12,38 @@ import org.eclipse.jgit.lib.ProgressMonitor;
 public class PruneWorldScreen extends Screen {
     private final Screen parent;
     private final String levelId;
-    private final ConfirmationListener callback;
+    private final Screen successParent;
 
     private MultiLineLabel descriptionWidget;
 
-    public PruneWorldScreen(Screen parent, String levelId, ConfirmationListener callback) {
+    public PruneWorldScreen(Screen parent, String levelId, Screen successParent) {
         this.parent = parent;
         this.levelId = levelId;
-        this.callback = callback;
+        this.successParent = successParent;
     }
 
     @Override
-    protected void init() {
+    public void init() {
         // Confirmation message
         descriptionWidget = MultiLineLabel.create(textRenderer, I18n.translate("minegit.prune.description"), this.width - 50);
         int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Confirm button
-        ButtonWidget confirmButton = new ButtonWidget(0, this.width / 2 - 152, 98 + descriptionHeight, 150, 20, I18n.translate("minegit.prune.confirm")) {
-            @Override
-            public void click(double mouseX, double mouseY) {
-                pullThenPrune();
-            }
-        };
+        ButtonWidget confirmButton = new ButtonWidget(0, this.width / 2 - 152, 98 + descriptionHeight, 150, 20, I18n.translate("minegit.prune.confirm"));
         addButton(confirmButton);
 
         // Cancel button
-        ButtonWidget cancelButton = new ButtonWidget(1, this.width / 2 + 2, 98 + descriptionHeight, 150, 20, I18n.translate("minegit.prune.cancel")) {
-            @Override
-            public void click(double mouseX, double mouseY) {
-                close();
-            }
-        };
+        ButtonWidget cancelButton = new ButtonWidget(1, this.width / 2 + 2, 98 + descriptionHeight, 150, 20, I18n.translate("minegit.prune.cancel"));
         addButton(cancelButton);
+    }
+
+    @Override
+    protected void buttonClicked(ButtonWidget button) {
+        if (button.id == 0) {
+            pullThenPrune();
+        } else if (button.id == 1) {
+            close();
+        }
     }
 
     @Override
@@ -64,7 +62,7 @@ public class PruneWorldScreen extends Screen {
         } else {
             minecraft.getToasts().add(new WideToast(I18n.translate("minegit.prune.failed")));
         }
-        minecraft.executeTask(() -> this.callback.confirmResult(true, 0));
+        minecraft.executeTask(() -> minecraft.openScreen(successParent));
     }
 
     private void pullThenPrune() {
@@ -101,8 +99,12 @@ public class PruneWorldScreen extends Screen {
         }).start();
     }
 
-    @Override
     public void close() {
         minecraft.openScreen(parent);
+    }
+
+    @Override
+    protected void keyPressed(char i, int j) {
+        if (j == 1) close();
     }
 }

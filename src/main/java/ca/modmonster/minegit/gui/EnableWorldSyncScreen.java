@@ -28,33 +28,29 @@ public class EnableWorldSyncScreen extends Screen {
     }
 
     @Override
-    protected void init() {
+    public void init() {
         // Confirm button
-        confirmButton = new ButtonWidget(0, width / 2 - 152, 124, 150, 20, I18n.translate("minegit.sync.enable.confirm.ok")) {
-            @Override
-            public void click(double mouseX, double mouseY) {
-                setupSync();
-            }
-        };
+        confirmButton = new ButtonWidget(0, width / 2 - 152, 124, 150, 20, I18n.translate("minegit.sync.enable.confirm.ok"));
         addButton(confirmButton);
 
         // Cancel button
-        cancelButton = new ButtonWidget(1, width / 2 + 2, 124, 150, 20, I18n.translate("minegit.sync.enable.confirm.cancel")) {
-            @Override
-            public void click(double mouseX, double mouseY) {
-                close();
-            }
-        };
+        cancelButton = new ButtonWidget(1, width / 2 + 2, 124, 150, 20, I18n.translate("minegit.sync.enable.confirm.cancel"));
         addButton(cancelButton);
 
-        ButtonWidget openSetupButton = new ButtonWidget(2, width / 2 - 75, 152, 150, 20, I18n.translate("minegit.link.setup.open")) {
-            @Override
-            public void click(double mouseX, double mouseY) {
-                minecraft.openScreen(new AccountLinkScreen(parent, closeCallback));
-            }
-        };
+        ButtonWidget openSetupButton = new ButtonWidget(2, width / 2 - 75, 152, 150, 20, I18n.translate("minegit.link.setup.open"));
         openSetupButton.visible = showOpenSetupButton;
         addButton(openSetupButton);
+    }
+
+    @Override
+    protected void buttonClicked(ButtonWidget button) {
+        if (button.id == 0) {
+            setupSync();
+        } else if (button.id == 1) {
+            close();
+        } else if (button.id == 2) {
+            minecraft.openScreen(new AccountLinkScreen(EnableWorldSyncScreen.this.parent, closeCallback));
+        }
     }
 
     @Override
@@ -112,9 +108,13 @@ public class EnableWorldSyncScreen extends Screen {
         }).start();
     }
 
-    @Override
     public void close() {
         minecraft.openScreen(parent);
         if (closeCallback != null) closeCallback.run();
+    }
+
+    @Override
+    protected void keyPressed(char i, int j) {
+        if (j == 1) close();
     }
 }

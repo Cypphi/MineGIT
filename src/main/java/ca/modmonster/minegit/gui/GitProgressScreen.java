@@ -16,11 +16,6 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
     }
 
     @Override
-    public boolean shouldCloseOnEsc() {
-        return false;
-    }
-
-    @Override
     public void render(int i, int j, float f) {
         this.drawBackgroundTexture(i);
         super.render(i, j, f);
@@ -61,4 +56,7 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
 
     @Override
     public boolean isCancelled() {return false;}
+
+    @Override
+    protected void keyPressed(char typedChar, int keyCode) {}
 }

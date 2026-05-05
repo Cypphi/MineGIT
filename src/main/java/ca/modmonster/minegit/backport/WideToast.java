@@ -24,7 +24,7 @@ public class WideToast implements Toast, ToastWidthAccessor {
         toastComponent.getMinecraft().getTextureManager().bind(Toast.TOASTS_LOCATION);
         GlStateManager.color3f(1.0F, 1.0F, 1.0F);
         this.renderBackgroundRow(toastComponent, getWidth());
-        toastComponent.getMinecraft().textRenderer.draw(message, 18.0F, 12.0F, -256);
+        toastComponent.getMinecraft().textRenderer.draw(message, 18, 12, -256);
         return l - this.lastChanged < 5000L ? Visibility.SHOW : Visibility.HIDE;
     }
 

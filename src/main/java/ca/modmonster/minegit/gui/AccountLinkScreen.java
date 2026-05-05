@@ -32,38 +32,25 @@ public class AccountLinkScreen extends Screen {
     }
 
     @Override
-    protected void init() {
+    public void init() {
         // Username text field
         usernameEdit = new TextFieldWidget(0, textRenderer, this.width / 2 - 100, 107, 200, 20);
         usernameEdit.setMaxLength(39);
-        this.children.add(usernameEdit);
 
         // PAT text field
         patEdit = new TextFieldWidget(1, textRenderer, this.width / 2 - 100, 152, 200, 20);
         patEdit.setMaxLength(255);
-        this.children.add(patEdit);
 
         // Test credentials button
-        testCredentialsButton = new ButtonWidget(2, this.width / 2 - 100, 180, 200, 20, I18n.translate("minegit.link.test")) {
-            @Override
-            public void click(double mouseX, double mouseY) {
-                testCredentials();
-            }
-        };
+        testCredentialsButton = new ButtonWidget(2, this.width / 2 - 100, 180, 200, 20, I18n.translate("minegit.link.test"));
         addButton(testCredentialsButton);
 
         // Back button
-        backButton = new ImageButton(3, 6, 6, ImageButton.ImageButtonTex.BACK) {
-            @Override
-            public void click(double mouseX, double mouseY) {
-                close();
-            }
-        };
+        backButton = new ImageButton(3, 6, 6, ImageButton.ImageButtonTex.BACK);
         addButton(backButton);
 
         // Ralsei go spinny
         ralspinWidget = new RalspinWidget(width - 60, height - 80);
-        this.children.add(ralspinWidget);
 
         // Load configuration and update default values
         Config config = ConfigManager.getCurrentConfig();
@@ -71,10 +58,18 @@ public class AccountLinkScreen extends Screen {
         String pat = config.getPat();
         if (pat != null) patEdit.setText(pat);
 
-        setFocused(usernameEdit);
         usernameEdit.setFocused(true);
 
         updateTestButtonStatus(false);
+    }
+
+    @Override
+    protected void buttonClicked(ButtonWidget button) {
+        if (button.id == 2) {
+            testCredentials();
+        } else if (button.id == 3) {
+            close();
+        }
     }
 
     @Override
@@ -84,35 +79,31 @@ public class AccountLinkScreen extends Screen {
         drawCenteredString(this.textRenderer, I18n.translate("minegit.link.title"), this.width / 2, 50, 16777215);
         drawCenteredString(this.textRenderer, I18n.translate("minegit.link.username"), this.width / 2, 90, -2130706433);
         drawCenteredString(this.textRenderer, I18n.translate("minegit.link.pat"), this.width / 2, 135, -2130706433);
-        ralspinWidget.render(i, j, f);
-        usernameEdit.render(i, j, f);
-        patEdit.render(i, j, f);
+        ralspinWidget.render(i, j);
+        usernameEdit.render();
+        patEdit.render();
         if (testCredentialsStatus != null) drawCenteredString(this.textRenderer, testCredentialsStatus, this.width / 2, 208, 16777215);
         if (backButton.isHovered()) renderTooltip(I18n.translate("minegit.link.back"),  i, j);
         if (ralspinWidget.isHovered()) renderTooltip(RalspinWidget.TOOLTIP, i, j);
     }
 
     @Override
-    public boolean charTyped(char i, int j) {
-        if (this.usernameEdit.charTyped(i, j) | this.patEdit.charTyped(i, j)) {
+    protected void keyPressed(char i, int j) {
+        if (this.usernameEdit.isFocused()) {
+            this.usernameEdit.keyPressed(i, j);
             updateTestButtonStatus(false);
-            return true;
-        } else {
-            return false;
+        } else if (this.patEdit.isFocused()) {
+            this.patEdit.keyPressed(i, j);
+            updateTestButtonStatus(false);
         }
+        if (j == 1) close();
     }
 
     @Override
-    public boolean keyPressed(int i, int j, int k) {
-        if (this.usernameEdit.keyPressed(i, j, k) | this.patEdit.keyPressed(i, j, k)) {
-            updateTestButtonStatus(false);
-            return true;
-        } else if (i != 257 && i != 335) {
-            return false;
-        } else {
-            close();
-            return true;
-        }
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) {
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+        this.usernameEdit.mouseClicked(mouseX, mouseY, mouseButton);
+        this.patEdit.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
     @Override
@@ -155,7 +146,6 @@ public class AccountLinkScreen extends Screen {
         testCredentialsButton.active = !forceDisable && !requestInProgress && !usernameEdit.getText().replace(" ", "").isEmpty() && !patEdit.getText().replace(" ", "").isEmpty();
     }
 
-    @Override
     public void close() {
         // Save credentials
         String username = usernameEdit.getText();

@@ -2,7 +2,6 @@ package ca.modmonster.minegit.mixin;
 
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.QuitState;
-import net.minecraft.client.gui.GuiEventListener;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -25,9 +24,7 @@ public class PauseScreenMixin extends Screen {
     @Inject(at = @At("TAIL"), method = "init", remap = false)
     protected void createPauseMenu(CallbackInfo ci) {
         // Find the disconnect button
-        for (GuiEventListener child : this.children) {
-            if (!(child instanceof ButtonWidget)) return;
-            ButtonWidget button = (ButtonWidget) child;
+        for (ButtonWidget button : this.buttons) {
             if (button.message.equals(I18n.translate("menu.returnToMenu"))) disconnectButton = button;
         }
 
@@ -41,7 +38,8 @@ public class PauseScreenMixin extends Screen {
         IntegratedServer server = minecraft.getServer();
         if (server == null) return;
         if (!GitManager.syncEnabled(minecraft, server.getWorldSaveName())) return;
-        if (!QuitState.altQuit) return;
+        QuitState.altQuit = isAltDown();
+        if (!isAltDown()) return;
 
         if (disconnectButton.isHovered()) {
             // draw red border
@@ -64,17 +62,5 @@ public class PauseScreenMixin extends Screen {
         fill(x, y + height - 1, x + width, y + height, color);
         fill(x, y + 1, x + 1, y + height - 1, color);
         fill(x + width - 1, y + 1, x + width, y + height - 1, color);
-    }
-
-    @Override
-    public boolean keyPressed(int i, int j, int k) {
-        if (i == 342) QuitState.altQuit = true;
-        return super.keyPressed(i, j, k);
-    }
-
-    @Override
-    public boolean keyReleased(int i, int j, int k) {
-        if (i == 342) QuitState.altQuit = false;
-        return super.keyReleased(i, j, k);
     }
 }

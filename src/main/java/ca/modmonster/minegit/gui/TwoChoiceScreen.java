@@ -23,28 +23,27 @@ public class TwoChoiceScreen extends Screen {
     private MultiLineLabel descriptionWidget;
 
     @Override
-    protected void init() {
+    public void init() {
         // Confirmation message
         descriptionWidget = MultiLineLabel.create(this.textRenderer, description, this.width - 50);
         int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Continue button
-        ButtonWidget continueButton = new ButtonWidget(0, width / 2 - 152, 98 + descriptionHeight, 150, 20, continueMessage) {
-            @Override
-            public void click(double mouseX, double mouseY) {
-                continueCallback.run();
-            }
-        };
+        ButtonWidget continueButton = new ButtonWidget(0, width / 2 - 152, 98 + descriptionHeight, 150, 20, continueMessage);
         addButton(continueButton);
 
         // Cancel button
-        ButtonWidget cancelButton = new ButtonWidget(1, width / 2 + 2, 98 + descriptionHeight, 150, 20, cancelMessage) {
-            @Override
-            public void click(double mouseX, double mouseY) {
-                cancelCallback.run();
-            }
-        };
+        ButtonWidget cancelButton = new ButtonWidget(1, width / 2 + 2, 98 + descriptionHeight, 150, 20, cancelMessage);
         addButton(cancelButton);
+    }
+
+    @Override
+    protected void buttonClicked(ButtonWidget button) {
+        if (button.id == 0) {
+            continueCallback.run();
+        } else if (button.id == 1) {
+            cancelCallback.run();
+        }
     }
 
     @Override
@@ -56,7 +55,5 @@ public class TwoChoiceScreen extends Screen {
     }
 
     @Override
-    public boolean shouldCloseOnEsc() {
-        return false;
-    }
+    protected void keyPressed(char i, int j) {}
 }

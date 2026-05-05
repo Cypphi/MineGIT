@@ -28,69 +28,53 @@ public class CloneScreen extends Screen {
     }
 
     @Override
-    protected void init() {
+    public void init() {
         // Repo name text field
         repoEdit = new TextFieldWidget(0, textRenderer, this.width / 2 - 100, 107, 200, 20);
         repoEdit.setMaxLength(39);
-        this.children.add(repoEdit);
 
         // Clone button
-        cloneButton = new ButtonWidget(1, this.width / 2 - 100, 135, 200, 20, I18n.translate("minegit.clone.confirm")) {
-            @Override
-            public void click(double mouseX, double mouseY) {
-                doClone();
-            }
-        };
+        cloneButton = new ButtonWidget(1, this.width / 2 - 100, 135, 200, 20, I18n.translate("minegit.clone.confirm"));
         addButton(cloneButton);
 
         // Back button
-        backButton = new ImageButton(2, 6, 6, ImageButton.ImageButtonTex.BACK) {
-            @Override
-            public void click(double mouseX, double mouseY) {
-                close();
-            }
-        };
+        backButton = new ImageButton(2, 6, 6, ImageButton.ImageButtonTex.BACK);
         addButton(backButton);
 
         // Configure button
-        configureButton = new ImageButton(3, width - 26, 6, ImageButton.ImageButtonTex.CLOUD) {
-            @Override
-            public void click(double mouseX, double mouseY) {
-                minecraft.openScreen(new AccountLinkScreen(CloneScreen.this));
-            }
-        };
+        configureButton = new ImageButton(3, width - 26, 6, ImageButton.ImageButtonTex.CLOUD);
         addButton(configureButton);
 
         // Ralsei go spinny
         ralspinWidget = new RalspinWidget(width - 60, height - 80);
-        this.children.add(ralspinWidget);
 
         updateButtonsStatus();
-        setFocused(repoEdit);
         repoEdit.setFocused(true);
     }
 
     @Override
-    public boolean charTyped(char i, int j) {
-        if (this.repoEdit.charTyped(i, j)) {
-            updateButtonsStatus();
-            return true;
-        } else {
-            return false;
+    protected void buttonClicked(ButtonWidget button) {
+        if (button.id == 1) {
+            doClone();
+        } else if (button.id == 2) {
+            close();
+        } else if (button.id == 3) {
+            minecraft.openScreen(new AccountLinkScreen(CloneScreen.this));
         }
     }
 
     @Override
-    public boolean keyPressed(int i, int j, int k) {
-        if (this.repoEdit.keyPressed(i, j, k)) {
+    public void keyPressed(char i, int j) {
+        if (this.repoEdit.keyPressed(i, j)) {
             updateButtonsStatus();
-            return true;
-        } else if (i != 257 && i != 335) {
-            return false;
-        } else {
-            close();
-            return true;
         }
+        if (j == 1) close();
+    }
+
+    @Override
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) {
+        super.mouseClicked(mouseX, mouseY, mouseButton);
+        this.repoEdit.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
     @Override
@@ -99,8 +83,8 @@ public class CloneScreen extends Screen {
         super.render(i, j, f);
         drawCenteredString(textRenderer, I18n.translate("minegit.clone.title"), this.width / 2, 50, 16777215);
         drawCenteredString(textRenderer, I18n.translate("minegit.clone.repo"), this.width / 2, 90, -2130706433);
-        repoEdit.render(i, j, f);
-        ralspinWidget.render(i, j, f);
+        repoEdit.render();
+        ralspinWidget.render(i, j);
         if (backButton.isHovered()) renderTooltip(I18n.translate("minegit.clone.back"), i, j);
         if (configureButton.isHovered()) renderTooltip(I18n.translate("minegit.link.setup.open"), i, j);
         if (ralspinWidget.isHovered()) renderTooltip(RalspinWidget.TOOLTIP, i, j);
@@ -142,7 +126,6 @@ public class CloneScreen extends Screen {
         cloneButton.active = !repoEdit.getText().replace(" ", "").isEmpty();
     }
 
-    @Override
     public void close() {
         closeCallback.run();
     }

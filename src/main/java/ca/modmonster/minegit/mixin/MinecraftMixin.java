@@ -16,9 +16,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Minecraft.class)
-public class MinecraftMixin {
+public abstract class MinecraftMixin {
     @Shadow
     private @Nullable IntegratedServer server;
+
+    @Shadow
+    public abstract void openScreen(@Nullable Screen screen);
 
     @Unique
     private String prevSaveId = null;
@@ -30,13 +33,20 @@ public class MinecraftMixin {
 
         // For some reason IntelliJ thinks this is always false. It is confused.
         if (!QuitState.altQuit && GitManager.syncEnabled((Minecraft) (Object) this, prevSaveId)) {
+            // Show the generic dirt screen instead
+            openScreen(new Screen() {
+                @Override
+                public void render(int i, int j, float f) {
+                    drawBackgroundTexture(i);
+                }
+            });
             ci.cancel();
         }
         prevSaveId = null;
     }
 
-    @Inject(method = "setWorld(Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/client/gui/screen/Screen;)V", at = @At("HEAD"))
-    private void onSetWorld(ClientWorld world, Screen screen, CallbackInfo ci) {
+    @Inject(method = "setWorld(Lnet/minecraft/client/world/ClientWorld;Ljava/lang/String;)V", at = @At("HEAD"))
+    private void onSetWorld(ClientWorld world, String message, CallbackInfo ci) {
         if (server == null) return;
         prevSaveId = server.getWorldSaveName();
     }

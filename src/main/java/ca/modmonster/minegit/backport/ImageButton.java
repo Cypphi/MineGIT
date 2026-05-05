@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.resource.Identifier;
 
-public abstract class ImageButton extends ButtonWidget {
+public class ImageButton extends ButtonWidget {
     public ImageButtonTex texture;
 
     public ImageButton(int buttonId, int x, int y, ImageButtonTex texture) {
@@ -13,9 +13,8 @@ public abstract class ImageButton extends ButtonWidget {
     }
 
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
-        super.render(mouseX, mouseY, partialTicks);
-        Minecraft minecraft = Minecraft.getInstance();
+    public void render(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
+        super.render(minecraft, mouseX, mouseY, partialTicks);
         minecraft.getTextureManager().bind(texture.get(active));
         drawTexture(
                 x, y,

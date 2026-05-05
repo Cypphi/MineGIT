@@ -8,7 +8,6 @@ import ca.modmonster.minegit.gui.TwoChoiceScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
 import net.minecraft.client.gui.screen.world.WorldSelectionEntry;
-import net.minecraft.client.gui.screen.world.WorldSelectionList;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.world.storage.WorldSaveInfo;
 import org.spongepowered.asm.mixin.Final;
@@ -95,8 +94,6 @@ public abstract class WorldListEntryMixin {
 
     @Unique
     private void returnToScreen() {
-        WorldSelectionList list = ((SelectWorldScreenAccessor) this).getLevelList();
-        ((WorldSelectionListInvoker) list).invokeReloadWorldList(() -> ((SelectWorldScreenAccessor) this.screen).getEditBox().getText(), true);
         minecraft.openScreen(screen);
     }
 }
