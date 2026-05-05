@@ -2,7 +2,8 @@ package ca.modmonster.minegit.gui;
 
 import ca.modmonster.minegit.backport.ImageButton;
 import ca.modmonster.minegit.backport.RalspinWidget;
-import ca.modmonster.minegit.backport.WideToast;
+import ca.modmonster.minegit.backport.toast.Toast;
+import ca.modmonster.minegit.backport.toast.ToastManager;
 import ca.modmonster.minegit.data.GitManager;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -103,18 +104,18 @@ public class CloneScreen extends Screen {
 
             minecraft.executeTask(() -> {
                 if (result == 0) {
-                    minecraft.getToasts().add(new WideToast(I18n.translate("minegit.clone.success")));
+                    ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.clone.success")));
                     if (cloneSuccessCallback != null) {
                         cloneSuccessCallback.run();
                     } else {
                         close();
                     }
                 } else if (result == 1) {
-                    minecraft.getToasts().add(new WideToast(I18n.translate("minegit.clone.error.invalid_remote")));
+                    ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.clone.error.invalid_remote")));
                     minecraft.openScreen(this);
                     updateButtonsStatus();
                 } else {
-                    minecraft.getToasts().add(new WideToast(I18n.translate("minegit.clone.error.generic")));
+                    ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.clone.error.generic")));
                     minecraft.openScreen(this);
                     updateButtonsStatus();
                 }

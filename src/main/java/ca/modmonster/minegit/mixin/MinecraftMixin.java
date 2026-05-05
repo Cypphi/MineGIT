@@ -23,6 +23,8 @@ public abstract class MinecraftMixin {
     @Shadow
     public abstract void openScreen(@Nullable Screen screen);
 
+    @Shadow
+    public int width;
     @Unique
     private String prevSaveId = null;
 

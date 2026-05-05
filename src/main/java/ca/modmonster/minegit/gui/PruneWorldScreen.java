@@ -1,7 +1,8 @@
 package ca.modmonster.minegit.gui;
 
 import ca.modmonster.minegit.backport.MultiLineLabel;
-import ca.modmonster.minegit.backport.WideToast;
+import ca.modmonster.minegit.backport.toast.Toast;
+import ca.modmonster.minegit.backport.toast.ToastManager;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.SyncResult;
 import net.minecraft.client.gui.screen.Screen;
@@ -58,9 +59,9 @@ public class PruneWorldScreen extends Screen {
         boolean ok = GitManager.prune(minecraft, levelId, progress);
         if (minecraft == null) return;
         if (ok) {
-            minecraft.getToasts().add(new WideToast(I18n.translate("minegit.prune.complete")));
+            ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.prune.complete")));
         } else {
-            minecraft.getToasts().add(new WideToast(I18n.translate("minegit.prune.failed")));
+            ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.prune.failed")));
         }
         minecraft.executeTask(() -> minecraft.openScreen(successParent));
     }

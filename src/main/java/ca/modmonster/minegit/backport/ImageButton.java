@@ -13,8 +13,8 @@ public class ImageButton extends ButtonWidget {
     }
 
     @Override
-    public void render(Minecraft minecraft, int mouseX, int mouseY, float partialTicks) {
-        super.render(minecraft, mouseX, mouseY, partialTicks);
+    public void render(Minecraft minecraft, int mouseX, int mouseY) {
+        super.render(minecraft, mouseX, mouseY);
         minecraft.getTextureManager().bind(texture.get(active));
         drawTexture(
                 x, y,

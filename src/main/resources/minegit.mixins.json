@@ -8,8 +8,8 @@
     "LevelSaveMixin",
     "MinecraftMixin",
     "PauseScreenMixin",
+    "ScreenMixin",
     "SinglePlayerScreenMixin",
-    "ToastComponentMixin",
     "WorldListEntryAccessor",
     "WorldListEntryMixin"
   ],

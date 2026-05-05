@@ -1,7 +1,8 @@
 package ca.modmonster.minegit.gui;
 
 import ca.modmonster.minegit.MineGIT;
-import ca.modmonster.minegit.backport.WideToast;
+import ca.modmonster.minegit.backport.toast.Toast;
+import ca.modmonster.minegit.backport.toast.ToastManager;
 import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.GitManager;
@@ -77,7 +78,7 @@ public class EnableWorldSyncScreen extends Screen {
             if (statusCode != 201) {
                 // OOPS! ERROR!!
                 minecraft.executeTask(() -> {
-                    minecraft.getToasts().add(new WideToast(I18n.translate("minegit.sync.enable.create_repo.error", statusCode)));
+                    ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.sync.enable.create_repo.error", statusCode)));
                     showOpenSetupButton = true;
                     cancelButton.active = true;
 
@@ -96,14 +97,14 @@ public class EnableWorldSyncScreen extends Screen {
             boolean ok = GitManager.init(minecraft, level.getSaveName(), repoUrl, progressScreen);
             if (!ok) {
                 minecraft.executeTask(() -> {
-                    minecraft.getToasts().add(new WideToast(I18n.translate("minegit.sync.enable.git_init.error")));
+                    ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.sync.enable.git_init.error")));
                     minecraft.openScreen(this);
                     cancelButton.active = true;
                 });
                 return;
             }
 
-            minecraft.getToasts().add(new WideToast(I18n.translate("minegit.sync.enable.complete")));
+            ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.sync.enable.complete")));
             minecraft.executeTask(this::close);
         }).start();
     }

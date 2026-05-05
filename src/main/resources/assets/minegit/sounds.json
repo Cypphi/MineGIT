@@ -1,0 +1,8 @@
+{
+  "ui.toast.in": {
+    "sounds": ["minegit:ui/toast/in"]
+  },
+  "ui.toast.out": {
+    "sounds": ["minegit:ui/toast/out"]
+  }
+}
