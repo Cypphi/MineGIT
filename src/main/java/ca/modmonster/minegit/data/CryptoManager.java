@@ -1,6 +1,6 @@
 package ca.modmonster.minegit.data;
 
-import net.fabricmc.loader.api.FabricLoader;
+import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -66,7 +66,7 @@ public class CryptoManager {
         }
 
         // Save a randomly generated key to a file
-        Path keyFilePath = FabricLoader.getInstance().getConfigDir().resolve(".minegit.key");
+        Path keyFilePath = FMLPaths.CONFIGDIR.get().resolve(".minegit.key");
         String fileKey = null;
         if (keyFilePath.toFile().exists()) {
             try {
