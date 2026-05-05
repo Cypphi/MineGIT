@@ -1,19 +1,5 @@
 package ca.modmonster.minegit.mixin;
 
-import net.minecraft.client.gui.*;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.world.storage.WorldSummary;
-
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.Collections;
-import java.util.List;
-
 import ca.modmonster.minegit.backport.ImageButton;
 import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
@@ -23,6 +9,18 @@ import ca.modmonster.minegit.gui.AccountLinkScreen;
 import ca.modmonster.minegit.gui.CloneScreen;
 import ca.modmonster.minegit.gui.EnableWorldSyncScreen;
 import ca.modmonster.minegit.widget.WorldSyncButtonState;
+import net.minecraft.client.gui.*;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.world.storage.WorldSummary;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Collections;
+import java.util.List;
 
 @Mixin(GuiWorldSelection.class)
 public class SinglePlayerScreenMixin extends GuiScreen {
@@ -50,7 +48,7 @@ public class SinglePlayerScreenMixin extends GuiScreen {
     @Unique
     private boolean mineGIT$prevAltState = false;
 
-    @Inject(at = @At("TAIL"), method = "initGui", remap = false)
+    @Inject(at = @At("TAIL"), method = "initGui")
 	private void initGui(CallbackInfo info) {
         mineGIT$cloneButtonTooltip = I18n.format("minegit.clone.title");
 
@@ -90,7 +88,7 @@ public class SinglePlayerScreenMixin extends GuiScreen {
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "drawScreen", remap = false)
+    @Inject(at = @At("TAIL"), method = "drawScreen")
     public void drawScreen(int i, int j, float f, CallbackInfo ci) {
         if (mineGIT$cloneButton != null && mineGIT$cloneButton.isMouseOver()) drawHoveringText(mineGIT$cloneButtonTooltip, i, j);
         if (mineGIT$worldSyncButtonTooltip != null && mineGIT$worldSyncButton != null &&  mineGIT$worldSyncButton.isMouseOver()) drawHoveringText(mineGIT$worldSyncButtonTooltip, i, j);
@@ -110,10 +108,10 @@ public class SinglePlayerScreenMixin extends GuiScreen {
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "selectWorld", remap = false)
+    @Inject(at = @At("TAIL"), method = "selectWorld")
     private void selectWorld(GuiListWorldSelectionEntry entry, CallbackInfo ci) {
         if (mineGIT$worldSyncButton == null) return;
-        mineGIT$hoveredLevel = ((WorldListEntryAccessor) (Object) entry).getSummary();
+        mineGIT$hoveredLevel = ((WorldListEntryAccessor) entry).getSummary();
         mineGIT$updateWorldSyncButton();
     }
 

@@ -1,19 +1,17 @@
 package ca.modmonster.minegit.mixin;
 
+import ca.modmonster.minegit.data.GitManager;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiIngameMenu;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.server.integrated.IntegratedServer;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import ca.modmonster.minegit.data.GitManager;
 
 @Mixin(GuiIngameMenu.class)
 public class PauseScreenMixin extends GuiScreen {
@@ -23,7 +21,7 @@ public class PauseScreenMixin extends GuiScreen {
     @Unique
     private GuiButton mineGIT$disconnectButton;
 
-    @Inject(at = @At("TAIL"), method = "initGui", remap = false)
+    @Inject(at = @At("TAIL"), method = "initGui")
     public void initGui(CallbackInfo ci) {
         // Find the disconnect button
         for (GuiButton button : this.buttonList) {
@@ -33,7 +31,7 @@ public class PauseScreenMixin extends GuiScreen {
         mineGIT$tooltip = I18n.format("minegit.exit_without_push");
     }
 
-    @Inject(at = @At("TAIL"), method = "drawScreen", remap = false)
+    @Inject(at = @At("TAIL"), method = "drawScreen")
     private void drawScreen(int mouseX, int mouseY, float f, CallbackInfo ci) {
         if (mineGIT$disconnectButton == null) return;
         if (!mc.isSingleplayer()) return;

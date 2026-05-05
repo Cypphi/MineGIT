@@ -8,6 +8,7 @@
     "CreateWorldScreenMixin",
     "EditWorldScreenMixin",
     "LevelSaveMixin",
+    "MinecraftMixin",
     "PauseScreenMixin",
     "SinglePlayerScreenMixin",
     "ToastComponentMixin",

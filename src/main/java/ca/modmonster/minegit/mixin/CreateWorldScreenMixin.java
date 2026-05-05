@@ -1,21 +1,17 @@
 package ca.modmonster.minegit.mixin;
 
-import net.minecraft.client.gui.*;
-import net.minecraft.client.resources.I18n;
-
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.io.IOException;
-
 import ca.modmonster.minegit.backport.ImageButton;
 import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.gui.AccountLinkScreen;
 import ca.modmonster.minegit.gui.CloneScreen;
+import net.minecraft.client.gui.*;
+import net.minecraft.client.resources.I18n;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GuiCreateWorld.class)
 public abstract class CreateWorldScreenMixin extends GuiScreen {
@@ -28,7 +24,7 @@ public abstract class CreateWorldScreenMixin extends GuiScreen {
     @Unique
     private boolean mineGIT$needsSetup = false;
 
-    @Inject(at = @At("TAIL"), method = "initGui", remap = false)
+    @Inject(at = @At("TAIL"), method = "initGui")
     private void initGui(CallbackInfo info) {
         mineGIT$checkNeedsSetup();
 
@@ -45,13 +41,13 @@ public abstract class CreateWorldScreenMixin extends GuiScreen {
     }
 
     @Inject(at = @At("TAIL"), method = "actionPerformed")
-    protected void actionPerformed(GuiButton button, CallbackInfo ci) throws IOException {
+    protected void actionPerformed(GuiButton button, CallbackInfo ci) {
         if (button.id == 100) {
             mineGIT$onGitButtonPress();
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "drawScreen", remap = false)
+    @Inject(at = @At("TAIL"), method = "drawScreen")
     private void drawScreen(final int mouseX, final int mouseY, final float a, CallbackInfo info) {
         if (mineGIT$gitButton != null && mineGIT$gitButton.isMouseOver()) {
             drawHoveringText(mineGIT$gitButtonTooltip, mouseX, mouseY);

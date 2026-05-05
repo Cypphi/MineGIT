@@ -12,7 +12,6 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
 version = '1.5.2'
@@ -38,13 +37,8 @@ minecraft {
     runs {
         client {
             workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-
-            // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
-
             arg '-torg.spongepowered.asm.launch.MixinTweaker'
         }
     }
@@ -52,13 +46,12 @@ minecraft {
 
 repositories {
     mavenCentral()
-    maven { url = 'https://maven.minecraftforge.net/' }
     maven { url = 'https://repo.spongepowered.org/maven/' }
 }
 
 configurations {
-    shade
-    compile.extendsFrom shade
+    embed
+    compile.extendsFrom(embed)
 }
 
 dependencies {
@@ -82,63 +75,24 @@ dependencies {
     // deobf 'com.mod-buildcraft:buildcraft:6.0.8:dev'
 
     // JGit
-    shade "org.eclipse.jgit:org.eclipse.jgit:5.13.5.202508271544-r"
+    embed "org.eclipse.jgit:org.eclipse.jgit:5.13.5.202508271544-r"
 
-    // Apply Mixin AP
-    shade ("org.spongepowered:mixin:0.8.7") {
+    // Apply Mixin AP (0.8.7 gives "unsupported class file major version 60")
+    embed('org.spongepowered:mixin:0.8.3-SNAPSHOT') {
         exclude module: 'guava'
         exclude module: 'commons-io'
         exclude module: 'gson'
     }
-    annotationProcessor "org.spongepowered:mixin:0.8.5:processor"
-    testAnnotationProcessor "org.spongepowered:mixin:0.8.5:processor"
+    annotationProcessor "org.spongepowered:mixin:0.8.3:processor"
+    testAnnotationProcessor "org.spongepowered:mixin:0.8.3:processor"
 
     // For more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 }
 
-// Example for how to get properties into the manifest for reading by the runtime..
-jar {
-    manifest {
-        attributes([
-            "ForceLoadAsMod": "true",
-            "FMLCorePluginContainsFMLMod": "true",
-            "TweakClass": "org.spongepowered.asm.launch.MixinTweaker",
-            "TweakOrder": "0",
-            "Specification-Title": "minegit",
-            "Specification-Vendor": "modmonster",
-            "Specification-Version": "1", // We are version 1 of ourselves
-            "Implementation-Title": project.name,
-            "Implementation-Version": "${version}",
-            "Implementation-Vendor" :"modmonster",
-            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
-    }
-
-    configurations.shade.each { dep ->
-        from(project.zipTree(dep)){
-            exclude 'META-INF', 'META-INF/**'
-        }
-    }
-}
-
-jar.finalizedBy('reobfJar')
-
-sourceSets.each {
-    def dir = layout.buildDirectory.file("sourcesSets/$it.name").get().asFile
-    it.output.resourcesDir = dir
-    it.java.outputDir = dir
-}
-
-mixin {
-    // MixinGradle Settings
-    add sourceSets.main, 'minegit.mixins.refmap.json'
-    config 'minegit.mixins.json'
-}
-
 processResources {
-    inputs.property "version", version
+    inputs.property 'version', version
 
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
@@ -149,3 +103,30 @@ processResources {
         exclude 'mcmod.info'
     }
 }
+
+sourceSets {
+    main {
+        refMap = "minegit.mixins.refmap.json"
+    }
+}
+
+mixin {
+    config "minegit.mixins.json"
+}
+
+jar {
+    from {
+        configurations.embed.collect { it.isDirectory() ? it : zipTree(it) }
+    } {
+        exclude 'LICENSE.txt', 'META-INF/MANIFSET.MF', 'META-INF/maven/**', 'META-INF/*.RSA', 'META-INF/*.SF'
+    }
+
+    manifest.attributes(
+            'ForceLoadAsMod': 'true',
+            'FMLCorePluginContainsFMLMod': 'true',
+            'TweakClass': 'org.spongepowered.asm.launch.MixinTweaker',
+            'TweakOrder': '0'
+    )
+}
+
+jar.finalizedBy('reobfJar')
