@@ -1,17 +1,15 @@
 package ca.modmonster.minegit.mixin;
 
 import ca.modmonster.minegit.backport.ImageButton;
+import ca.modmonster.minegit.backport.SinglePlayerScreenExtension;
 import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.GitManager;
-import ca.modmonster.minegit.gui.AccountLinkScreen;
-import ca.modmonster.minegit.gui.CloneScreen;
-import ca.modmonster.minegit.gui.EnableWorldSyncScreen;
+import ca.modmonster.minegit.data.SyncResult;
+import ca.modmonster.minegit.gui.*;
 import ca.modmonster.minegit.widget.WorldSyncButtonState;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
-import net.minecraft.client.gui.screen.world.WorldSelectionEntry;
-import net.minecraft.client.gui.screen.world.WorldSelectionList;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.world.storage.WorldSaveInfo;
@@ -27,12 +25,20 @@ import java.util.Collections;
 import java.util.List;
 
 @Mixin(SelectWorldScreen.class)
-public class SinglePlayerScreenMixin extends Screen {
-    @Unique
-    private String cloneButtonTooltip;
+public abstract class SinglePlayerScreenMixin extends Screen implements SinglePlayerScreenExtension {
+    @Shadow
+    private int selectedWorldId;
+    @Shadow
+    private List<WorldSaveInfo> saves;
 
     @Shadow
-    private @Nullable WorldSelectionList worldList;
+    protected abstract String getSaveFileName(int index);
+
+    @Shadow
+    public abstract void selectWorld(int id);
+
+    @Unique
+    private String cloneButtonTooltip;
 
     @Unique @Nullable
     private ButtonWidget cloneButton;
@@ -46,11 +52,11 @@ public class SinglePlayerScreenMixin extends Screen {
     @Unique
     private WorldSyncButtonState worldSyncButtonState = WorldSyncButtonState.SETUP;
 
-    @Unique @Nullable
-    private WorldSaveInfo hoveredLevel;
-
     @Unique
     private boolean prevAltState = false;
+
+    @Unique
+    private boolean showGitBeforeJoin = true;
 
     @Inject(at = @At("TAIL"), method = "init", remap = false)
 	private void init(CallbackInfo info) {
@@ -65,28 +71,30 @@ public class SinglePlayerScreenMixin extends Screen {
         cloneButton = new ImageButton(101, width / 2 - 178, height - 28, ImageButton.ImageButtonTex.CLONE);
         buttons.add(cloneButton);
 
-        hoveredLevel = null;
         updateWorldSyncButton();
 	}
 
     @Inject(at = @At("TAIL"), method = "buttonClicked")
     protected void buttonClicked(ButtonWidget button, CallbackInfo ci) {
-        if (button.id == 100) {
+        if (button.id == 2) {
+            // delete button; make .git folder writable
+            GitManager.makeWritable(minecraft, getSaveFileName(selectedWorldId));
+        } else if (button.id == 100) {
             if (worldSyncButtonState == WorldSyncButtonState.SETUP || isAltDown()) {
                 minecraft.openScreen(new AccountLinkScreen(SinglePlayerScreenMixin.this, () -> {
-                    if (worldList != null) returnToScreen();
+                    returnToScreen();
                     updateWorldSyncButton();
                 }));
             } else if (worldSyncButtonState == WorldSyncButtonState.ENABLE) {
-                if (hoveredLevel != null)
-                    minecraft.openScreen(new EnableWorldSyncScreen(SinglePlayerScreenMixin.this, hoveredLevel, () -> {
-                        if (worldList != null) returnToScreen();
+                if (selectedWorldId != -1)
+                    minecraft.openScreen(new EnableWorldSyncScreen(SinglePlayerScreenMixin.this, saves.get(selectedWorldId), () -> {
+                        returnToScreen();
                         updateWorldSyncButton();
                     }));
             }
         } else if (button.id == 101) {
             minecraft.openScreen(new CloneScreen(() -> {
-                if (worldList != null) returnToScreen();
+                returnToScreen();
                 updateWorldSyncButton();
             }));
         }
@@ -110,11 +118,9 @@ public class SinglePlayerScreenMixin extends Screen {
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "updateButtons", remap = false)
-    private void worldSelected(WorldSelectionEntry selectedWorld, CallbackInfo ci) {
+    @Override
+    public void worldSelected(int selectedWorld) {
         if (worldSyncButton == null) return;
-        if (worldList == null) return;
-        hoveredLevel = selectedWorld == null? null : ((WorldListEntryAccessor) selectedWorld).getSummary();
         updateWorldSyncButton();
     }
 
@@ -127,17 +133,65 @@ public class SinglePlayerScreenMixin extends Screen {
             // Set the world sync button to configuration state
             worldSyncButtonState = WorldSyncButtonState.SETUP;
             this.worldSyncButton.active = true;
-        } else if (hoveredLevel != null && GitManager.syncEnabled(minecraft, hoveredLevel.getSaveName())) {
+        } else if (selectedWorldId != -1 && GitManager.syncEnabled(minecraft, getSaveFileName(selectedWorldId))) {
             worldSyncButtonState = WorldSyncButtonState.WORLD_CONFIGURE;
             this.worldSyncButton.active = false;
         } else {
             worldSyncButtonState = WorldSyncButtonState.ENABLE;
-            this.worldSyncButton.active = hoveredLevel != null;
+            this.worldSyncButton.active = selectedWorldId != -1;
         }
 
         worldSyncButton.texture = worldSyncButtonState.texture;
         worldSyncButtonTooltip = worldSyncButtonState.getTooltip();
         if (cloneButton != null) cloneButton.active = worldSyncButtonState != WorldSyncButtonState.SETUP;
+    }
+
+    @Inject(method = "selectWorld", at = @At("HEAD"), cancellable = true)
+    private void beforeWorldJoin(int id, CallbackInfo ci) {
+        if (!showGitBeforeJoin) return;
+        String worldId = getSaveFileName(selectedWorldId);
+        if (!GitManager.syncEnabled(minecraft, worldId)) return;
+        ci.cancel();
+        GitProgressScreen progressScreen = new GitProgressScreen(I18n.translate("minegit.sync.status.git_pull"));
+        minecraft.openScreen(progressScreen);
+        new Thread(() -> {
+            SyncResult status = GitManager.pull(GitManager.getPath(minecraft, worldId), progressScreen);
+            GitManager.makeWritable(minecraft, worldId);
+            switch (status) {
+                case SUCCESS:
+                    // Success; load world as normal
+                    doLoadWorld();
+                    break;
+                case FAIL_GENERIC:
+                    // Generic error; show option to keep local or cloud
+                    minecraft.executeTask(() -> minecraft.openScreen(new GitConflictScreen(
+                            this::doLoadWorld,
+                            this::returnToScreen,
+                            GitManager.getPath(minecraft, worldId)
+                    )));
+                    break;
+                case FAIL_NETWORK:
+                    // Network error; show unreachable screen
+                    minecraft.executeTask(() -> minecraft.openScreen(new TwoChoiceScreen(
+                            I18n.translate("minegit.sync.pull_unreachable.title"),
+                            I18n.translate("minegit.sync.pull_unreachable.description"),
+                            I18n.translate("minegit.sync.pull_unreachable.continue"),
+                            I18n.translate("minegit.sync.pull_unreachable.cancel"),
+                            this::doLoadWorld, // continue
+                            this::returnToScreen // cancel
+                    )));
+                    break;
+            }
+        }).start();
+    }
+
+    @Unique
+    private void doLoadWorld() {
+        minecraft.executeTask(() -> {
+            showGitBeforeJoin = false;
+            selectWorld(selectedWorldId);
+            showGitBeforeJoin = true;
+        });
     }
 
     @Unique
