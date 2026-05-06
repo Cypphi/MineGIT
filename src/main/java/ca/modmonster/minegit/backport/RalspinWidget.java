@@ -2,8 +2,8 @@ package ca.modmonster.minegit.backport;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiElement;
-import net.minecraft.client.render.platform.GlStateManager;
-import net.minecraft.resource.Identifier;
+import net.minecraft.client.resource.Identifier;
+import org.lwjgl.opengl.GL11;
 
 public class RalspinWidget extends GuiElement {
     private static final Identifier SPRITE = new Identifier("minegit", "textures/gui/ralspin.png");
@@ -31,10 +31,10 @@ public class RalspinWidget extends GuiElement {
         int u = 0;
         int v = frame * FRAME_HEIGHT;
 
-        GlStateManager.pushMatrix();
-        GlStateManager.translatef(x, y, 0);
-        GlStateManager.scalef(SCALE, SCALE, 1);
-        GlStateManager.color4f(1F, 1F, 1F, 1F);
+        GL11.glPushMatrix();
+        GL11.glTranslatef(x, y, 0);
+        GL11.glScalef(SCALE, SCALE, 1);
+        GL11.glColor4f(1F, 1F, 1F, 1F);
         Minecraft.getInstance().getTextureManager().bind(SPRITE);
         drawTexture(
                 0, 0,
@@ -42,7 +42,7 @@ public class RalspinWidget extends GuiElement {
                 FRAME_WIDTH, FRAME_HEIGHT,
                 FRAME_WIDTH, FRAME_HEIGHT * FRAME_COUNT
         );
-        GlStateManager.popMatrix();
+        GL11.glPopMatrix();
     }
 
     public boolean isHovered() {

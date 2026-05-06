@@ -2,7 +2,7 @@ package ca.modmonster.minegit.backport;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.resource.Identifier;
+import net.minecraft.client.resource.Identifier;
 
 public class ImageButton extends ButtonWidget {
     public ImageButtonTex texture;

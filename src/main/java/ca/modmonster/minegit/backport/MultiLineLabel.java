@@ -7,7 +7,10 @@ import java.util.stream.Collectors;
 
 public interface MultiLineLabel {
     static MultiLineLabel create(TextRenderer font, String text, int i) {
-        return createFixed(font, font.split(text, i).stream().map((formattedCharSequence) -> new MultiLineLabel.TextWithWidth(formattedCharSequence, font.getWidth(formattedCharSequence))).collect(Collectors.toList()));
+        List<String> lines = font.split(text, i);
+        List<TextWithWidth> list = lines.stream().map((str) ->
+                new TextWithWidth(str, font.getWidth(str))).collect(Collectors.toList());
+        return createFixed(font, list);
     }
 
     static MultiLineLabel createFixed(final TextRenderer font, final List<TextWithWidth> list) {
@@ -17,7 +20,7 @@ public interface MultiLineLabel {
                 int m = j;
 
                 for (TextWithWidth textWithWidth : list) {
-                    font.drawWithShadow(textWithWidth.text, (float) (i - textWithWidth.width / 2), (float) m, 16777215);
+                    font.drawWithShadow(textWithWidth.text, i - textWithWidth.width / 2, m, 16777215);
                     m += k;
                 }
 

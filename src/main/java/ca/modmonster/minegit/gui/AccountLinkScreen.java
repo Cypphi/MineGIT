@@ -34,11 +34,11 @@ public class AccountLinkScreen extends Screen {
     @Override
     public void init() {
         // Username text field
-        usernameEdit = new TextFieldWidget(0, textRenderer, this.width / 2 - 100, 107, 200, 20);
+        usernameEdit = new TextFieldWidget(textRenderer, this.width / 2 - 100, 107, 200, 20);
         usernameEdit.setMaxLength(39);
 
         // PAT text field
-        patEdit = new TextFieldWidget(1, textRenderer, this.width / 2 - 100, 152, 200, 20);
+        patEdit = new TextFieldWidget(textRenderer, this.width / 2 - 100, 152, 200, 20);
         patEdit.setMaxLength(255);
 
         // Test credentials button

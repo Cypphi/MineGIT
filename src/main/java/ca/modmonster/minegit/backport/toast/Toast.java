@@ -3,8 +3,8 @@ package ca.modmonster.minegit.backport.toast;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.render.platform.GlStateManager;
-import net.minecraft.resource.Identifier;
+import net.minecraft.client.resource.Identifier;
+import org.lwjgl.opengl.GL11;
 
 public class Toast {
     Identifier TOASTS_LOCATION = new Identifier("minegit", "textures/gui/toasts.png");
@@ -39,7 +39,7 @@ public class Toast {
         }
 
         toastComponent.getMinecraft().getTextureManager().bind(TOASTS_LOCATION);
-        GlStateManager.color3f(1.0F, 1.0F, 1.0F);
+        GL11.glColor3f(1.0F, 1.0F, 1.0F);
         this.renderBackgroundRow(toastComponent, getWidth());
         toastComponent.getMinecraft().textRenderer.draw(message, 18, 12, -256);
         return l - this.lastChanged < 5000L? Visibility.SHOW : Visibility.HIDE;

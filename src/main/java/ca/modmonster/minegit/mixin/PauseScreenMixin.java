@@ -1,5 +1,6 @@
 package ca.modmonster.minegit.mixin;
 
+import ca.modmonster.minegit.backport.ScreenUtil;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.QuitState;
 import net.minecraft.client.gui.screen.GameMenuScreen;
@@ -24,7 +25,8 @@ public class PauseScreenMixin extends Screen {
     @Inject(at = @At("TAIL"), method = "init", remap = false)
     protected void createPauseMenu(CallbackInfo ci) {
         // Find the disconnect button
-        for (ButtonWidget button : this.buttons) {
+        for (Object o : this.buttons) {
+            ButtonWidget button = (ButtonWidget) o;
             if (button.message.equals(I18n.translate("menu.returnToMenu"))) disconnectButton = button;
         }
 
@@ -38,8 +40,8 @@ public class PauseScreenMixin extends Screen {
         IntegratedServer server = minecraft.getServer();
         if (server == null) return;
         if (!GitManager.syncEnabled(minecraft, server.getWorldSaveName())) return;
-        QuitState.altQuit = isAltDown();
-        if (!isAltDown()) return;
+        QuitState.altQuit = ScreenUtil.isAltDown();
+        if (!ScreenUtil.isAltDown()) return;
 
         if (disconnectButton.isHovered()) {
             // draw red border

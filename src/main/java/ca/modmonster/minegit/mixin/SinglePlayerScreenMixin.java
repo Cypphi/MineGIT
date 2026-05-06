@@ -1,7 +1,7 @@
 package ca.modmonster.minegit.mixin;
 
-import ca.modmonster.minegit.MineGIT;
 import ca.modmonster.minegit.backport.ImageButton;
+import ca.modmonster.minegit.backport.ScreenUtil;
 import ca.modmonster.minegit.backport.SinglePlayerScreenExtension;
 import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
@@ -81,7 +81,7 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
             // delete button; make .git folder writable
             GitManager.makeWritable(minecraft, getSaveFileName(selectedWorldId));
         } else if (button.id == 100) {
-            if (worldSyncButtonState == WorldSyncButtonState.SETUP || isAltDown()) {
+            if (worldSyncButtonState == WorldSyncButtonState.SETUP || ScreenUtil.isAltDown()) {
                 minecraft.openScreen(new AccountLinkScreen(SinglePlayerScreenMixin.this, () -> {
                     returnToScreen();
                     updateWorldSyncButton();
@@ -106,10 +106,10 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
         if (cloneButton != null && cloneButton.isHovered()) renderTooltip(cloneButtonTooltip, i, j);
         if (worldSyncButtonTooltip != null && worldSyncButton != null &&  worldSyncButton.isHovered()) renderTooltip(worldSyncButtonTooltip, i, j);
 
-        if (worldSyncButton != null && isAltDown() != prevAltState) {
-            prevAltState = isAltDown();
+        if (worldSyncButton != null && ScreenUtil.isAltDown() != prevAltState) {
+            prevAltState = ScreenUtil.isAltDown();
 
-            if (isAltDown()) {
+            if (ScreenUtil.isAltDown()) {
                 worldSyncButton.active = true;
                 worldSyncButton.texture = ImageButton.ImageButtonTex.CLOUD;
                 worldSyncButtonTooltip = Collections.singletonList(I18n.translate("minegit.link.setup.open"));
@@ -122,17 +122,14 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
     @Override
     public void worldSelected(int selectedWorld) {
         if (worldSyncButton == null) return;
-        MineGIT.LOGGER.info("Updateing worl sync butt");
         updateWorldSyncButton();
     }
 
     @Unique
     private void updateWorldSyncButton() {
         if (worldSyncButton == null) return;
-        if (isAltDown()) return;
+        if (ScreenUtil.isAltDown()) return;
         Config config = ConfigManager.getCurrentConfig();
-        if (selectedWorldId != -1) MineGIT.LOGGER.info("YOU HAVE SLEECTED: " + selectedWorldId + " with folder name " + getSaveFileName(selectedWorldId));
-        if (selectedWorldId == -1) MineGIT.LOGGER.info("USELEECTED!!");
         if (config.username.replace(" ", "").isEmpty() || config.getPat().replace(" ", "").isEmpty()) {
             // Set the world sync button to configuration state
             worldSyncButtonState = WorldSyncButtonState.SETUP;

@@ -3,9 +3,9 @@ package ca.modmonster.minegit.backport.toast;
 import com.google.common.collect.Queues;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiElement;
-import net.minecraft.client.render.platform.GlStateManager;
 import net.minecraft.client.render.platform.Lighting;
 import net.minecraft.util.math.MathHelper;
+import org.lwjgl.opengl.GL11;
 
 import java.util.Arrays;
 import java.util.Deque;
@@ -81,10 +81,10 @@ public class ToastManager extends GuiElement {
                 this.visibleTime = l;
             }
 
-            GlStateManager.pushMatrix();
-            GlStateManager.translatef(x - toast.getWidth() * this.getVisibility(l), y * 32, 500 + y);
+            GL11.glPushMatrix();
+            GL11.glTranslatef(x - toast.getWidth() * this.getVisibility(l), y * 32, 500 + y);
             Toast.Visibility visibility = this.toast.render(ToastManager.this, l - this.visibleTime);
-            GlStateManager.popMatrix();
+            GL11.glPopMatrix();
             if (visibility != this.visibility) {
                 this.time = l - (int)((1.0F - this.getVisibility(l)) * 600.0F);
                 this.visibility = visibility;

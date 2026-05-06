@@ -31,7 +31,7 @@ public class CloneScreen extends Screen {
     @Override
     public void init() {
         // Repo name text field
-        repoEdit = new TextFieldWidget(0, textRenderer, this.width / 2 - 100, 107, 200, 20);
+        repoEdit = new TextFieldWidget(textRenderer, this.width / 2 - 100, 107, 200, 20);
         repoEdit.setMaxLength(39);
 
         // Clone button
