@@ -10,22 +10,35 @@ import net.minecraft.resources.Identifier;
 import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.CryptoManager;
+import ca.modmonster.minegit.data.GitService;
 import ca.modmonster.minegit.data.NetworkManager;
 
 public class AccountLinkScreen extends Screen {
     private static final Component USERNAME_EDIT_LABEL = Component.translatable("minegit.link.username");
     private static final Component PAT_EDIT_LABEL = Component.translatable("minegit.link.pat");
+    private static final Component WEB_URL_LABEL = Component.translatable("minegit.link.web_url");
+    private static final Component API_URL_LABEL = Component.translatable("minegit.link.api_url");
+    private static final Component SERVICE_LABEL = Component.translatable("minegit.link.service");
     private static final Identifier RALSPIN = Identifier.fromNamespaceAndPath("minegit", "ralspin");
-    private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 60);
+    private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 36);
 
     private final Screen parent;
     private final Runnable closeCallback;
     private EditBox usernameEdit;
     private EditBox patEdit;
+    private EditBox webUrlEdit;
+    private EditBox apiUrlEdit;
     private Button testCredentialsButton;
+    private ScrollableLayout scrollable;
     private ImageWidget ralspinWidget;
     private boolean requestInProgress = false;
     private StringWidget testCredentialsStatus;
+    private Button prevServiceButton;
+    private Button nextServiceButton;
+    private StringWidget serviceDisplay;
+
+    private LinearLayout columnLayout;
+    private GitService selectedService = GitService.GITHUB;
 
     public AccountLinkScreen(Screen parent) {
         this(parent, null);
@@ -40,11 +53,25 @@ public class AccountLinkScreen extends Screen {
     @Override
     protected void init() {
         // Column layout
-        LinearLayout columnLayout = this.layout.addToContents(LinearLayout.vertical().spacing(8));
+        columnLayout = LinearLayout.vertical().spacing(8);
         columnLayout.defaultCellSetting().alignHorizontallyCenter();
 
         // Menu title
         layout.addTitleHeader(this.title, this.font);
+
+        // Compact service selector: < GitHub >
+        StringWidget serviceLabel = columnLayout.addChild(new StringWidget(SERVICE_LABEL, font));
+        serviceLabel.setAlpha(0.5f);
+
+        LinearLayout serviceRow = columnLayout.addChild(LinearLayout.horizontal().spacing(4));
+        prevServiceButton = Button.builder(Component.literal("<"), button -> cycleService(-1))
+                .size(24, 20).build();
+        nextServiceButton = Button.builder(Component.literal(">"), button -> cycleService(1))
+                .size(24, 20).build();
+        serviceDisplay = new StringWidget(Component.literal("GitHub"), font);
+        serviceRow.addChild(prevServiceButton);
+        serviceRow.addChild(serviceDisplay);
+        serviceRow.addChild(nextServiceButton);
 
         // Username text field
         StringWidget usernameEditLabel = columnLayout.addChild(new StringWidget(USERNAME_EDIT_LABEL, font));
@@ -62,6 +89,23 @@ public class AccountLinkScreen extends Screen {
         patEdit.setResponder(string -> updateTestButtonStatus(false));
         columnLayout.addChild(patEdit);
 
+        // Custom URL fields (for Custom service)
+        StringWidget webUrlLabel = columnLayout.addChild(new StringWidget(WEB_URL_LABEL, font));
+        webUrlLabel.setAlpha(0.5f);
+        webUrlEdit = new EditBox(font, 0, 0, 200, 20, WEB_URL_LABEL);
+        webUrlEdit.setMaxLength(255);
+        webUrlEdit.setResponder(string -> updateTestButtonStatus(false));
+        webUrlEdit.visible = false;
+        columnLayout.addChild(webUrlEdit);
+
+        StringWidget apiUrlLabel = columnLayout.addChild(new StringWidget(API_URL_LABEL, font));
+        apiUrlLabel.setAlpha(0.5f);
+        apiUrlEdit = new EditBox(font, 0, 0, 200, 20, API_URL_LABEL);
+        apiUrlEdit.setMaxLength(255);
+        apiUrlEdit.setResponder(string -> updateTestButtonStatus(false));
+        apiUrlEdit.visible = false;
+        columnLayout.addChild(apiUrlEdit);
+
         // Test credentials button
         testCredentialsButton = Button.builder(Component.translatable("minegit.link.test"), button -> testCredentials()).size(200, 20).build();
         columnLayout.addChild(testCredentialsButton);
@@ -69,6 +113,11 @@ public class AccountLinkScreen extends Screen {
         // Test credentials status
         testCredentialsStatus = new StringWidget(Component.empty(), font);
         columnLayout.addChild(testCredentialsStatus);
+
+        int availableHeight = this.height - layout.getHeaderHeight() - layout.getFooterHeight();
+        ScrollableLayout scrollable = new ScrollableLayout(minecraft, columnLayout, availableHeight);
+        this.layout.addToContents(scrollable);
+        this.scrollable = scrollable;
 
         // Add layout widgets
         this.layout.visitWidgets(this::addRenderableWidget);
@@ -94,40 +143,94 @@ public class AccountLinkScreen extends Screen {
         usernameEdit.setValue(config.username);
         String pat = config.getPat();
         if (pat != null) patEdit.setValue(pat);
+
+        // Set the current service and update UI
+        selectedService = config.gitService;
+        webUrlEdit.setValue(config.customWebUrl);
+        apiUrlEdit.setValue(config.customApiUrl);
+        updateServiceDisplay();
+        updateCustomUrlVisibility();
+    }
+
+    private void cycleService(int direction) {
+        GitService[] services = GitService.values();
+        int currentIndex = selectedService.ordinal();
+        int newIndex = (currentIndex + direction + services.length) % services.length;
+        selectedService = services[newIndex];
+        updateServiceDisplay();
+        updateCustomUrlVisibility();
+        updateTestButtonStatus(false);
+    }
+
+    private void updateServiceDisplay() {
+        serviceDisplay.setMessage(Component.literal(selectedService.getDisplayName()));
+        layout.arrangeElements();
+    }
+
+    private void updateCustomUrlVisibility() {
+        boolean showCustomUrls = selectedService.requiresCustomUrl();
+        webUrlEdit.visible = showCustomUrls;
+        apiUrlEdit.visible = showCustomUrls;
+
+        // Update username field constraints
+        if (showCustomUrls) {
+            usernameEdit.setMaxLength(100);
+        } else {
+            usernameEdit.setMaxLength(39);
+        }
+
+        layout.arrangeElements();
     }
 
     private void testCredentials() {
         requestInProgress = true;
         updateTestButtonStatus(false);
 
-        new Thread(() -> {
-            int statusCode = NetworkManager.testCredentials(usernameEdit.getValue(), patEdit.getValue());
-            requestInProgress = false;
-            updateTestButtonStatus(false);
+        // Build config from current UI values
+        Config testConfig = new Config(usernameEdit.getValue(), CryptoManager.encrypt(patEdit.getValue()));
+        testConfig.gitService = selectedService;
+        testConfig.customWebUrl = webUrlEdit.getValue();
+        testConfig.customApiUrl = apiUrlEdit.getValue();
 
-            switch (statusCode) {
-                case 200:
-                    updateTestCredentialsStatus(Component.translatable("minegit.link.status.success"));
-                    updateTestButtonStatus(true);
-                    break;
-                case 401:
-                    updateTestCredentialsStatus(Component.translatable("minegit.link.status.error.pat"));
-                    updateTestButtonStatus(true);
-                    break;
-                case 404:
-                    updateTestCredentialsStatus(Component.translatable("minegit.link.status.error.username"));
-                    updateTestButtonStatus(true);
-                    break;
-                default:
-                    updateTestCredentialsStatus(Component.translatable("minegit.link.status.error.generic", statusCode));
-                    updateTestButtonStatus(true);
-                    break;
-            }
+        new Thread(() -> {
+            int statusCode = NetworkManager.testCredentials(testConfig);
+            requestInProgress = false;
+
+            minecraft.submit(() -> {
+                updateTestButtonStatus(false);
+
+                switch (statusCode) {
+                    case 200:
+                        updateTestCredentialsStatus(Component.translatable("minegit.link.status.success"));
+                        updateTestButtonStatus(true);
+                        break;
+                    case 401:
+                        updateTestCredentialsStatus(Component.translatable("minegit.link.status.error.pat"));
+                        updateTestButtonStatus(true);
+                        break;
+                    case 404:
+                        updateTestCredentialsStatus(Component.translatable("minegit.link.status.error.username"));
+                        updateTestButtonStatus(true);
+                        break;
+                    case -2:
+                        updateTestCredentialsStatus(Component.translatable("minegit.link.status.error.custom_url_required"));
+                        updateTestButtonStatus(true);
+                        break;
+                    default:
+                        updateTestCredentialsStatus(Component.translatable("minegit.link.status.error.generic", statusCode));
+                        updateTestButtonStatus(true);
+                        break;
+                }
+            });
         }).start();
     }
 
     private void updateTestButtonStatus(boolean forceDisable) {
-        testCredentialsButton.active = !forceDisable && !requestInProgress && !usernameEdit.getValue().isBlank() && !patEdit.getValue().isBlank();
+        boolean hasBasicInfo = !usernameEdit.getValue().isBlank() && !patEdit.getValue().isBlank();
+        boolean hasCustomUrls = !selectedService.requiresCustomUrl() ||
+                                 (!webUrlEdit.getValue().isBlank() && !apiUrlEdit.getValue().isBlank());
+
+        testCredentialsButton.active = !forceDisable && !requestInProgress && hasBasicInfo && hasCustomUrls;
     }
 
     private void updateTestCredentialsStatus(Component message) {
@@ -137,10 +240,15 @@ public class AccountLinkScreen extends Screen {
 
     @Override
     public void onClose() {
-        // Save credentials
+        // Save credentials with service configuration
         String username = usernameEdit.getValue();
         String pat = CryptoManager.encrypt(patEdit.getValue());
-        ConfigManager.save(new Config(username, pat));
+        Config config = new Config(username, pat);
+        config.gitService = selectedService;
+        config.customWebUrl = webUrlEdit.getValue();
+        config.customApiUrl = apiUrlEdit.getValue();
+        ConfigManager.save(config);
+
         minecraft.setScreen(parent);
         if (closeCallback != null) closeCallback.run();
     }
@@ -152,6 +260,7 @@ public class AccountLinkScreen extends Screen {
 
     @Override
     protected void repositionElements() {
+        scrollable.setMaxHeight(this.height - layout.getHeaderHeight() - layout.getFooterHeight());
         layout.arrangeElements();
         ralspinWidget.setPosition(width - 60, height - 80);
     }

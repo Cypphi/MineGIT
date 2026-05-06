@@ -1,5 +1,7 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.data.Config;
+import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.GitManager;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -11,6 +13,7 @@ import net.minecraft.resources.Identifier;
 
 public class CloneScreen extends Screen {
     private static final Component REPO_LABEL = Component.translatable("minegit.clone.repo");
+    private static final Component REPO_HINT = Component.translatable("minegit.clone.repo_hint");
     private static final Identifier RALSPIN = Identifier.fromNamespaceAndPath("minegit", "ralspin");
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 60);
 
@@ -18,6 +21,7 @@ public class CloneScreen extends Screen {
     private final Runnable closeCallback;
     private final Runnable cloneSuccessCallback;
     private EditBox repoEdit;
+    private StringWidget repoHint;
     private Button testCredentialsButton;
     private ImageWidget ralspinWidget;
     private Button configureButton;
@@ -42,13 +46,22 @@ public class CloneScreen extends Screen {
         // Menu title
         layout.addTitleHeader(this.title, this.font);
 
-        // Repo name text field
+        // Repo name/URL text field
         StringWidget usernameEditLabel = columnLayout.addChild(new StringWidget(REPO_LABEL, font));
         usernameEditLabel.setAlpha(0.5f);
         repoEdit = new EditBox(font, 0, 0, 200, 20, REPO_LABEL);
-        repoEdit.setMaxLength(39);
-        repoEdit.setResponder(string -> updateButtonsStatus());
+        repoEdit.setMaxLength(255);
+        repoEdit.setResponder(string -> {
+            updateButtonsStatus();
+            updateHintVisibility();
+        });
         columnLayout.addChild(repoEdit);
+
+        // Hint text (shows based on selected service)
+        repoHint = columnLayout.addChild(new StringWidget(REPO_HINT, font));
+        repoHint.setAlpha(0.5f);
+        repoHint.visible = false;
+        updateHintVisibility();
 
         // Clone button
         testCredentialsButton = Button.builder(Component.translatable("minegit.clone.confirm"), button -> doClone()).size(200, 20).build();
@@ -79,6 +92,18 @@ public class CloneScreen extends Screen {
 
         updateButtonsStatus();
         repositionElements();
+    }
+
+    private void updateHintVisibility() {
+        Config config = ConfigManager.getCurrentConfig();
+        String value = repoEdit.getValue();
+
+        // Show hint if the field is empty or if it's a URL for a service that needs username/repo
+        if (value.isEmpty() || !value.startsWith("http")) {
+            repoHint.visible = !config.gitService.requiresCustomUrl();
+        } else {
+            repoHint.visible = false;
+        }
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
