@@ -20,7 +20,6 @@ public class EditWorldScreenMixin extends Screen {
     private String worldName;
 
     @Shadow
-    @Final
     private Screen parent;
 
     @Inject(at = @At(value = "TAIL"), method = "init")
