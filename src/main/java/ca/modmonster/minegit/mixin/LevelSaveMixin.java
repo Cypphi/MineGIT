@@ -51,11 +51,11 @@ public class LevelSaveMixin {
             switch (status) {
                 case SUCCESS:
                     // Success; quit as normal
-                    minecraft.executeTask(() -> minecraft.openScreen(null));
+                    minecraft.execute(() -> minecraft.openScreen(null));
                     break;
                 case FAIL_GENERIC:
                     // Generic error; show option to keep local or cloud
-                    minecraft.executeTask(() -> minecraft.openScreen(new GitConflictScreen(
+                    minecraft.execute(() -> minecraft.openScreen(new GitConflictScreen(
                             () -> minecraft.openScreen(null),
                             null,
                             worldFolder
@@ -63,12 +63,12 @@ public class LevelSaveMixin {
                     break;
                 case FAIL_NETWORK:
                     // Network error; show unreachable screen
-                    minecraft.executeTask(() -> minecraft.openScreen(new TwoChoiceScreen(
+                    minecraft.execute(() -> minecraft.openScreen(new TwoChoiceScreen(
                             I18n.translate("minegit.sync.push_unreachable.title"),
                             I18n.translate("minegit.sync.push_unreachable.description"),
                             I18n.translate("minegit.sync.push_unreachable.retry"),
                             I18n.translate("minegit.sync.push_unreachable.exit"),
-                            () -> minecraft.executeTask(() -> doWorldSave(worldFolder)),
+                            () -> minecraft.execute(() -> doWorldSave(worldFolder)),
                             () -> minecraft.openScreen(null)
                     )));
                     break;

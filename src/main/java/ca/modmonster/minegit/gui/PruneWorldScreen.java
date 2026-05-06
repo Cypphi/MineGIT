@@ -63,7 +63,7 @@ public class PruneWorldScreen extends Screen {
         } else {
             ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.prune.failed")));
         }
-        minecraft.executeTask(() -> minecraft.openScreen(successParent));
+        minecraft.execute(() -> minecraft.openScreen(successParent));
     }
 
     private void pullThenPrune() {
@@ -79,7 +79,7 @@ public class PruneWorldScreen extends Screen {
                     break;
                 case FAIL_GENERIC:
                     // Generic error; show option to keep local or cloud
-                    minecraft.executeTask(() -> minecraft.openScreen(new GitConflictScreen(
+                    minecraft.execute(() -> minecraft.openScreen(new GitConflictScreen(
                             () -> doPrune(progressScreen),
                             this::close,
                             GitManager.getPath(minecraft, levelId)
@@ -87,7 +87,7 @@ public class PruneWorldScreen extends Screen {
                     break;
                 case FAIL_NETWORK:
                     // Network error; show unreachable screen
-                    minecraft.executeTask(() -> minecraft.openScreen(new TwoChoiceScreen(
+                    minecraft.execute(() -> minecraft.openScreen(new TwoChoiceScreen(
                             I18n.translate("minegit.sync.pull_unreachable.title"),
                             I18n.translate("minegit.sync.pull_unreachable.description"),
                             I18n.translate("minegit.sync.pull_unreachable.continue"),

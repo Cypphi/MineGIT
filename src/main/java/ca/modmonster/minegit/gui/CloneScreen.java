@@ -102,7 +102,7 @@ public class CloneScreen extends Screen {
         new Thread(() -> {
             int result = GitManager.cloneRepo(minecraft, repoEdit.getText(), progressScreen);
 
-            minecraft.executeTask(() -> {
+            minecraft.execute(() -> {
                 if (result == 0) {
                     ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.clone.success")));
                     if (cloneSuccessCallback != null) {

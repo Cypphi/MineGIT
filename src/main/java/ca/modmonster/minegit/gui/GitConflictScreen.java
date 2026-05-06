@@ -59,9 +59,9 @@ public class GitConflictScreen extends Screen {
             new Thread(() -> {
                 boolean ok = GitManager.forcePull(worldFolder, progressScreen) == SyncResult.SUCCESS;
                 if (ok) {
-                    minecraft.executeTask(resolvedCallback);
+                    minecraft.execute(resolvedCallback);
                 } else {
-                    minecraft.executeTask(() -> {
+                    minecraft.execute(() -> {
                         ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.sync.conflict.failed")));
                         if (cancelCallback != null) {
                             cancelCallback.run();
@@ -77,9 +77,9 @@ public class GitConflictScreen extends Screen {
             new Thread(() -> {
                 boolean ok = GitManager.forcePush(worldFolder, progressScreen) == SyncResult.SUCCESS;
                 if (ok) {
-                    minecraft.executeTask(resolvedCallback);
+                    minecraft.execute(resolvedCallback);
                 } else {
-                    minecraft.executeTask(() -> {
+                    minecraft.execute(() -> {
                         ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.sync.conflict.failed")));
                         if (cancelCallback != null) {
                             cancelCallback.run();
