@@ -32,15 +32,15 @@ public class EnableWorldSyncScreen extends Screen {
     public void init() {
         // Confirm button
         confirmButton = new ButtonWidget(0, width / 2 - 152, 124, 150, 20, I18n.translate("minegit.sync.enable.confirm.ok"));
-        addButton(confirmButton);
+        buttons.add(confirmButton);
 
         // Cancel button
         cancelButton = new ButtonWidget(1, width / 2 + 2, 124, 150, 20, I18n.translate("minegit.sync.enable.confirm.cancel"));
-        addButton(cancelButton);
+        buttons.add(cancelButton);
 
         ButtonWidget openSetupButton = new ButtonWidget(2, width / 2 - 75, 152, 150, 20, I18n.translate("minegit.link.setup.open"));
         openSetupButton.visible = showOpenSetupButton;
-        addButton(openSetupButton);
+        buttons.add(openSetupButton);
     }
 
     @Override

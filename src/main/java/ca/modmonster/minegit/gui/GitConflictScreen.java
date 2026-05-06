@@ -38,16 +38,16 @@ public class GitConflictScreen extends Screen {
 
         // Remote button
         ButtonWidget remoteButton = new ButtonWidget(0, this.width / 2 - 120, 108 + descriptionHeight, 240, 20, I18n.translate("minegit.sync.conflict.remote") + " - " + remoteCommitDate);
-        addButton(remoteButton);
+        buttons.add(remoteButton);
 
         // Local button
         ButtonWidget localButton = new ButtonWidget(1, this.width / 2 - 120, 130 + descriptionHeight, 240, 20, I18n.translate("minegit.sync.conflict.local") + " - " + localCommitDate);
-        addButton(localButton);
+        buttons.add(localButton);
 
         // Cancel button
         if (cancelCallback != null) {
             ButtonWidget cancelButton = new ButtonWidget(2, this.width / 2 - 75, 156 + descriptionHeight, 150, 20, I18n.translate("minegit.sync.conflict.cancel"));
-            addButton(cancelButton);
+            buttons.add(cancelButton);
         }
     }
 

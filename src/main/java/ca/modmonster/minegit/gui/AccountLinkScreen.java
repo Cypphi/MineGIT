@@ -43,11 +43,11 @@ public class AccountLinkScreen extends Screen {
 
         // Test credentials button
         testCredentialsButton = new ButtonWidget(2, this.width / 2 - 100, 180, 200, 20, I18n.translate("minegit.link.test"));
-        addButton(testCredentialsButton);
+        buttons.add(testCredentialsButton);
 
         // Back button
         backButton = new ImageButton(3, 6, 6, ImageButton.ImageButtonTex.BACK);
-        addButton(backButton);
+        buttons.add(backButton);
 
         // Ralsei go spinny
         ralspinWidget = new RalspinWidget(width - 60, height - 80);

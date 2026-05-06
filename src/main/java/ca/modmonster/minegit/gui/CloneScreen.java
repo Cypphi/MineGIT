@@ -36,15 +36,15 @@ public class CloneScreen extends Screen {
 
         // Clone button
         cloneButton = new ButtonWidget(1, this.width / 2 - 100, 135, 200, 20, I18n.translate("minegit.clone.confirm"));
-        addButton(cloneButton);
+        buttons.add(cloneButton);
 
         // Back button
         backButton = new ImageButton(2, 6, 6, ImageButton.ImageButtonTex.BACK);
-        addButton(backButton);
+        buttons.add(backButton);
 
         // Configure button
         configureButton = new ImageButton(3, width - 26, 6, ImageButton.ImageButtonTex.CLOUD);
-        addButton(configureButton);
+        buttons.add(configureButton);
 
         // Ralsei go spinny
         ralspinWidget = new RalspinWidget(width - 60, height - 80);

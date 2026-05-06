@@ -43,7 +43,7 @@ public abstract class CreateWorldScreenMixin extends Screen {
             gitButton = new ImageButton(100, width / 2 - 178, height - 28, ImageButton.ImageButtonTex.CLONE);
             gitButtonTooltip = I18n.translate("minegit.clone.title");
         }
-        addButton(gitButton);
+        buttons.add(gitButton);
     }
 
     @Inject(at = @At("TAIL"), method = "buttonClicked")

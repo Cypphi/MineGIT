@@ -31,11 +31,11 @@ public class PruneWorldScreen extends Screen {
 
         // Confirm button
         ButtonWidget confirmButton = new ButtonWidget(0, this.width / 2 - 152, 98 + descriptionHeight, 150, 20, I18n.translate("minegit.prune.confirm"));
-        addButton(confirmButton);
+        buttons.add(confirmButton);
 
         // Cancel button
         ButtonWidget cancelButton = new ButtonWidget(1, this.width / 2 + 2, 98 + descriptionHeight, 150, 20, I18n.translate("minegit.prune.cancel"));
-        addButton(cancelButton);
+        buttons.add(cancelButton);
     }
 
     @Override

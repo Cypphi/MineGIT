@@ -30,11 +30,11 @@ public class TwoChoiceScreen extends Screen {
 
         // Continue button
         ButtonWidget continueButton = new ButtonWidget(0, width / 2 - 152, 98 + descriptionHeight, 150, 20, continueMessage);
-        addButton(continueButton);
+        buttons.add(continueButton);
 
         // Cancel button
         ButtonWidget cancelButton = new ButtonWidget(1, width / 2 + 2, 98 + descriptionHeight, 150, 20, cancelMessage);
-        addButton(cancelButton);
+        buttons.add(cancelButton);
     }
 
     @Override

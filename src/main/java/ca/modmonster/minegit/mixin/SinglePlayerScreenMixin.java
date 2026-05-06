@@ -59,11 +59,11 @@ public class SinglePlayerScreenMixin extends Screen {
         // Add world sync button
         worldSyncButton = new ImageButton(100, width / 2 - 178, height - 52, ImageButton.ImageButtonTex.CLOUD);
         worldSyncButton.active = false;
-        addButton(worldSyncButton);
+        buttons.add(worldSyncButton);
 
         // Add clone button
         cloneButton = new ImageButton(101, width / 2 - 178, height - 28, ImageButton.ImageButtonTex.CLONE);
-        addButton(cloneButton);
+        buttons.add(cloneButton);
 
         hoveredLevel = null;
         updateWorldSyncButton();
