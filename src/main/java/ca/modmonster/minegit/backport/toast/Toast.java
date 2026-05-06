@@ -4,10 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.render.platform.GlStateManager;
-import net.minecraft.client.sound.instance.SimpleSoundInstance;
-import net.minecraft.client.sound.system.SoundManager;
 import net.minecraft.resource.Identifier;
-import net.minecraft.sound.SoundEvent;
 
 public class Toast {
     Identifier TOASTS_LOCATION = new Identifier("minegit", "textures/gui/toasts.png");
@@ -50,17 +47,7 @@ public class Toast {
 
     @Environment(EnvType.CLIENT)
     public enum Visibility {
-        SHOW(new SoundEvent(new Identifier("minegit", "ui.toast.in"))),
-        HIDE(new SoundEvent(new Identifier("minegit", "ui.toast.out")));
-
-        private final SoundEvent sound;
-
-        Visibility(SoundEvent sound) {
-            this.sound = sound;
-        }
-
-        public void playSound(SoundManager manager) {
-            manager.play(SimpleSoundInstance.of(this.sound, 1.0F));
-        }
+        SHOW,
+        HIDE
     }
 }

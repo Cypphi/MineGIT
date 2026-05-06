@@ -49,9 +49,9 @@ public class TwoChoiceScreen extends Screen {
     @Override
     public void render(int i, int j, float f) {
         this.drawBackgroundTexture(i);
-        super.render(i, j, f);
         drawCenteredString(textRenderer, title, this.width / 2, 50, 16777215);
         descriptionWidget.renderCentered(this.width / 2, 90);
+        super.render(i, j, f);
     }
 
     @Override

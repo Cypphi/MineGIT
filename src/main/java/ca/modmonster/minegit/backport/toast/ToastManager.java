@@ -75,7 +75,6 @@ public class ToastManager extends GuiElement {
             long l = Minecraft.getTime();
             if (this.time == -1L) {
                 this.time = l;
-                this.visibility.playSound(ToastManager.this.minecraft.getSoundManager());
             }
 
             if (this.visibility == Toast.Visibility.SHOW && l - this.time <= 600L) {
@@ -89,7 +88,6 @@ public class ToastManager extends GuiElement {
             if (visibility != this.visibility) {
                 this.time = l - (int)((1.0F - this.getVisibility(l)) * 600.0F);
                 this.visibility = visibility;
-                this.visibility.playSound(ToastManager.this.minecraft.getSoundManager());
             }
 
             return this.visibility == Toast.Visibility.HIDE && l - this.time > 600L;

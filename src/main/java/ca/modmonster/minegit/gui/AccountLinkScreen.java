@@ -75,13 +75,13 @@ public class AccountLinkScreen extends Screen {
     @Override
     public void render(int i, int j, float f) {
         this.drawBackgroundTexture(i);
-        super.render(i, j, f);
         drawCenteredString(this.textRenderer, I18n.translate("minegit.link.title"), this.width / 2, 50, 16777215);
         drawCenteredString(this.textRenderer, I18n.translate("minegit.link.username"), this.width / 2, 90, -2130706433);
         drawCenteredString(this.textRenderer, I18n.translate("minegit.link.pat"), this.width / 2, 135, -2130706433);
         ralspinWidget.render(i, j);
         usernameEdit.render();
         patEdit.render();
+        super.render(i, j, f);
         if (testCredentialsStatus != null) drawCenteredString(this.textRenderer, testCredentialsStatus, this.width / 2, 208, 16777215);
         if (backButton.isHovered()) renderTooltip(I18n.translate("minegit.link.back"),  i, j);
         if (ralspinWidget.isHovered()) renderTooltip(RalspinWidget.TOOLTIP, i, j);

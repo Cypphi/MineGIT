@@ -81,11 +81,11 @@ public class CloneScreen extends Screen {
     @Override
     public void render(int i, int j, float f) {
         this.drawBackgroundTexture(i);
-        super.render(i, j, f);
         drawCenteredString(textRenderer, I18n.translate("minegit.clone.title"), this.width / 2, 50, 16777215);
         drawCenteredString(textRenderer, I18n.translate("minegit.clone.repo"), this.width / 2, 90, -2130706433);
         repoEdit.render();
         ralspinWidget.render(i, j);
+        super.render(i, j, f);
         if (backButton.isHovered()) renderTooltip(I18n.translate("minegit.clone.back"), i, j);
         if (configureButton.isHovered()) renderTooltip(I18n.translate("minegit.link.setup.open"), i, j);
         if (ralspinWidget.isHovered()) renderTooltip(RalspinWidget.TOOLTIP, i, j);

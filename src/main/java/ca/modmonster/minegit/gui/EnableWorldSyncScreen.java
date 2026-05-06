@@ -57,10 +57,10 @@ public class EnableWorldSyncScreen extends Screen {
     @Override
     public void render(int i, int j, float f) {
         this.drawBackgroundTexture(i);
-        super.render(i, j, f);
         drawCenteredString(this.textRenderer, I18n.translate("minegit.sync.enable.title"), this.width / 2, 50, 16777215);
         drawCenteredString(this.textRenderer, I18n.translate("minegit.sync.enable.confirm.line1", level.getName()), this.width / 2, 90, 16777215);
         drawCenteredString(this.textRenderer, I18n.translate("minegit.sync.enable.confirm.line2"), this.width / 2, 103, 16777215);
+        super.render(i, j, f);
     }
 
     private void setupSync() {
