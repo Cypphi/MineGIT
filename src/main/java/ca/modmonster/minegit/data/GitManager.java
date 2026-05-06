@@ -1,7 +1,8 @@
 package ca.modmonster.minegit.data;
 
-import ca.modmonster.minegit.MineGIT;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.I18n;
+
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeCommand;
 import org.eclipse.jgit.api.PullResult;
@@ -30,8 +31,9 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
+
+import ca.modmonster.minegit.MineGIT;
 
 public class GitManager {
     public static boolean syncEnabled(Minecraft minecraft, String worldId) {
@@ -49,6 +51,7 @@ public class GitManager {
      * @return SyncResult representing if the pull was successful or why it failed
      */
     public static SyncResult pull(Path worldFolder, ProgressMonitor progressMonitor) {
+        progressMonitor.beginTask(I18n.get("minegit.status.open"), 0);
         Config config = ConfigManager.getCurrentConfig();
         try (Git git = Git.open(worldFolder.toFile())) {
             PullResult result = git.pull()
@@ -61,7 +64,7 @@ public class GitManager {
             if (result.isSuccessful()) return SyncResult.SUCCESS;
 
             // pull was unsuccessful, check if it was caused by a recent prune
-            progressMonitor.beginTask("Checking for pruning", 0);
+            progressMonitor.beginTask(I18n.get("minegit.status.pull_check_prune"), 0);
             Repository repo = git.getRepository();
             ObjectId head = repo.resolve("HEAD");
             int localCommitTime;
@@ -157,12 +160,12 @@ public class GitManager {
         Config config = ConfigManager.getCurrentConfig();
         try (Git git = Git.open(worldFolder.toFile())) {
             // add all
-            progressMonitor.beginTask("Stage world to commit", 0);
+            progressMonitor.beginTask(I18n.get("minegit.status.stage"), 0);
             git.add()
                     .addFilepattern(".")
                     .call();
             // commit
-            progressMonitor.beginTask("Commit world state", 0);
+            progressMonitor.beginTask(I18n.get("minegit.status.commit"), 0);
             String timestamp = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("h:mm a, MM/dd/yy"));
             git.commit()
                     .setMessage("World snapshot - " + timestamp)
@@ -223,13 +226,13 @@ public class GitManager {
         Path worldFolder = getPath(minecraft, worldId);
         Config config = ConfigManager.getCurrentConfig();
         try (Git git = Git.init().setDirectory(worldFolder.toFile()).call()) {
-            progressMonitor.beginTask("Stage world to commit", 0);
+            progressMonitor.beginTask(I18n.get("minegit.status.stage"), 0);
             // add all
             git.add()
                     .addFilepattern(".")
                     .call();
             // commit
-            progressMonitor.beginTask("Commit world state", 0);
+            progressMonitor.beginTask(I18n.get("minegit.status.commit"), 0);
             String timestamp = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("h:mm a, MM/dd/yy"));
             git.commit()
                     .setMessage("Initial world snapshot - " + timestamp)
@@ -257,16 +260,47 @@ public class GitManager {
         }
     }
 
-    public static int cloneRepo(Minecraft minecraft, String repo, ProgressMonitor progressMonitor) {
-        progressMonitor.beginTask("Starting world clone", 0);
+    /**
+     * @param in Input repository. Can be in any of the following forms:
+     *           [repo name],
+     *           [username]/[repo name],
+     *           full URL with or without .git suffix
+     * @return String representing full repository URL (e.g. https://github.com/modmonster/repo.git)
+     */
+    public static String getRepoUrl(Config config, String in) {
+        if (in.startsWith("http://") || in.startsWith("https://")) {
+            // Full URL; return ensuring .git at the end
+            return in.endsWith(".git") ? in : in + ".git";
+        } else if (in.contains("/")) {
+            // <username>/<repo> format
+            return config.buildCloneUrl(in);
+        } else {
+            // <repo> format
+            return config.buildCloneUrl(config.username + "/" + in);
+        }
+    }
+
+    /**
+     * Clone a repository. Accepts full URLs for custom git services.
+     * @param minecraft Minecraft client reference
+     * @param repoInput Either a full URL (https://...) or a repo name (for GitHub: username/repo)
+     * @param progressMonitor ProgressMonitor for tracking clone progress
+     * @return 0 on success, 1 for invalid remote, 2 for other errors
+     */
+    public static int cloneRepo(Minecraft minecraft, String repoInput, ProgressMonitor progressMonitor) {
+        progressMonitor.beginTask(I18n.get("minegit.status.clone"), 0);
         Config config = ConfigManager.getCurrentConfig();
-        String repoUrl = String.format("https://github.com/%s/%s.git", config.username, repo);
-        Path localWorldFolder = getPath(minecraft, repo.replaceFirst(Pattern.quote("minegit_"), ""));
+
+        // Determine the clone URL based on input type
+        String repoUrl = getRepoUrl(config, repoInput);
+        String worldFolderName = extractRepoNameFromUrl(repoUrl).replaceFirst("minegit_", "");
+
+        Path localWorldFolder = getPath(minecraft, worldFolderName);
 
         // Add a counter at the end if world folder already exists
         int i = 1;
         while (localWorldFolder.toFile().exists()) {
-            localWorldFolder = getPath(minecraft, repo.replaceFirst(Pattern.quote("minegit_"), "") + "_" + i);
+            localWorldFolder = getPath(minecraft, worldFolderName + "_" + i);
             i++;
         }
 
@@ -284,6 +318,23 @@ public class GitManager {
             MineGIT.LOGGER.error("Error cloning repo", e);
             return 2;
         }
+    }
+
+    /**
+     * Extract repository name from a URL
+     * e.g., https://github.com/user/repo.git -> repo,
+     *       https://gitlab.com/user/repo -> repo
+     */
+    private static String extractRepoNameFromUrl(String url) {
+        // Remove .git suffix if present
+        String cleanUrl = url.replaceAll("\\.git$", "");
+
+        // Find the last path segment
+        int lastSlash = cleanUrl.lastIndexOf('/');
+        if (lastSlash >= 0 && lastSlash < cleanUrl.length() - 1) {
+            return cleanUrl.substring(lastSlash + 1);
+        }
+        return cleanUrl;
     }
 
     public static Path getPath(Minecraft minecraft, String worldId) {
@@ -344,14 +395,13 @@ public class GitManager {
     }
 
     public static boolean prune(Minecraft minecraft, String worldId, ProgressMonitor progressMonitor) {
-        progressMonitor.beginTask("Opening world", 0);
         Path worldFolder = getPath(minecraft, worldId);
         Config config = ConfigManager.getCurrentConfig();
         try (Git git = Git.open(worldFolder.toFile())) {
             // get current branch name
             String mainBranch = git.getRepository().getBranch();
 
-            progressMonitor.beginTask("Creating temporary branch", 0);
+            progressMonitor.beginTask(I18n.get("minegit.status.prune.create"), 0);
             // new branch
             git.checkout()
                     .setName("prune")
@@ -359,12 +409,12 @@ public class GitManager {
                     .setProgressMonitor(progressMonitor)
                     .call();
             // add all
-            progressMonitor.beginTask("Stage world to commit", 0);
+            progressMonitor.beginTask(I18n.get("minegit.status.stage"), 0);
             git.add()
                     .addFilepattern(".")
                     .call();
             // commit
-            progressMonitor.beginTask("Commit world state", 0);
+            progressMonitor.beginTask(I18n.get("minegit.status.commit"), 0);
             String timestamp = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("h:mm a, MM/dd/yy"));
             git.commit()
                     .setMessage("World pruning - " + timestamp)
@@ -375,7 +425,7 @@ public class GitManager {
                     .setForce(true)
                     .setProgressMonitor(progressMonitor)
                     .call();
-            progressMonitor.beginTask("Renaming temporary branch to main", 0);
+            progressMonitor.beginTask(I18n.get("minegit.status.prune.rename"), 0);
             // rename temp branch to main
             git.branchRename()
                     .setNewName(mainBranch)

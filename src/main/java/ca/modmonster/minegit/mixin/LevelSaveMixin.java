@@ -7,9 +7,11 @@ import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -17,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.nio.file.Path;
 
 import ca.modmonster.minegit.MineGIT;
+import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.QuitState;
 import ca.modmonster.minegit.data.SyncResult;
@@ -41,15 +44,16 @@ public class LevelSaveMixin {
         MinecraftServer server = (MinecraftServer) (Object) this;
         Path worldFolder = server.getWorldPath(LevelResource.ROOT); // get world folder
         if (!GitManager.syncEnabled(worldFolder)) return;
-        MineGIT.LOGGER.info("Pushing current world to GitHub");
+        MineGIT.LOGGER.info("Pushing current world to remote");
 
         doWorldSave(worldFolder);
     }
 
+    @Unique
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private void doWorldSave(Path worldFolder) {
         minecraft.submit(() -> {
-            GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_push"));
+            GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_push", ConfigManager.getCurrentConfig().gitService.getNaturalName()));
             minecraft.gui.setScreen(progressScreen);
             new Thread(() -> {
                 SyncResult status = GitManager.push(worldFolder, progressScreen);
