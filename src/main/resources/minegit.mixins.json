@@ -7,6 +7,7 @@
     "CreateWorldScreenMixin",
     "EditWorldScreenMixin",
     "LevelSaveMixin",
+    "LocaleMixin",
     "MinecraftMixin",
     "PauseScreenMixin",
     "ScreenMixin",

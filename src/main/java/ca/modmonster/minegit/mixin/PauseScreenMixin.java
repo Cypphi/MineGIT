@@ -1,5 +1,6 @@
 package ca.modmonster.minegit.mixin;
 
+import ca.modmonster.minegit.backport.ScreenTooltipRenderer;
 import ca.modmonster.minegit.backport.ScreenUtil;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.QuitState;
@@ -48,13 +49,13 @@ public class PauseScreenMixin extends Screen {
             renderOutline(
                     disconnectButton.x,
                     disconnectButton.y,
-                    disconnectButton.getWidth(),
+                    200,
                     20,
                     -65536
             );
 
             // draw tooltip
-            renderTooltip(tooltip, mouseX, mouseY);
+            ((ScreenTooltipRenderer) this).renderTooltip(tooltip, mouseX, mouseY);
         }
     }
 

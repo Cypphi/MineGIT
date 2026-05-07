@@ -36,7 +36,7 @@ public class RalspinWidget extends GuiElement {
         GL11.glScalef(SCALE, SCALE, 1);
         GL11.glColor4f(1F, 1F, 1F, 1F);
         Minecraft.getInstance().getTextureManager().bind(SPRITE);
-        drawTexture(
+        ScreenUtil.drawTexture(
                 0, 0,
                 u, v,
                 FRAME_WIDTH, FRAME_HEIGHT,

@@ -1,6 +1,7 @@
 package ca.modmonster.minegit.mixin;
 
 import ca.modmonster.minegit.backport.ImageButton;
+import ca.modmonster.minegit.backport.ScreenTooltipRenderer;
 import ca.modmonster.minegit.backport.ScreenUtil;
 import ca.modmonster.minegit.backport.SinglePlayerScreenExtension;
 import ca.modmonster.minegit.data.Config;
@@ -103,8 +104,8 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
 
     @Inject(at = @At("TAIL"), method = "render", remap = false)
     public void render(int i, int j, float f, CallbackInfo ci) {
-        if (cloneButton != null && cloneButton.isHovered()) renderTooltip(cloneButtonTooltip, i, j);
-        if (worldSyncButtonTooltip != null && worldSyncButton != null &&  worldSyncButton.isHovered()) renderTooltip(worldSyncButtonTooltip, i, j);
+        if (cloneButton != null && cloneButton.isHovered()) ((ScreenTooltipRenderer) this).renderTooltip(cloneButtonTooltip, i, j);
+        if (worldSyncButtonTooltip != null && worldSyncButton != null &&  worldSyncButton.isHovered()) ((ScreenTooltipRenderer) this).renderTooltip(worldSyncButtonTooltip, i, j);
 
         if (worldSyncButton != null && ScreenUtil.isAltDown() != prevAltState) {
             prevAltState = ScreenUtil.isAltDown();

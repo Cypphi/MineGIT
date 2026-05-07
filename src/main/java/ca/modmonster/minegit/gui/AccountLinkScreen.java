@@ -2,6 +2,7 @@ package ca.modmonster.minegit.gui;
 
 import ca.modmonster.minegit.backport.ImageButton;
 import ca.modmonster.minegit.backport.RalspinWidget;
+import ca.modmonster.minegit.backport.ScreenTooltipRenderer;
 import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.CryptoManager;
@@ -83,8 +84,8 @@ public class AccountLinkScreen extends Screen {
         patEdit.render();
         super.render(i, j, f);
         if (testCredentialsStatus != null) drawCenteredString(this.textRenderer, testCredentialsStatus, this.width / 2, 208, 16777215);
-        if (backButton.isHovered()) renderTooltip(I18n.translate("minegit.link.back"),  i, j);
-        if (ralspinWidget.isHovered()) renderTooltip(RalspinWidget.TOOLTIP, i, j);
+        if (backButton.isHovered()) ((ScreenTooltipRenderer) this).renderTooltip(I18n.translate("minegit.link.back"),  i, j);
+        if (ralspinWidget.isHovered()) ((ScreenTooltipRenderer) this).renderTooltip(RalspinWidget.TOOLTIP, i, j);
     }
 
     @Override

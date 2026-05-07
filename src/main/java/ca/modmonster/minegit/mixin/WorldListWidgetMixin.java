@@ -19,7 +19,7 @@ public abstract class WorldListWidgetMixin {
     }
 
     @Inject(method = "entryClicked", at = @At("TAIL"))
-    private void entryClicked(int index, boolean doubleClick, int mouseX, int mouseY, CallbackInfo ci) {
+    private void entryClicked(int index, boolean doubleClick, CallbackInfo ci) {
         ((SinglePlayerScreenExtension) selectWorldScreen).worldSelected(index);
     }
 }
