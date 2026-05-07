@@ -13,7 +13,7 @@ import ca.modmonster.minegit.widget.WorldSyncButtonState;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.locale.I18n;
 import net.minecraft.world.storage.WorldSaveInfo;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;

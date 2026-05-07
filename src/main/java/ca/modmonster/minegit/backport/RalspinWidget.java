@@ -2,11 +2,10 @@ package ca.modmonster.minegit.backport;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiElement;
-import net.minecraft.client.resource.Identifier;
 import org.lwjgl.opengl.GL11;
 
 public class RalspinWidget extends GuiElement {
-    private static final Identifier SPRITE = new Identifier("minegit", "textures/gui/ralspin.png");
+    private static final String SPRITE = "/assets/minegit/textures/gui/ralspin.png";
     private static final int FRAME_WIDTH = 21;
     private static final int FRAME_HEIGHT = 40;
     private static final int FRAME_COUNT = 12;
@@ -35,7 +34,7 @@ public class RalspinWidget extends GuiElement {
         GL11.glTranslatef(x, y, 0);
         GL11.glScalef(SCALE, SCALE, 1);
         GL11.glColor4f(1F, 1F, 1F, 1F);
-        Minecraft.getInstance().getTextureManager().bind(SPRITE);
+        Minecraft.getInstance().textureManager.bind(SPRITE);
         ScreenUtil.drawTexture(
                 0, 0,
                 u, v,

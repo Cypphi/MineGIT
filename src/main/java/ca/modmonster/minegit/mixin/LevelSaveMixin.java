@@ -10,7 +10,7 @@ import ca.modmonster.minegit.gui.TwoChoiceScreen;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.locale.I18n;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
 import org.spongepowered.asm.mixin.Final;

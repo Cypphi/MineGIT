@@ -3,7 +3,6 @@
   "package": "ca.modmonster.minegit.mixin",
   "compatibilityLevel": "JAVA_8",
   "client": [
-    "BuiltInResourcePackMixin",
     "CreateWorldScreenMixin",
     "EditWorldScreenMixin",
     "LevelSaveMixin",

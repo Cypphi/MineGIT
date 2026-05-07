@@ -10,7 +10,7 @@ import ca.modmonster.minegit.data.NetworkManager;
 import com.google.gson.JsonParser;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.locale.I18n;
 import net.minecraft.world.storage.WorldSaveInfo;
 
 public class EnableWorldSyncScreen extends Screen {

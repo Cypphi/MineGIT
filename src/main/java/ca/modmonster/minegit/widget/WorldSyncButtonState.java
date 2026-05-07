@@ -1,7 +1,7 @@
 package ca.modmonster.minegit.widget;
 
 import ca.modmonster.minegit.backport.ImageButton;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.locale.I18n;
 
 import java.util.Arrays;
 import java.util.Collections;
