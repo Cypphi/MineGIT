@@ -3,6 +3,7 @@ package ca.modmonster.minegit.gui;
 import ca.modmonster.minegit.backport.ImageButton;
 import ca.modmonster.minegit.backport.RalspinWidget;
 import ca.modmonster.minegit.backport.ScreenTooltipRenderer;
+import ca.modmonster.minegit.backport.ScreenUtil;
 import ca.modmonster.minegit.backport.toast.Toast;
 import ca.modmonster.minegit.backport.toast.ToastManager;
 import ca.modmonster.minegit.data.GitManager;
@@ -87,8 +88,10 @@ public class CloneScreen extends Screen {
         repoEdit.render();
         ralspinWidget.render(i, j);
         super.render(i, j, f);
-        if (backButton.isHovered()) ((ScreenTooltipRenderer) this).renderTooltip(I18n.translate("minegit.clone.back"), i, j);
-        if (configureButton.isHovered()) ((ScreenTooltipRenderer) this).renderTooltip(I18n.translate("minegit.link.setup.open"), i, j);
+        if (ScreenUtil.isHovered(i, j, backButton.x, backButton.y, 20, 20))
+            ((ScreenTooltipRenderer) this).renderTooltip(I18n.translate("minegit.clone.back"), i, j);
+        if (ScreenUtil.isHovered(i, j, configureButton.x, configureButton.y, 20, 20))
+            ((ScreenTooltipRenderer) this).renderTooltip(I18n.translate("minegit.link.setup.open"), i, j);
         if (ralspinWidget.isHovered()) ((ScreenTooltipRenderer) this).renderTooltip(RalspinWidget.TOOLTIP, i, j);
     }
 

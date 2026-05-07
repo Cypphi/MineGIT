@@ -104,8 +104,10 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
 
     @Inject(at = @At("TAIL"), method = "render", remap = false)
     public void render(int i, int j, float f, CallbackInfo ci) {
-        if (cloneButton != null && cloneButton.isHovered()) ((ScreenTooltipRenderer) this).renderTooltip(cloneButtonTooltip, i, j);
-        if (worldSyncButtonTooltip != null && worldSyncButton != null &&  worldSyncButton.isHovered()) ((ScreenTooltipRenderer) this).renderTooltip(worldSyncButtonTooltip, i, j);
+        if (cloneButton != null && ScreenUtil.isHovered(i, j, cloneButton.x, cloneButton.y, 20, 20))
+            ((ScreenTooltipRenderer) this).renderTooltip(cloneButtonTooltip, i, j);
+        if (worldSyncButtonTooltip != null && worldSyncButton != null && ScreenUtil.isHovered(i, j, worldSyncButton.x, worldSyncButton.y, 20, 20))
+            ((ScreenTooltipRenderer) this).renderTooltip(worldSyncButtonTooltip, i, j);
 
         if (worldSyncButton != null && ScreenUtil.isAltDown() != prevAltState) {
             prevAltState = ScreenUtil.isAltDown();

@@ -2,6 +2,7 @@ package ca.modmonster.minegit.mixin;
 
 import ca.modmonster.minegit.backport.ImageButton;
 import ca.modmonster.minegit.backport.ScreenTooltipRenderer;
+import ca.modmonster.minegit.backport.ScreenUtil;
 import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.gui.AccountLinkScreen;
@@ -56,7 +57,7 @@ public abstract class CreateWorldScreenMixin extends Screen {
 
     @Inject(at = @At("TAIL"), method = "render", remap = false)
     private void render(final int mouseX, final int mouseY, final float a, CallbackInfo info) {
-        if (gitButton != null && gitButton.isHovered()) {
+        if (gitButton != null && ScreenUtil.isHovered(mouseX, mouseY, gitButton.x, gitButton.y, 20, 20)) {
             ((ScreenTooltipRenderer) this).renderTooltip(gitButtonTooltip, mouseX, mouseY);
         }
     }

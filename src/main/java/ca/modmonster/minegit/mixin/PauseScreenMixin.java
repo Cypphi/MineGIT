@@ -44,7 +44,7 @@ public class PauseScreenMixin extends Screen {
         QuitState.altQuit = ScreenUtil.isAltDown();
         if (!ScreenUtil.isAltDown()) return;
 
-        if (disconnectButton.isHovered()) {
+        if (ScreenUtil.isHovered(mouseX, mouseY, disconnectButton.x, disconnectButton.y, 200, 20)) {
             // draw red border
             renderOutline(
                     disconnectButton.x,

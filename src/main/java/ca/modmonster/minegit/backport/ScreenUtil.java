@@ -19,4 +19,8 @@ public class ScreenUtil {
         tesselator.vertex(x, y, 0.0, u * f, v * g);
         tesselator.end();
     }
+
+    public static boolean isHovered(int i, int j, int x, int y, int buttonWidth, int buttonHeight) {
+        return i >= x && j >= y && i < x + buttonWidth && j < y + buttonHeight;
+    }
 }
