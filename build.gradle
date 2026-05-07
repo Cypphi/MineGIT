@@ -32,7 +32,6 @@ dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings ploceus.featherMappings(project.feather_build)
-	exceptions ploceus.raven(project.raven_build)
 	nests ploceus.nests(project.nests_build)
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 

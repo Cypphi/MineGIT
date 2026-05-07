@@ -14,7 +14,7 @@ public class ImageButton extends ButtonWidget {
     @Override
     public void render(Minecraft minecraft, int mouseX, int mouseY) {
         super.render(minecraft, mouseX, mouseY);
-        minecraft.textureManager.bind(texture.get(active));
+        texture.bind(minecraft, active);
         ScreenUtil.drawTexture(
                 x, y,
                 0, 0,
@@ -31,6 +31,8 @@ public class ImageButton extends ButtonWidget {
 
         private final String enabledTex;
         private final String disabledTex;
+        private int enabledGlid;
+        private int disabledGlid;
 
         ImageButtonTex(String enabledTex, String disabledTex) {
             this.enabledTex = enabledTex;
@@ -39,6 +41,20 @@ public class ImageButton extends ButtonWidget {
 
         public String get(boolean enabled) {
             return enabled? enabledTex : disabledTex;
+        }
+
+        public void bind(Minecraft minecraft, boolean enabled) {
+            if (enabled) {
+                if (enabledGlid == 0) {
+                    enabledGlid = minecraft.textureManager.load(enabledTex);
+                }
+                minecraft.textureManager.bind(enabledGlid);
+            } else {
+                if (disabledGlid == 0) {
+                    disabledGlid = minecraft.textureManager.load(disabledTex);
+                }
+                minecraft.textureManager.bind(disabledGlid);
+            }
         }
     }
 }

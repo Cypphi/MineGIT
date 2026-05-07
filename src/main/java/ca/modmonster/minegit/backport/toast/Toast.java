@@ -6,7 +6,8 @@ import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
 
 public class Toast {
-    String TOASTS_LOCATION = "/assets/minegit/textures/gui/toasts.png";
+    public static final String TOASTS_LOCATION = "/assets/minegit/textures/gui/toasts.png";
+    private static int glid;
     private final String message;
     private boolean changed;
     private long lastChanged;
@@ -37,11 +38,18 @@ public class Toast {
             this.changed = false;
         }
 
-        toastComponent.getMinecraft().textureManager.bind(TOASTS_LOCATION);
+        bindTexture(toastComponent.getMinecraft());
         GL11.glColor3f(1.0F, 1.0F, 1.0F);
         this.renderBackgroundRow(toastComponent, getWidth());
         toastComponent.getMinecraft().textRenderer.draw(message, 18, 12, -256);
         return l - this.lastChanged < 5000L? Visibility.SHOW : Visibility.HIDE;
+    }
+
+    public void bindTexture(Minecraft minecraft) {
+        if (glid == 0) {
+            glid = minecraft.textureManager.load(TOASTS_LOCATION);
+        }
+        minecraft.textureManager.bind(glid);
     }
 
     @Environment(EnvType.CLIENT)

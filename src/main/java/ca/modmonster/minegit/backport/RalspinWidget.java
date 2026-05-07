@@ -12,6 +12,7 @@ public class RalspinWidget extends GuiElement {
     private static final int FRAME_TIME = 2;
     private static final int SCALE = 2;
     public static final String TOOLTIP = "hiiiii!! ^-^";
+    private static int glid;
 
     public final int x;
     public final int y;
@@ -34,7 +35,7 @@ public class RalspinWidget extends GuiElement {
         GL11.glTranslatef(x, y, 0);
         GL11.glScalef(SCALE, SCALE, 1);
         GL11.glColor4f(1F, 1F, 1F, 1F);
-        Minecraft.getInstance().textureManager.bind(SPRITE);
+        bindTexture(Minecraft.getInstance());
         ScreenUtil.drawTexture(
                 0, 0,
                 u, v,
@@ -42,6 +43,13 @@ public class RalspinWidget extends GuiElement {
                 FRAME_WIDTH, FRAME_HEIGHT * FRAME_COUNT
         );
         GL11.glPopMatrix();
+    }
+
+    public void bindTexture(Minecraft minecraft) {
+        if (glid == 0) {
+            glid = minecraft.textureManager.load(SPRITE);
+        }
+        minecraft.textureManager.bind(glid);
     }
 
     public boolean isHovered() {
