@@ -21,13 +21,12 @@ public class NetworkManager {
     public static int testCredentials(Config config) {
         if (config.gitService.requiresCustomUrl() && config.customApiUrl.isEmpty()) {
             hasValidCredentials = false;
-            return -2;
+            return -2; // Custom URL required but not provided
         }
 
         String apiUrl = config.getApiUrl();
         String username = config.username;
         String pat = config.getPat();
-        String token = config.patEncrypted; 
 
         HttpRequest request;
 
@@ -44,8 +43,7 @@ public class NetworkManager {
                         .header("PRIVATE-TOKEN", pat)
                         .GET().build();
                 break;
-            case CUSTOM:
-                // For custom services (Gitea, Forgejo, etc.), try Bearer token
+            case GITEA, CUSTOM:
                 request = HttpRequest.newBuilder()
                         .uri(URI.create(apiUrl + "/user"))
                         .header("Authorization", "Bearer " + pat)
@@ -82,13 +80,14 @@ public class NetworkManager {
             return null;
         }
 
-        if (config.gitService == GitService.CUSTOM) {
+        if (!config.gitService.supportsAutoRepoCreation()) {
             // Custom services don't support auto-repo creation
             return null;
         }
 
         String apiUrl = config.getApiUrl();
         String pat = config.getPat();
+        String encodedName = worldName.replace("\"", "\\\"");
 
         HttpRequest request;
 
@@ -101,16 +100,24 @@ public class NetworkManager {
                         .header("Accept", "application/vnd.github+json")
                         .POST(HttpRequest.BodyPublishers.ofString(String.format(
                                 "{\"name\":\"minegit_%s\",\"description\":\"Minecraft save for %s. Cloud sync by MineGIT\",\"private\":true}",
-                                worldId, worldName))).build();
+                                worldId, encodedName))).build();
                 break;
             case GITLAB:
-                String encodedName = worldName.replace("\"", "\\\"");
                 request = HttpRequest.newBuilder()
                         .uri(URI.create(apiUrl + "/projects"))
                         .header("PRIVATE-TOKEN", pat)
                         .header("Content-Type", "application/json")
                         .POST(HttpRequest.BodyPublishers.ofString(String.format(
                                 "{\"name\":\"minegit_%s\",\"description\":\"Minecraft save for %s. Cloud sync by MineGIT\",\"visibility\":\"private\"}",
+                                worldId, encodedName))).build();
+                break;
+            case GITEA:
+                request = HttpRequest.newBuilder()
+                        .uri(URI.create(apiUrl + "/user/repos"))
+                        .header("Authorization", "Bearer " + pat)
+                        .header("Content-Type", "application/json")
+                        .POST(HttpRequest.BodyPublishers.ofString(String.format(
+                                "{\"name\":\"minegit_%s\",\"description\":\"Minecraft save for %s. Cloud sync by MineGIT\",\"private\":true}",
                                 worldId, encodedName))).build();
                 break;
             default:
@@ -124,6 +131,9 @@ public class NetworkManager {
         }
     }
 
+    /**
+     * @deprecated Use createRepo(Config config, String worldId, String worldName) instead
+     */
     @Deprecated
     public static HttpResponse<String> createRepo(String pat, String worldId, String worldName) {
         Config config = new Config("", pat);
@@ -143,7 +153,7 @@ public class NetworkManager {
             var json = com.google.gson.JsonParser.parseString(response.body()).getAsJsonObject();
 
             switch (service) {
-                case GITHUB:
+                case GITHUB, GITEA:
                     if (json.has("clone_url")) {
                         return json.get("clone_url").getAsString();
                     }

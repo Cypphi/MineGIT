@@ -3,7 +3,6 @@ package ca.modmonster.minegit.gui;
 import ca.modmonster.minegit.MineGIT;
 import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
-import ca.modmonster.minegit.data.GitService;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.NetworkManager;
 import net.minecraft.client.gui.components.Button;
@@ -29,7 +28,6 @@ public class EnableWorldSyncScreen extends Screen {
     private Button cancelButton;
     private Button openSetupButton;
     private EditBox repoUrlEdit;
-    private StringWidget repoUrlLabel;
 
     public EnableWorldSyncScreen(Screen parent, LevelSummary level, Runnable closeCallback) {
         super(Component.translatable("minegit.sync.enable.title"));
@@ -48,16 +46,19 @@ public class EnableWorldSyncScreen extends Screen {
         layout.addTitleHeader(this.title, this.font);
 
         Config config = ConfigManager.getCurrentConfig();
-        boolean needsRepoUrl = config.gitService.requiresCustomUrl();
 
-        if (needsRepoUrl) {
-            // Show repository URL input for custom services
+        // Determine if we need manual repo URL input
+        boolean needsManualRepoUrl = config.gitService.requiresCustomUrl() &&
+                                      !config.gitService.supportsAutoRepoCreation();
+
+        if (needsManualRepoUrl) {
+            // Custom service without auto-repo support - ask for repo URL
             StringWidget message = columnLayout.addChild(new StringWidget(
                     Component.translatable("minegit.sync.enable.custom_service.message", config.gitService.getDisplayName()),
                     this.font));
             message.setAlpha(0.7f);
 
-            repoUrlLabel = columnLayout.addChild(new StringWidget(
+            StringWidget repoUrlLabel = columnLayout.addChild(new StringWidget(
                     Component.translatable("minegit.sync.enable.repo_url"), this.font));
             repoUrlLabel.setAlpha(0.5f);
 
@@ -65,21 +66,21 @@ public class EnableWorldSyncScreen extends Screen {
             repoUrlEdit.setMaxLength(255);
             columnLayout.addChild(repoUrlEdit);
         } else {
-            // Standard GitHub/GitLab flow - show confirmation
+            // GitHub/GitLab/Gitea - show confirmation and auto-create
             columnLayout.addChild(new StringWidget(Component.translatable("minegit.sync.enable.confirm.line1", level.getLevelName()), this.font));
             columnLayout.addChild(new StringWidget(Component.translatable("minegit.sync.enable.confirm.line2"), this.font));
         }
 
         // Confirm button
         LinearLayout buttonRowLayout = columnLayout.addChild(LinearLayout.horizontal().spacing(8));
-        confirmButton = Button.builder(Component.translatable("minegit.sync.enable.confirm.ok"), button -> setupSync()).build();
+        confirmButton = Button.builder(Component.translatable("minegit.sync.enable.confirm.ok"), _ -> setupSync()).build();
         buttonRowLayout.addChild(confirmButton);
 
         // Cancel button
-        cancelButton = Button.builder(Component.translatable("minegit.sync.enable.confirm.cancel"), button -> onClose()).build();
+        cancelButton = Button.builder(Component.translatable("minegit.sync.enable.confirm.cancel"), _ -> onClose()).build();
         buttonRowLayout.addChild(cancelButton);
 
-        openSetupButton = Button.builder(Component.translatable("minegit.link.setup.open"), button -> minecraft.setScreen(new AccountLinkScreen(this.parent, closeCallback))).build();
+        openSetupButton = Button.builder(Component.translatable("minegit.link.setup.open"), _ -> minecraft.setScreen(new AccountLinkScreen(this.parent, closeCallback))).build();
         openSetupButton.visible = false;
         columnLayout.addChild(openSetupButton);
 
@@ -97,28 +98,18 @@ public class EnableWorldSyncScreen extends Screen {
         minecraft.setScreen(progressScreen);
 
         Config config = ConfigManager.getCurrentConfig();
-        boolean needsRepoUrl = config.gitService.requiresCustomUrl();
 
         new Thread(() -> {
-            String repoUrl = null;
+            String repoUrl;
 
-            if (needsRepoUrl) {
-                // For custom services, use the provided repo URL directly
-                repoUrl = repoUrlEdit.getValue();
-                if (!repoUrl.startsWith("http://") && !repoUrl.startsWith("https://")) {
-                    repoUrl = "https://" + repoUrl;
-                }
-                if (!repoUrl.endsWith(".git")) {
-                    repoUrl = repoUrl + ".git";
-                }
-            } else {
-                // Create a repository on GitHub/GitLab
+            // Check if service supports auto-repo creation
+            if (config.gitService.supportsAutoRepoCreation()) {
+                // Try to create repo automatically (GitHub, GitLab, Gitea)
                 progressScreen.beginTask("Create repository", 0);
                 HttpResponse<String> response = NetworkManager.createRepo(config, level.getLevelId(), level.getLevelName());
                 int statusCode = response == null ? -1 : response.statusCode();
 
-                // Check for expected success codes (201 for GitHub/Gitea, 201 for GitLab)
-                boolean createSuccess = (statusCode == 201) || (config.gitService == GitService.GITLAB && statusCode == 201);
+                boolean createSuccess = (statusCode == 201);
 
                 if (!createSuccess) {
                     minecraft.submit(() -> {
@@ -134,10 +125,19 @@ public class EnableWorldSyncScreen extends Screen {
 
                 repoUrl = NetworkManager.parseCloneUrl(response, config.gitService);
                 if (repoUrl == null) {
-                    // Fallback for services that don't return clone_url in expected format
+                    // Fallback: construct URL from config
                     repoUrl = config.buildCloneUrl("minegit_" + level.getLevelId());
                 }
                 MineGIT.LOGGER.info("Successfully created repo with URL: {}", repoUrl);
+            } else {
+                // Custom service without auto-repo support - use provided URL
+                repoUrl = repoUrlEdit.getValue();
+                if (!repoUrl.startsWith("http://") && !repoUrl.startsWith("https://")) {
+                    repoUrl = "https://" + repoUrl;
+                }
+                if (!repoUrl.endsWith(".git")) {
+                    repoUrl = repoUrl + ".git";
+                }
             }
 
             // Git init on world save folder
