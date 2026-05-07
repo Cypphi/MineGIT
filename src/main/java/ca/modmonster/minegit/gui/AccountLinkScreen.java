@@ -1,5 +1,6 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.MineGIT;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
@@ -152,11 +153,22 @@ public class AccountLinkScreen extends Screen {
         updateCustomUrlVisibility();
     }
 
+    private void updateDefaultValues(Config config) {
+        if (selectedService == GitService.GITLAB) {
+            webUrlEdit.setValue(GitService.GITLAB.getDefaultWebUrl());
+            apiUrlEdit.setValue(GitService.GITLAB.getDefaultApiUrl());
+        } else {
+            webUrlEdit.setValue(config.customWebUrl);
+            apiUrlEdit.setValue(config.customApiUrl);
+        }
+    }
+
     private void cycleService(int direction) {
         GitService[] services = GitService.values();
         int currentIndex = selectedService.ordinal();
         int newIndex = (currentIndex + direction + services.length) % services.length;
         selectedService = services[newIndex];
+        updateDefaultValues(ConfigManager.getCurrentConfig());
         updateServiceDisplay();
         updateCustomUrlVisibility();
         updateTestButtonStatus(false);

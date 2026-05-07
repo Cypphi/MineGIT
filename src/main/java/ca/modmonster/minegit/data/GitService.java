@@ -29,7 +29,7 @@ public enum GitService {
     }
 
     public boolean requiresCustomUrl() {
-        return this == GITEA || this == CUSTOM;
+        return this == GITEA || this == CUSTOM || this == GITLAB;
     }
 
     public boolean supportsAutoRepoCreation() {
