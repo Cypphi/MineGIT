@@ -2,6 +2,7 @@ package ca.modmonster.minegit.mixin;
 
 import ca.modmonster.minegit.backport.ScreenTooltipRenderer;
 import ca.modmonster.minegit.backport.toast.ToastManager;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiElement;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.TextRenderer;
@@ -27,9 +28,12 @@ public class ScreenMixin extends GuiElement implements ScreenTooltipRenderer {
     @Shadow
     public int height;
 
+    @Shadow
+    protected Minecraft minecraft;
+
     @Inject(at = @At("TAIL"), method = "render")
     public void render(CallbackInfo ci) {
-        ToastManager.INSTANCE.render(width);
+        ToastManager.INSTANCE.render(minecraft, width);
     }
 
     @Unique

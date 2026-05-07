@@ -23,7 +23,7 @@ public class RalspinWidget extends GuiElement {
         this.y = y;
     }
 
-    public void render(int i, int j) {
+    public void render(Minecraft minecraft, int i, int j) {
         this.hovered = i >= this.x && j >= this.y && i < this.x + FRAME_WIDTH * SCALE && j < this.y + FRAME_HEIGHT * SCALE;
         long time = System.currentTimeMillis() / 50;
         int frame = (int) ((time / FRAME_TIME) % FRAME_COUNT);
@@ -35,7 +35,7 @@ public class RalspinWidget extends GuiElement {
         GL11.glTranslatef(x, y, 0);
         GL11.glScalef(SCALE, SCALE, 1);
         GL11.glColor4f(1F, 1F, 1F, 1F);
-        bindTexture(Minecraft.getInstance());
+        bindTexture(minecraft);
         ScreenUtil.drawTexture(
                 0, 0,
                 u, v,

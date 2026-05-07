@@ -80,7 +80,7 @@ public class AccountLinkScreen extends Screen {
         drawCenteredString(this.textRenderer, I18n.translate("minegit.link.title"), this.width / 2, 50, 16777215);
         drawCenteredString(this.textRenderer, I18n.translate("minegit.link.username"), this.width / 2, 90, -2130706433);
         drawCenteredString(this.textRenderer, I18n.translate("minegit.link.pat"), this.width / 2, 135, -2130706433);
-        ralspinWidget.render(i, j);
+        ralspinWidget.render(minecraft, i, j);
         usernameEdit.render();
         patEdit.render();
         super.render(i, j, f);

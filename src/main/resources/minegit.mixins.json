@@ -5,13 +5,14 @@
   "client": [
     "CreateWorldScreenMixin",
     "EditWorldScreenMixin",
-    "LevelSaveMixin",
     "LocaleMixin",
+    "MinecraftAccessor",
     "MinecraftMixin",
     "PauseScreenMixin",
     "ScreenMixin",
     "SinglePlayerScreenMixin",
-    "WorldListWidgetMixin"
+    "WorldListWidgetMixin",
+    "WorldMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -8,7 +8,6 @@ import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.locale.I18n;
-import net.minecraft.server.integrated.IntegratedServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,10 +36,9 @@ public class PauseScreenMixin extends Screen {
     @Inject(at = @At("TAIL"), method = "render", remap = false)
     private void render(int mouseX, int mouseY, float f, CallbackInfo ci) {
         if (disconnectButton == null) return;
-        if (!minecraft.isSingleplayer()) return;
-        IntegratedServer server = minecraft.getServer();
-        if (server == null) return;
-        if (!GitManager.syncEnabled(minecraft, server.getWorldSaveName())) return;
+        if (minecraft.isMultiplayer()) return;
+        if (minecraft.world == null) return;
+        if (!GitManager.syncEnabled(minecraft, minecraft.world.getStorage().getName())) return;
         QuitState.altQuit = ScreenUtil.isAltDown();
         if (!ScreenUtil.isAltDown()) return;
 

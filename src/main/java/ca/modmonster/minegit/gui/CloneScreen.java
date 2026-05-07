@@ -86,7 +86,7 @@ public class CloneScreen extends Screen {
         drawCenteredString(textRenderer, I18n.translate("minegit.clone.title"), this.width / 2, 50, 16777215);
         drawCenteredString(textRenderer, I18n.translate("minegit.clone.repo"), this.width / 2, 90, -2130706433);
         repoEdit.render();
-        ralspinWidget.render(i, j);
+        ralspinWidget.render(minecraft, i, j);
         super.render(i, j, f);
         if (ScreenUtil.isHovered(i, j, backButton.x, backButton.y, 20, 20))
             ((ScreenTooltipRenderer) this).renderTooltip(I18n.translate("minegit.clone.back"), i, j);

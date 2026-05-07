@@ -7,13 +7,11 @@ import ca.modmonster.minegit.data.SyncResult;
 import ca.modmonster.minegit.gui.GitConflictScreen;
 import ca.modmonster.minegit.gui.GitProgressScreen;
 import ca.modmonster.minegit.gui.TwoChoiceScreen;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.locale.I18n;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.integrated.IntegratedServer;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.util.ProgressListener;
+import net.minecraft.world.World;
+import net.minecraft.world.storage.WorldStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -23,27 +21,26 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.nio.file.Path;
 
-@Environment(EnvType.CLIENT)
-@Mixin(IntegratedServer.class)
-public class LevelSaveMixin {
+@Mixin(World.class)
+public abstract class WorldMixin {
     @Shadow
-    @Final
-    private Minecraft minecraft;
+    public abstract WorldStorage getStorage();
 
-    @Inject(method = "shutdown", at = @At("TAIL"))
-    private void onWorldSaved(CallbackInfo ci) {
+    @Inject(method = "forceSave", at = @At("TAIL"))
+    public void onWorldSave(ProgressListener progressListener, CallbackInfo ci) {
+        String levelId = getStorage().getName();
+        Minecraft minecraft = MinecraftAccessor.getInstance();
+        if (minecraft == null) return;
+
         if (QuitState.altQuit) return;
-
-        MinecraftServer server = (MinecraftServer) (Object) this;
-        String levelId = server.getWorldSaveName();
         if (!GitManager.syncEnabled(minecraft, levelId)) return;
         MineGIT.LOGGER.info("Pushing current world to GitHub");
 
-        doWorldSave(GitManager.getPath(minecraft, levelId));
+        doWorldSave(minecraft, GitManager.getPath(minecraft, levelId));
     }
 
     @Unique
-    private void doWorldSave(Path worldFolder) {
+    private void doWorldSave(Minecraft minecraft, Path worldFolder) {
         GitProgressScreen progressScreen = new GitProgressScreen(I18n.translate("minegit.sync.status.git_push"));
         minecraft.openScreen(progressScreen);
         new Thread(() -> {
@@ -51,6 +48,7 @@ public class LevelSaveMixin {
             switch (status) {
                 case SUCCESS:
                     // Success; quit as normal
+                    MineGIT.LOGGER.info("SUCCESS!!");
                     minecraft.execute(() -> minecraft.openScreen(null));
                     break;
                 case FAIL_GENERIC:
@@ -68,7 +66,7 @@ public class LevelSaveMixin {
                             I18n.translate("minegit.sync.push_unreachable.description"),
                             I18n.translate("minegit.sync.push_unreachable.retry"),
                             I18n.translate("minegit.sync.push_unreachable.exit"),
-                            () -> minecraft.execute(() -> doWorldSave(worldFolder)),
+                            () -> minecraft.execute(() -> doWorldSave(minecraft, worldFolder)),
                             () -> minecraft.openScreen(null)
                     )));
                     break;

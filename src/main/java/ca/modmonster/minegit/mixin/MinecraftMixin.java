@@ -5,9 +5,8 @@ import ca.modmonster.minegit.data.QuitState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.server.integrated.IntegratedServer;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.entity.mob.player.PlayerEntity;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -17,12 +16,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin {
-    @Shadow
-    private @Nullable IntegratedServer server;
-
-    @Shadow
-    public abstract void openScreen(@Nullable Screen screen);
-
     @Shadow
     public int width;
     @Unique
@@ -35,21 +28,14 @@ public abstract class MinecraftMixin {
 
         // For some reason IntelliJ thinks this is always false. It is confused.
         if (!QuitState.altQuit && GitManager.syncEnabled((Minecraft) (Object) this, prevSaveId)) {
-            // Show the generic dirt screen instead
-            openScreen(new Screen() {
-                @Override
-                public void render(int i, int j, float f) {
-                    drawBackgroundTexture(i);
-                }
-            });
             ci.cancel();
         }
         prevSaveId = null;
     }
 
-    @Inject(method = "setWorld(Lnet/minecraft/client/world/ClientWorld;Ljava/lang/String;)V", at = @At("HEAD"))
-    private void onSetWorld(ClientWorld world, String message, CallbackInfo ci) {
-        if (server == null) return;
-        prevSaveId = server.getWorldSaveName();
+    @Inject(method = "setWorld(Lnet/minecraft/world/World;Ljava/lang/String;Lnet/minecraft/entity/mob/player/PlayerEntity;)V", at = @At("HEAD"))
+    private void onSetWorld(World world, String message, PlayerEntity player, CallbackInfo ci) {
+        if (world == null) return;
+        prevSaveId = world.getStorage().getName();
     }
 }
