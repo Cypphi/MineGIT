@@ -10,6 +10,7 @@
   "minegit.link.status.error.pat": "Invalid access token.",
   "minegit.link.status.error.username": "Invalid username.",
   "minegit.link.status.success": "Success!",
+  "minegit.link.clear": "Clear",
   "minegit.sync.enable": "Enable Cloud Sync",
   "minegit.sync.enable.title": "Enable Cloud Sync",
   "minegit.sync.enable.confirm.line1": "Would you like to enable cloud sync for %s?",

@@ -4,7 +4,6 @@ import com.google.common.collect.Queues;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiElement;
 import net.minecraft.client.render.platform.Lighting;
-import net.minecraft.util.math.MathHelper;
 import org.lwjgl.Sys;
 import org.lwjgl.opengl.GL11;
 
@@ -58,9 +57,15 @@ public class ToastManager extends GuiElement {
         }
 
         private float getVisibility(long time) {
-            float f = MathHelper.clamp((float)(time - this.time) / 600.0F, 0.0F, 1.0F);
+            float f = clamp((float)(time - this.time) / 600.0F, 0.0F, 1.0F);
             f *= f;
             return this.visibility == Toast.Visibility.HIDE ? 1.0F - f : f;
+        }
+
+        private float clamp(float x, float min, float max) {
+            if (x > max) return max;
+            if (x < min) return min;
+            return x;
         }
 
         public boolean render(Minecraft minecraft, int x, int y) {

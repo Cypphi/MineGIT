@@ -33,6 +33,7 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings ploceus.featherMappings(project.feather_build)
 	clientExceptions ploceus.raven(project.client_raven_build, 'client')
+	clientSignatures ploceus.sparrow(project.client_sparrow_build, 'client')
 	clientNests ploceus.nests(project.client_nests_build, 'client')
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 

@@ -2,12 +2,37 @@ package ca.modmonster.minegit.backport;
 
 import net.minecraft.client.render.TextRenderer;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public interface MultiLineLabel {
+    static List<String> splitByWidth(TextRenderer font, String text, int width) {
+        List<String> lines = new ArrayList<>();
+
+        String[] words = text.split(" ");
+        int j = 0;
+
+        String current = "";
+        while (j < words.length) {
+            // grow line while it still fits
+            if (font.getWidth(current + words[j]) < width) {
+                current += words[j++] + " ";
+            } else {
+                lines.add(current);
+                current = "";
+            }
+        }
+
+        if (!current.trim().isEmpty()) {
+            lines.add(current);
+        }
+
+        return lines;
+    }
+
     static MultiLineLabel create(TextRenderer font, String text, int i) {
-        List<String> lines = font.split(text, i);
+        List<String> lines = splitByWidth(font, text, i);
         List<TextWithWidth> list = lines.stream().map((str) ->
                 new TextWithWidth(str, font.getWidth(str))).collect(Collectors.toList());
         return createFixed(font, list);

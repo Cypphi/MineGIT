@@ -23,6 +23,7 @@ public class AccountLinkScreen extends Screen {
     private String testCredentialsStatus = null;
     private ButtonWidget backButton;
     private RalspinWidget ralspinWidget;
+    private ButtonWidget clearButton;
 
     public AccountLinkScreen(Screen parent) {
         this(parent, null);
@@ -36,15 +37,19 @@ public class AccountLinkScreen extends Screen {
     @Override
     public void init() {
         // Username text field
-        usernameEdit = new TextFieldWidget(textRenderer, this.width / 2 - 100, 107, 200, 20);
+        usernameEdit = new TextFieldWidget(this, textRenderer, this.width / 2 - 100, 107, 200, 20, "");
         usernameEdit.setMaxLength(39);
 
         // PAT text field
-        patEdit = new TextFieldWidget(textRenderer, this.width / 2 - 100, 152, 200, 20);
+        patEdit = new TextFieldWidget(this, textRenderer, this.width / 2 - 100, 152, 200, 20, "");
         patEdit.setMaxLength(255);
 
+        // Clear credentials button
+        clearButton = new ButtonWidget(1, this.width / 2 - 100, 180, 60, 20, I18n.translate("minegit.link.clear"));
+        buttons.add(clearButton);
+
         // Test credentials button
-        testCredentialsButton = new ButtonWidget(2, this.width / 2 - 100, 180, 200, 20, I18n.translate("minegit.link.test"));
+        testCredentialsButton = new ButtonWidget(2, this.width / 2 - 34, 180, 136, 20, I18n.translate("minegit.link.test"));
         buttons.add(testCredentialsButton);
 
         // Back button
@@ -67,7 +72,11 @@ public class AccountLinkScreen extends Screen {
 
     @Override
     protected void buttonClicked(ButtonWidget button) {
-        if (button.id == 2) {
+        if (button.id == 1) {
+          usernameEdit.setText("");
+          patEdit.setText("");
+          updateTestButtonStatus(false);
+        } if (button.id == 2) {
             testCredentials();
         } else if (button.id == 3) {
             close();
@@ -91,13 +100,14 @@ public class AccountLinkScreen extends Screen {
 
     @Override
     protected void keyPressed(char i, int j) {
-        if (this.usernameEdit.isFocused()) {
+        if (this.usernameEdit.focused) {
             this.usernameEdit.keyPressed(i, j);
             updateTestButtonStatus(false);
-        } else if (this.patEdit.isFocused()) {
+        } else if (this.patEdit.focused) {
             this.patEdit.keyPressed(i, j);
             updateTestButtonStatus(false);
         }
+        clearButton.active = !this.usernameEdit.getText().isEmpty() || !this.patEdit.getText().isEmpty();
         if (j == 1) close();
     }
 
