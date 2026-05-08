@@ -48,7 +48,6 @@ public abstract class WorldMixin {
             switch (status) {
                 case SUCCESS:
                     // Success; quit as normal
-                    MineGIT.LOGGER.info("SUCCESS!!");
                     minecraft.execute(() -> minecraft.openScreen(null));
                     break;
                 case FAIL_GENERIC:

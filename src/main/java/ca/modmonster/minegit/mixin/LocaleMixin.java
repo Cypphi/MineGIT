@@ -14,9 +14,8 @@ public class LocaleMixin {
     @Shadow
     private Properties translations;
 
-    @Inject(at = @At("TAIL"), method = "loadLanguage")
-    public void load(String language, CallbackInfo ci) {
-        if (!language.equals("en_US")) return;
+    @Inject(at = @At("TAIL"), method = "<init>")
+    public void load(CallbackInfo ci) {
         this.translations.put("selectWorld.rename", "Edit");
         this.translations.put("selectWorld.renameTitle", "Edit World");
     }

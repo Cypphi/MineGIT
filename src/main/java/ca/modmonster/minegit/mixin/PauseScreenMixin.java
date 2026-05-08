@@ -25,9 +25,9 @@ public class PauseScreenMixin extends Screen {
     @Inject(at = @At("TAIL"), method = "init", remap = false)
     protected void createPauseMenu(CallbackInfo ci) {
         // Find the disconnect button
-        for (Object o : this.buttons) {
-            ButtonWidget button = (ButtonWidget) o;
-            if (button.message.equals(I18n.translate("menu.returnToMenu"))) disconnectButton = button;
+        for (ButtonWidget button : this.buttons) {
+            System.out.println(button.message);
+            if (button.message.equals("Save and quit to title")) disconnectButton = button;
         }
 
         tooltip = I18n.translate("minegit.exit_without_push");
