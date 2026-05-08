@@ -56,7 +56,7 @@ public class PruneWorldScreen extends Screen {
     }
 
     private void doPrune(ProgressMonitor progress) {
-        boolean ok = GitManager.prune(minecraft, levelId, progress);
+        boolean ok = GitManager.prune(levelId, progress);
         if (minecraft == null) return;
         if (ok) {
             ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.prune.complete")));
@@ -70,8 +70,8 @@ public class PruneWorldScreen extends Screen {
         GitProgressScreen progressScreen = new GitProgressScreen(I18n.translate("minegit.prune.in_progress"));
         minecraft.openScreen(progressScreen);
         new Thread(() -> {
-            SyncResult status = GitManager.pull(GitManager.getPath(minecraft, levelId), progressScreen);
-            GitManager.makeWritable(minecraft, levelId);
+            SyncResult status = GitManager.pull(GitManager.getPath(levelId), progressScreen);
+            GitManager.makeWritable(levelId);
             switch (status) {
                 case SUCCESS:
                     // Success; load world as normal
@@ -82,7 +82,7 @@ public class PruneWorldScreen extends Screen {
                     minecraft.execute(() -> minecraft.openScreen(new GitConflictScreen(
                             () -> doPrune(progressScreen),
                             this::close,
-                            GitManager.getPath(minecraft, levelId)
+                            GitManager.getPath(levelId)
                     )));
                     break;
                 case FAIL_NETWORK:

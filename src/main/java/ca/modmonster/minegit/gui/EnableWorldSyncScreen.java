@@ -94,7 +94,7 @@ public class EnableWorldSyncScreen extends Screen {
 
             // Git init on world save folder
             progressScreen.beginTask("Create Git repo", 0);
-            boolean ok = GitManager.init(minecraft, level.getSaveName(), repoUrl, progressScreen);
+            boolean ok = GitManager.init(level.getSaveName(), repoUrl, progressScreen);
             if (!ok) {
                 minecraft.execute(() -> {
                     ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.sync.enable.git_init.error")));

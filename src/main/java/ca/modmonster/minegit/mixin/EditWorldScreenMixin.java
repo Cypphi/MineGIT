@@ -24,7 +24,7 @@ public class EditWorldScreenMixin extends Screen {
 
     @Inject(at = @At(value = "TAIL"), method = "init")
     private void init(CallbackInfo ci) {
-        if (!GitManager.syncEnabled(minecraft, worldName)) return;
+        if (!GitManager.syncEnabled(worldName)) return;
 
         // Add prune button
         buttons.add(new ButtonWidget(100, this.width / 2 - 100, this.height / 4 + 72 + 12, 200, 20, I18n.translate("minegit.prune.button")));

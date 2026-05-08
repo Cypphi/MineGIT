@@ -8,6 +8,7 @@ import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.locale.I18n;
+import net.minecraft.world.storage.WorldStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,7 +27,6 @@ public class PauseScreenMixin extends Screen {
     protected void createPauseMenu(CallbackInfo ci) {
         // Find the disconnect button
         for (ButtonWidget button : this.buttons) {
-            System.out.println(button.message);
             if (button.message.equals("Save and quit to title")) disconnectButton = button;
         }
 
@@ -38,7 +38,9 @@ public class PauseScreenMixin extends Screen {
         if (disconnectButton == null) return;
         if (minecraft.isMultiplayer()) return;
         if (minecraft.world == null) return;
-        if (!GitManager.syncEnabled(minecraft, minecraft.world.getStorage().getName())) return;
+        WorldStorage worldStorage = ((WorldAccessor) minecraft.world).getStorage();
+        if (!(worldStorage instanceof AlphaWorldStorageAccessor)) return;
+        if (!GitManager.syncEnabled(((AlphaWorldStorageAccessor) worldStorage).getDir().toPath())) return;
         QuitState.altQuit = ScreenUtil.isAltDown();
         if (!ScreenUtil.isAltDown()) return;
 

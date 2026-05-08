@@ -80,7 +80,7 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
     protected void buttonClicked(ButtonWidget button, CallbackInfo ci) {
         if (button.id == 2) {
             // delete button; make .git folder writable
-            GitManager.makeWritable(minecraft, getSaveFileName(selectedWorldId));
+            GitManager.makeWritable(getSaveFileName(selectedWorldId));
         } else if (button.id == 100) {
             if (worldSyncButtonState == WorldSyncButtonState.SETUP || ScreenUtil.isAltDown()) {
                 minecraft.openScreen(new AccountLinkScreen(SinglePlayerScreenMixin.this, () -> {
@@ -137,7 +137,7 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
             // Set the world sync button to configuration state
             worldSyncButtonState = WorldSyncButtonState.SETUP;
             this.worldSyncButton.active = true;
-        } else if (selectedWorldId != -1 && GitManager.syncEnabled(minecraft, getSaveFileName(selectedWorldId))) {
+        } else if (selectedWorldId != -1 && GitManager.syncEnabled(getSaveFileName(selectedWorldId))) {
             worldSyncButtonState = WorldSyncButtonState.WORLD_CONFIGURE;
             this.worldSyncButton.active = false;
         } else {
@@ -153,14 +153,14 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
     @Inject(method = "selectWorld", at = @At("HEAD"), cancellable = true)
     private void beforeWorldJoin(int id, CallbackInfo ci) {
         if (!showGitBeforeJoin) return;
-        String worldId = getSaveFileName(selectedWorldId);
-        if (!GitManager.syncEnabled(minecraft, worldId)) return;
+        String worldId = getSaveFileName(id);
+        if (!GitManager.syncEnabled(worldId)) return;
         ci.cancel();
         GitProgressScreen progressScreen = new GitProgressScreen(I18n.translate("minegit.sync.status.git_pull"));
         minecraft.openScreen(progressScreen);
         new Thread(() -> {
-            SyncResult status = GitManager.pull(GitManager.getPath(minecraft, worldId), progressScreen);
-            GitManager.makeWritable(minecraft, worldId);
+            SyncResult status = GitManager.pull(GitManager.getPath(worldId), progressScreen);
+            GitManager.makeWritable(worldId);
             switch (status) {
                 case SUCCESS:
                     // Success; load world as normal
@@ -171,7 +171,7 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
                     minecraft.execute(() -> minecraft.openScreen(new GitConflictScreen(
                             this::doLoadWorld,
                             this::returnToScreen,
-                            GitManager.getPath(minecraft, worldId)
+                            GitManager.getPath(worldId)
                     )));
                     break;
                 case FAIL_NETWORK:

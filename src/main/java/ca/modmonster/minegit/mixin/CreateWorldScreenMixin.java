@@ -38,11 +38,11 @@ public abstract class CreateWorldScreenMixin extends Screen {
 
         if (needsSetup) {
             // Add setup button
-            gitButton = new ImageButton(100, width / 2 - 178, height - 28, ImageButton.ImageButtonTex.CLOUD);
+            gitButton = new ImageButton(100, this.width / 2 - 124, this.height / 4 + 96 + 12, ImageButton.ImageButtonTex.CLOUD);
             gitButtonTooltip = I18n.translate("minegit.link.setup");
         } else {
             // Add clone button
-            gitButton = new ImageButton(100, width / 2 - 178, height - 28, ImageButton.ImageButtonTex.CLONE);
+            gitButton = new ImageButton(100, this.width / 2 - 124, this.height / 4 + 96 + 12, ImageButton.ImageButtonTex.CLONE);
             gitButtonTooltip = I18n.translate("minegit.clone.title");
         }
         buttons.add(gitButton);

@@ -12,6 +12,7 @@ import net.minecraft.locale.I18n;
 import net.minecraft.util.ProgressListener;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.WorldStorage;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -24,19 +25,21 @@ import java.nio.file.Path;
 @Mixin(World.class)
 public abstract class WorldMixin {
     @Shadow
-    public abstract WorldStorage getStorage();
+    @Final
+    protected WorldStorage storage;
 
     @Inject(method = "forceSave", at = @At("TAIL"))
     public void onWorldSave(ProgressListener progressListener, CallbackInfo ci) {
-        String levelId = getStorage().getName();
+        if (!(storage instanceof AlphaWorldStorageAccessor)) return;
+        Path path = ((AlphaWorldStorageAccessor) storage).getDir().toPath();
         Minecraft minecraft = MinecraftAccessor.getInstance();
         if (minecraft == null) return;
 
         if (QuitState.altQuit) return;
-        if (!GitManager.syncEnabled(minecraft, levelId)) return;
+        if (!GitManager.syncEnabled(path)) return;
         MineGIT.LOGGER.info("Pushing current world to GitHub");
 
-        doWorldSave(minecraft, GitManager.getPath(minecraft, levelId));
+        doWorldSave(minecraft, path);
     }
 
     @Unique

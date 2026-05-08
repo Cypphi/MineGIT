@@ -34,8 +34,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class GitManager {
-    public static boolean syncEnabled(Minecraft minecraft, String worldId) {
-        return syncEnabled(getPath(minecraft, worldId));
+    public static boolean syncEnabled(String worldId) {
+        return syncEnabled(getPath(worldId));
     }
 
     public static boolean syncEnabled(Path worldFolder) {
@@ -219,8 +219,8 @@ public class GitManager {
         }
     }
 
-    public static boolean init(Minecraft minecraft, String worldId, String repoUrl, ProgressMonitor progressMonitor) {
-        Path worldFolder = getPath(minecraft, worldId);
+    public static boolean init(String worldId, String repoUrl, ProgressMonitor progressMonitor) {
+        Path worldFolder = getPath(worldId);
         Config config = ConfigManager.getCurrentConfig();
         try (Git git = Git.init().setDirectory(worldFolder.toFile()).call()) {
             progressMonitor.beginTask("Stage world to commit", 0);
@@ -257,16 +257,16 @@ public class GitManager {
         }
     }
 
-    public static int cloneRepo(Minecraft minecraft, String repo, ProgressMonitor progressMonitor) {
+    public static int cloneRepo(String repo, ProgressMonitor progressMonitor) {
         progressMonitor.beginTask("Starting world clone", 0);
         Config config = ConfigManager.getCurrentConfig();
         String repoUrl = String.format("https://github.com/%s/%s.git", config.username, repo);
-        Path localWorldFolder = getPath(minecraft, repo.replaceFirst(Pattern.quote("minegit_"), ""));
+        Path localWorldFolder = getPath(repo.replaceFirst(Pattern.quote("minegit_"), ""));
 
         // Add a counter at the end if world folder already exists
         int i = 1;
         while (localWorldFolder.toFile().exists()) {
-            localWorldFolder = getPath(minecraft, repo.replaceFirst(Pattern.quote("minegit_"), "") + "_" + i);
+            localWorldFolder = getPath(repo.replaceFirst(Pattern.quote("minegit_"), "") + "_" + i);
             i++;
         }
 
@@ -286,19 +286,19 @@ public class GitManager {
         }
     }
 
-    public static Path getPath(Minecraft minecraft, String worldId) {
-        return minecraft.gameDir.toPath().resolve("saves/" + worldId);
+    public static Path getPath(String worldId) {
+        return Minecraft.getWorkingDirectory().toPath().resolve("saves/" + worldId);
     }
 
     /**
      * Recursively make the .git folder within the provided world folder writable
      * This prevents issues when needing to upgrade the world from <=1.21.11 to >=26.1
-     * @param minecraft Minecraft client reference
+     *
      * @param worldId The world ID containing the Git repo
      */
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static void makeWritable(Minecraft minecraft, String worldId) {
-        Path root = getPath(minecraft, worldId).resolve(".git");
+    public static void makeWritable(String worldId) {
+        Path root = getPath(worldId).resolve(".git");
         if (!root.toFile().exists()) return;
 
         try (Stream<Path> stream = Files.walk(root)) {
@@ -343,9 +343,9 @@ public class GitManager {
         } catch (Exception ignored) {}
     }
 
-    public static boolean prune(Minecraft minecraft, String worldId, ProgressMonitor progressMonitor) {
+    public static boolean prune(String worldId, ProgressMonitor progressMonitor) {
         progressMonitor.beginTask("Opening world", 0);
-        Path worldFolder = getPath(minecraft, worldId);
+        Path worldFolder = getPath(worldId);
         Config config = ConfigManager.getCurrentConfig();
         try (Git git = Git.open(worldFolder.toFile())) {
             // get current branch name

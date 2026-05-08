@@ -6,6 +6,8 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(TextFieldWidget.class)
@@ -13,6 +15,9 @@ public class TextFieldWidgetMixin {
     @Shadow
     @Final
     private int width;
+
+    @Shadow
+    private int maxLength;
 
     @Redirect(method = "render", at = @At(
             value = "INVOKE",
@@ -31,5 +36,10 @@ public class TextFieldWidgetMixin {
         }
 
         textRenderer.drawWithShadow(t, x, y, color);
+    }
+
+    @ModifyConstant(method = "keyPressed", constant = @Constant(intValue = 32))
+    private int changeLimit(int original) {
+        return maxLength;
     }
 }

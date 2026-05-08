@@ -103,7 +103,7 @@ public class CloneScreen extends Screen {
         GitProgressScreen progressScreen = new GitProgressScreen(I18n.translate("minegit.clone.in_progress"));
         minecraft.openScreen(progressScreen);
         new Thread(() -> {
-            int result = GitManager.cloneRepo(minecraft, repoEdit.getText(), progressScreen);
+            int result = GitManager.cloneRepo(repoEdit.getText(), progressScreen);
 
             minecraft.execute(() -> {
                 if (result == 0) {
