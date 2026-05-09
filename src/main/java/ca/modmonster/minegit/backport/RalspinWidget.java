@@ -1,10 +1,10 @@
 package ca.modmonster.minegit.backport;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiElement;
+import net.minecraft.client.gui.DrawableHelper;
 import org.lwjgl.opengl.GL11;
 
-public class RalspinWidget extends GuiElement {
+public class RalspinWidget extends DrawableHelper {
     private static final String SPRITE = "/assets/minegit/textures/gui/ralspin.png";
     private static final int FRAME_WIDTH = 21;
     private static final int FRAME_HEIGHT = 40;
@@ -47,9 +47,9 @@ public class RalspinWidget extends GuiElement {
 
     public void bindTexture(Minecraft minecraft) {
         if (glid == 0) {
-            glid = minecraft.textureManager.load(SPRITE);
+            glid = minecraft.textureManager.getTextureId(SPRITE);
         }
-        minecraft.textureManager.bind(glid);
+        minecraft.textureManager.bindTexture(glid);
     }
 
     public boolean isHovered() {

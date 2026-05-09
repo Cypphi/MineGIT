@@ -1,6 +1,6 @@
 package ca.modmonster.minegit.mixin;
 
-import net.minecraft.locale.Language;
+import net.minecraft.client.resource.language.TranslationStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Properties;
 
-@Mixin(Language.class)
+@Mixin(TranslationStorage.class)
 public class LocaleMixin {
     @Shadow
     private Properties translations;

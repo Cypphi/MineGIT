@@ -47,9 +47,9 @@ public class Toast {
 
     public void bindTexture(Minecraft minecraft) {
         if (glid == 0) {
-            glid = minecraft.textureManager.load(TOASTS_LOCATION);
+            glid = minecraft.textureManager.getTextureId(TOASTS_LOCATION);
         }
-        minecraft.textureManager.bind(glid);
+        minecraft.textureManager.bindTexture(glid);
     }
 
     @Environment(EnvType.CLIENT)

@@ -1,16 +1,12 @@
 package ca.modmonster.minegit.gui;
 
-import ca.modmonster.minegit.backport.ImageButton;
-import ca.modmonster.minegit.backport.RalspinWidget;
-import ca.modmonster.minegit.backport.ScreenTooltipRenderer;
-import ca.modmonster.minegit.backport.ScreenUtil;
+import ca.modmonster.minegit.backport.*;
 import ca.modmonster.minegit.backport.toast.Toast;
 import ca.modmonster.minegit.backport.toast.ToastManager;
 import ca.modmonster.minegit.data.GitManager;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.locale.I18n;
 
 public class CloneScreen extends Screen {
     private final Runnable closeCallback;
@@ -37,7 +33,7 @@ public class CloneScreen extends Screen {
         repoEdit.setMaxLength(39);
 
         // Clone button
-        cloneButton = new ButtonWidget(1, this.width / 2 - 100, 135, 200, 20, I18n.translate("minegit.clone.confirm"));
+        cloneButton = new ButtonWidget(1, this.width / 2 - 100, 135, 200, 20, "Clone");
         buttons.add(cloneButton);
 
         // Back button
@@ -62,7 +58,7 @@ public class CloneScreen extends Screen {
         } else if (button.id == 2) {
             close();
         } else if (button.id == 3) {
-            minecraft.openScreen(new AccountLinkScreen(CloneScreen.this));
+            minecraft.setScreen(new AccountLinkScreen(CloneScreen.this));
         }
     }
 
@@ -81,16 +77,16 @@ public class CloneScreen extends Screen {
 
     @Override
     public void render(int i, int j, float f) {
-        this.drawBackgroundTexture(i);
-        drawCenteredString(textRenderer, I18n.translate("minegit.clone.title"), this.width / 2, 50, 16777215);
-        drawCenteredString(textRenderer, I18n.translate("minegit.clone.repo"), this.width / 2, 90, -2130706433);
+        this.renderBackgroundTexture(i);
+        drawCenteredTextWithShadow(textRenderer, "Clone World", this.width / 2, 50, 16777215);
+        drawCenteredTextWithShadow(textRenderer, "Repository Name", this.width / 2, 90, -2130706433);
         repoEdit.render();
         ralspinWidget.render(minecraft, i, j);
         super.render(i, j, f);
         if (ScreenUtil.isHovered(i, j, backButton.x, backButton.y, 20, 20))
-            ((ScreenTooltipRenderer) this).renderTooltip(I18n.translate("minegit.clone.back"), i, j);
+            ((ScreenTooltipRenderer) this).renderTooltip("Back", i, j);
         if (ScreenUtil.isHovered(i, j, configureButton.x, configureButton.y, 20, 20))
-            ((ScreenTooltipRenderer) this).renderTooltip(I18n.translate("minegit.link.setup.open"), i, j);
+            ((ScreenTooltipRenderer) this).renderTooltip("Open Cloud Sync Setup", i, j);
         if (ralspinWidget.isHovered()) ((ScreenTooltipRenderer) this).renderTooltip(RalspinWidget.TOOLTIP, i, j);
     }
 
@@ -100,26 +96,26 @@ public class CloneScreen extends Screen {
     }
 
     private void doClone() {
-        GitProgressScreen progressScreen = new GitProgressScreen(I18n.translate("minegit.clone.in_progress"));
-        minecraft.openScreen(progressScreen);
+        GitProgressScreen progressScreen = new GitProgressScreen("Cloning world...");
+        minecraft.setScreen(progressScreen);
         new Thread(() -> {
             int result = GitManager.cloneRepo(repoEdit.getText(), progressScreen);
 
-            minecraft.execute(() -> {
+            MainThreadTasks.execute(() -> {
                 if (result == 0) {
-                    ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.clone.success")));
+                    ToastManager.INSTANCE.add(new Toast("Successfully cloned the world from GitHub!"));
                     if (cloneSuccessCallback != null) {
                         cloneSuccessCallback.run();
                     } else {
                         close();
                     }
                 } else if (result == 1) {
-                    ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.clone.error.invalid_remote")));
-                    minecraft.openScreen(this);
+                    ToastManager.INSTANCE.add(new Toast("The world you are looking for doesn't exist!"));
+                    minecraft.setScreen(this);
                     updateButtonsStatus();
                 } else {
-                    ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.clone.error.generic")));
-                    minecraft.openScreen(this);
+                    ToastManager.INSTANCE.add(new Toast("Something went wrong when trying to clone the world."));
+                    minecraft.setScreen(this);
                     updateButtonsStatus();
                 }
             });

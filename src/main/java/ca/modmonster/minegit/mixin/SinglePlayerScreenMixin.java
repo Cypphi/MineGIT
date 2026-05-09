@@ -1,20 +1,16 @@
 package ca.modmonster.minegit.mixin;
 
-import ca.modmonster.minegit.backport.ImageButton;
-import ca.modmonster.minegit.backport.ScreenTooltipRenderer;
-import ca.modmonster.minegit.backport.ScreenUtil;
-import ca.modmonster.minegit.backport.SinglePlayerScreenExtension;
+import ca.modmonster.minegit.backport.*;
 import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.SyncResult;
 import ca.modmonster.minegit.gui.*;
 import ca.modmonster.minegit.widget.WorldSyncButtonState;
+import net.minecraft.class_591;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.locale.I18n;
-import net.minecraft.world.storage.WorldSaveInfo;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,15 +25,15 @@ import java.util.List;
 @Mixin(SelectWorldScreen.class)
 public abstract class SinglePlayerScreenMixin extends Screen implements SinglePlayerScreenExtension {
     @Shadow
-    private int selectedWorldId;
+    private int field_2435;
     @Shadow
-    private List<WorldSaveInfo> saves;
+    private List field_2436;
 
     @Shadow
-    protected abstract String getSaveFileName(int index);
+    protected abstract String method_1887(int index);
 
     @Shadow
-    public abstract void selectWorld(int id);
+    public abstract void method_1891(int id);
 
     @Unique
     private String cloneButtonTooltip;
@@ -60,9 +56,9 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
     @Unique
     private boolean showGitBeforeJoin = true;
 
-    @Inject(at = @At("TAIL"), method = "init", remap = false)
+    @Inject(at = @At("TAIL"), method = "init")
 	private void init(CallbackInfo info) {
-        cloneButtonTooltip = I18n.translate("minegit.clone.title");
+        cloneButtonTooltip = "Clone World";
 
         // Add world sync button
         worldSyncButton = new ImageButton(100, width / 2 - 178, height - 52, ImageButton.ImageButtonTex.CLOUD);
@@ -80,29 +76,29 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
     protected void buttonClicked(ButtonWidget button, CallbackInfo ci) {
         if (button.id == 2) {
             // delete button; make .git folder writable
-            GitManager.makeWritable(getSaveFileName(selectedWorldId));
+            GitManager.makeWritable(method_1887(field_2435));
         } else if (button.id == 100) {
             if (worldSyncButtonState == WorldSyncButtonState.SETUP || ScreenUtil.isAltDown()) {
-                minecraft.openScreen(new AccountLinkScreen(SinglePlayerScreenMixin.this, () -> {
+                minecraft.setScreen(new AccountLinkScreen(SinglePlayerScreenMixin.this, () -> {
                     returnToScreen();
                     updateWorldSyncButton();
                 }));
             } else if (worldSyncButtonState == WorldSyncButtonState.ENABLE) {
-                if (selectedWorldId != -1)
-                    minecraft.openScreen(new EnableWorldSyncScreen(SinglePlayerScreenMixin.this, saves.get(selectedWorldId), () -> {
+                if (field_2435 != -1)
+                    minecraft.setScreen(new EnableWorldSyncScreen(SinglePlayerScreenMixin.this, (class_591) field_2436.get(field_2435), () -> {
                         returnToScreen();
                         updateWorldSyncButton();
                     }));
             }
         } else if (button.id == 101) {
-            minecraft.openScreen(new CloneScreen(() -> {
+            minecraft.setScreen(new CloneScreen(() -> {
                 returnToScreen();
                 updateWorldSyncButton();
             }));
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "render", remap = false)
+    @Inject(at = @At("TAIL"), method = "render")
     public void render(int i, int j, float f, CallbackInfo ci) {
         if (cloneButton != null && ScreenUtil.isHovered(i, j, cloneButton.x, cloneButton.y, 20, 20))
             ((ScreenTooltipRenderer) this).renderTooltip(cloneButtonTooltip, i, j);
@@ -115,7 +111,7 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
             if (ScreenUtil.isAltDown()) {
                 worldSyncButton.active = true;
                 worldSyncButton.texture = ImageButton.ImageButtonTex.CLOUD;
-                worldSyncButtonTooltip = Collections.singletonList(I18n.translate("minegit.link.setup.open"));
+                worldSyncButtonTooltip = Collections.singletonList("Open Cloud Sync Setup");
             } else {
                 updateWorldSyncButton();
             }
@@ -137,12 +133,12 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
             // Set the world sync button to configuration state
             worldSyncButtonState = WorldSyncButtonState.SETUP;
             this.worldSyncButton.active = true;
-        } else if (selectedWorldId != -1 && GitManager.syncEnabled(getSaveFileName(selectedWorldId))) {
+        } else if (field_2435 != -1 && GitManager.syncEnabled(method_1887(field_2435))) {
             worldSyncButtonState = WorldSyncButtonState.WORLD_CONFIGURE;
             this.worldSyncButton.active = false;
         } else {
             worldSyncButtonState = WorldSyncButtonState.ENABLE;
-            this.worldSyncButton.active = selectedWorldId != -1;
+            this.worldSyncButton.active = field_2435 != -1;
         }
 
         worldSyncButton.texture = worldSyncButtonState.texture;
@@ -150,14 +146,14 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
         if (cloneButton != null) cloneButton.active = worldSyncButtonState != WorldSyncButtonState.SETUP;
     }
 
-    @Inject(method = "selectWorld", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "method_1891", at = @At("HEAD"), cancellable = true)
     private void beforeWorldJoin(int id, CallbackInfo ci) {
         if (!showGitBeforeJoin) return;
-        String worldId = getSaveFileName(id);
+        String worldId = method_1887(id);
         if (!GitManager.syncEnabled(worldId)) return;
         ci.cancel();
-        GitProgressScreen progressScreen = new GitProgressScreen(I18n.translate("minegit.sync.status.git_pull"));
-        minecraft.openScreen(progressScreen);
+        GitProgressScreen progressScreen = new GitProgressScreen("Pulling from GitHub...");
+        minecraft.setScreen(progressScreen);
         new Thread(() -> {
             SyncResult status = GitManager.pull(GitManager.getPath(worldId), progressScreen);
             GitManager.makeWritable(worldId);
@@ -168,7 +164,7 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
                     break;
                 case FAIL_GENERIC:
                     // Generic error; show option to keep local or cloud
-                    minecraft.execute(() -> minecraft.openScreen(new GitConflictScreen(
+                    MainThreadTasks.execute(() -> minecraft.setScreen(new GitConflictScreen(
                             this::doLoadWorld,
                             this::returnToScreen,
                             GitManager.getPath(worldId)
@@ -176,11 +172,11 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
                     break;
                 case FAIL_NETWORK:
                     // Network error; show unreachable screen
-                    minecraft.execute(() -> minecraft.openScreen(new TwoChoiceScreen(
-                            I18n.translate("minegit.sync.pull_unreachable.title"),
-                            I18n.translate("minegit.sync.pull_unreachable.description"),
-                            I18n.translate("minegit.sync.pull_unreachable.continue"),
-                            I18n.translate("minegit.sync.pull_unreachable.cancel"),
+                    MainThreadTasks.execute(() -> minecraft.setScreen(new TwoChoiceScreen(
+                            "Error syncing world",
+                            "Your latest world changes could not be synced with the cloud. You can continue to load the world if you wish, but you might not have the latest version of your world.",
+                            "Load without syncing",
+                            "Cancel",
                             this::doLoadWorld, // continue
                             this::returnToScreen // cancel
                     )));
@@ -191,15 +187,15 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
 
     @Unique
     private void doLoadWorld() {
-        minecraft.execute(() -> {
+        MainThreadTasks.execute(() -> {
             showGitBeforeJoin = false;
-            selectWorld(selectedWorldId);
+            method_1891(field_2435);
             showGitBeforeJoin = true;
         });
     }
 
     @Unique
     private void returnToScreen() {
-        minecraft.openScreen(this);
+        minecraft.setScreen(this);
     }
 }

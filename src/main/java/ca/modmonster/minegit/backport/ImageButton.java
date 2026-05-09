@@ -46,14 +46,14 @@ public class ImageButton extends ButtonWidget {
         public void bind(Minecraft minecraft, boolean enabled) {
             if (enabled) {
                 if (enabledGlid == 0) {
-                    enabledGlid = minecraft.textureManager.load(enabledTex);
+                    enabledGlid = minecraft.textureManager.getTextureId(enabledTex);
                 }
-                minecraft.textureManager.bind(enabledGlid);
+                minecraft.textureManager.bindTexture(enabledGlid);
             } else {
                 if (disabledGlid == 0) {
-                    disabledGlid = minecraft.textureManager.load(disabledTex);
+                    disabledGlid = minecraft.textureManager.getTextureId(disabledTex);
                 }
-                minecraft.textureManager.bind(disabledGlid);
+                minecraft.textureManager.bindTexture(disabledGlid);
             }
         }
     }

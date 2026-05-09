@@ -1,19 +1,12 @@
 plugins {
-	id 'fabric-loom' version "${loom_version}"
+	id 'babric-loom' version '1.5-SNAPSHOT'
 	id 'maven-publish'
-	id 'ploceus' version "${ploceus_version}"
 }
 
 loom {
-	runs {
-		client {
-			programArgs "--userProperties", "{}"
-		}
-	}
-}
-
-ploceus {
-	setIntermediaryGeneration(2)
+	gluedMinecraftJar()
+	customMinecraftManifest.set("https://babric.github.io/manifest-polyfill/${minecraft_version}.json")
+	intermediaryUrl.set("https://maven.glass-launcher.net/babric/babric/intermediary/%1\$s/intermediary-%1\$s-v2.jar")
 }
 
 version = project.mod_version
@@ -25,26 +18,26 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+	maven {
+		name = 'Babric'
+		url = 'https://maven.glass-launcher.net/babric'
+	}
     mavenCentral()
 }
 
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings ploceus.featherMappings(project.feather_build)
-	clientExceptions ploceus.raven(project.client_raven_build, 'client')
-	clientSignatures ploceus.sparrow(project.client_sparrow_build, 'client')
-	clientNests ploceus.nests(project.client_nests_build, 'client')
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	mappings "babric:barn:${project.yarn_mappings}:v2"
+	modImplementation "babric:fabric-loader:${project.loader_version}"
 
-	ploceus.dependOsl(project.osl_version)
+	implementation "org.slf4j:slf4j-api:1.8.0-beta4"
+	implementation "org.apache.logging.log4j:log4j-slf4j18-impl:2.16.0"
+	implementation "com.google.code.gson:gson:2.10.1"
 
-    // JGit
-    implementation "org.eclipse.jgit:org.eclipse.jgit:5.13.5.202508271544-r"
-    include "org.eclipse.jgit:org.eclipse.jgit:5.13.5.202508271544-r"
-
-	// Mod Menu
-	modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
+	// JGit
+	implementation "org.eclipse.jgit:org.eclipse.jgit:5.13.5.202508271544-r"
+	include "org.eclipse.jgit:org.eclipse.jgit:5.13.5.202508271544-r"
 }
 
 processResources {

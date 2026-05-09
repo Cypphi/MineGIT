@@ -1,24 +1,25 @@
 package ca.modmonster.minegit.backport.toast;
 
-import com.google.common.collect.Queues;
+import net.minecraft.class_583;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiElement;
-import net.minecraft.client.render.platform.Lighting;
+import net.minecraft.client.gui.DrawableHelper;
 import org.lwjgl.Sys;
 import org.lwjgl.opengl.GL11;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
 
-public class ToastManager extends GuiElement {
+public class ToastManager extends DrawableHelper {
     public static final ToastManager INSTANCE = new ToastManager();
 
     private final ToastManager.ToastInstance<?>[] toasts = new ToastManager.ToastInstance[5];
-    private final Deque<Toast> queue = Queues.newArrayDeque();
+    private final Deque<Toast> queue = new ArrayDeque<>();
 
     public void render(Minecraft minecraft, int width) {
-        if (!minecraft.options.hideGui) {
-            Lighting.turnOff();
+        if (!minecraft.options.hideHud) {
+            // Turn off lighting
+            class_583.method_1927();
 
             for (int i = 0; i < this.toasts.length; i++) {
                 ToastManager.ToastInstance<?> toastInstance = this.toasts[i];

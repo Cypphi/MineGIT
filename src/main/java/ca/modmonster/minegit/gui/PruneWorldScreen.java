@@ -1,5 +1,6 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.backport.MainThreadTasks;
 import ca.modmonster.minegit.backport.MultiLineLabel;
 import ca.modmonster.minegit.backport.toast.Toast;
 import ca.modmonster.minegit.backport.toast.ToastManager;
@@ -7,7 +8,6 @@ import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.SyncResult;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.locale.I18n;
 import org.eclipse.jgit.lib.ProgressMonitor;
 
 public class PruneWorldScreen extends Screen {
@@ -26,15 +26,15 @@ public class PruneWorldScreen extends Screen {
     @Override
     public void init() {
         // Confirmation message
-        descriptionWidget = MultiLineLabel.create(textRenderer, I18n.translate("minegit.prune.description"), this.width - 50);
+        descriptionWidget = MultiLineLabel.create(textRenderer, "This will delete all but the most recent version of your world both locally and from cloud storage. You will no longer be able to restore old snapshots of your world, but it will reduce the world's file size.", this.width - 50);
         int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Confirm button
-        ButtonWidget confirmButton = new ButtonWidget(0, this.width / 2 - 152, 98 + descriptionHeight, 150, 20, I18n.translate("minegit.prune.confirm"));
+        ButtonWidget confirmButton = new ButtonWidget(0, this.width / 2 - 152, 98 + descriptionHeight, 150, 20, "Confirm");
         buttons.add(confirmButton);
 
         // Cancel button
-        ButtonWidget cancelButton = new ButtonWidget(1, this.width / 2 + 2, 98 + descriptionHeight, 150, 20, I18n.translate("minegit.prune.cancel"));
+        ButtonWidget cancelButton = new ButtonWidget(1, this.width / 2 + 2, 98 + descriptionHeight, 150, 20, "Cancel");
         buttons.add(cancelButton);
     }
 
@@ -49,8 +49,8 @@ public class PruneWorldScreen extends Screen {
 
     @Override
     public void render(int i, int j, float f) {
-        this.drawBackgroundTexture(i);
-        drawCenteredString(textRenderer, I18n.translate("minegit.prune.title"), this.width / 2, 50, 16777215);
+        this.renderBackgroundTexture(i);
+        drawCenteredTextWithShadow(textRenderer, "Prune World Commits", this.width / 2, 50, 16777215);
         descriptionWidget.renderCentered(this.width / 2, 90);
         super.render(i, j, f);
     }
@@ -59,16 +59,16 @@ public class PruneWorldScreen extends Screen {
         boolean ok = GitManager.prune(levelId, progress);
         if (minecraft == null) return;
         if (ok) {
-            ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.prune.complete")));
+            ToastManager.INSTANCE.add(new Toast("World pruning complete!"));
         } else {
-            ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.prune.failed")));
+            ToastManager.INSTANCE.add(new Toast("Failed to prune world. Please see game console for details"));
         }
-        minecraft.execute(() -> minecraft.openScreen(successParent));
+        MainThreadTasks.execute(() -> minecraft.setScreen(successParent));
     }
 
     private void pullThenPrune() {
-        GitProgressScreen progressScreen = new GitProgressScreen(I18n.translate("minegit.prune.in_progress"));
-        minecraft.openScreen(progressScreen);
+        GitProgressScreen progressScreen = new GitProgressScreen("Pruning world...");
+        minecraft.setScreen(progressScreen);
         new Thread(() -> {
             SyncResult status = GitManager.pull(GitManager.getPath(levelId), progressScreen);
             GitManager.makeWritable(levelId);
@@ -79,7 +79,7 @@ public class PruneWorldScreen extends Screen {
                     break;
                 case FAIL_GENERIC:
                     // Generic error; show option to keep local or cloud
-                    minecraft.execute(() -> minecraft.openScreen(new GitConflictScreen(
+                    MainThreadTasks.execute(() -> minecraft.setScreen(new GitConflictScreen(
                             () -> doPrune(progressScreen),
                             this::close,
                             GitManager.getPath(levelId)
@@ -87,11 +87,11 @@ public class PruneWorldScreen extends Screen {
                     break;
                 case FAIL_NETWORK:
                     // Network error; show unreachable screen
-                    minecraft.execute(() -> minecraft.openScreen(new TwoChoiceScreen(
-                            I18n.translate("minegit.sync.pull_unreachable.title"),
-                            I18n.translate("minegit.sync.pull_unreachable.description"),
-                            I18n.translate("minegit.sync.pull_unreachable.continue"),
-                            I18n.translate("minegit.sync.pull_unreachable.cancel"),
+                    MainThreadTasks.execute(() -> minecraft.setScreen(new TwoChoiceScreen(
+                            "Error syncing world",
+                            "Your latest world changes could not be synced with the cloud. You can continue to load the world if you wish, but you might not have the latest version of your world.",
+                            "Load without syncing",
+                            "Cancel",
                             () -> doPrune(progressScreen),
                             this::close
                     )));
@@ -101,7 +101,7 @@ public class PruneWorldScreen extends Screen {
     }
 
     public void close() {
-        minecraft.openScreen(parent);
+        minecraft.setScreen(parent);
     }
 
     @Override

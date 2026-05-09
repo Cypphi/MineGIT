@@ -2,11 +2,11 @@ package ca.modmonster.minegit.mixin;
 
 import ca.modmonster.minegit.backport.ScreenTooltipRenderer;
 import ca.modmonster.minegit.backport.toast.ToastManager;
+import net.minecraft.class_583;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiElement;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.TextRenderer;
-import net.minecraft.client.render.platform.Lighting;
 import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 @Mixin(Screen.class)
-public class ScreenMixin extends GuiElement implements ScreenTooltipRenderer {
+public class ScreenMixin extends DrawableHelper implements ScreenTooltipRenderer {
     @Shadow
     public int width;
 
@@ -40,7 +40,7 @@ public class ScreenMixin extends GuiElement implements ScreenTooltipRenderer {
     public void renderTooltip(List<String> tooltip, int x, int y) {
         if (!tooltip.isEmpty()) {
             GL11.glDisable(32826);
-            Lighting.turnOff();
+            class_583.method_1927();
             GL11.glDisable(GL11.GL_LIGHTING);
             GL11.glDisable(GL11.GL_DEPTH_TEST);
             int i = 0;
@@ -67,7 +67,7 @@ public class ScreenMixin extends GuiElement implements ScreenTooltipRenderer {
                 k = this.height - n - 6;
             }
 
-            this.drawOffset = 300.0F;
+            this.zOffset = 300.0F;
             int o = -267386864;
             this.fillGradient(j - 3, k - 4, j + i + 3, k - 3, o, o);
             this.fillGradient(j - 3, k + n + 3, j + i + 3, k + n + 4, o, o);
@@ -91,10 +91,10 @@ public class ScreenMixin extends GuiElement implements ScreenTooltipRenderer {
                 k += 10;
             }
 
-            this.drawOffset = 0.0F;
+            this.zOffset = 0.0F;
             GL11.glEnable(GL11.GL_LIGHTING);
             GL11.glEnable(GL11.GL_DEPTH_TEST);
-            Lighting.turnOn();
+            class_583.method_1930();
             GL11.glEnable(32826);
         }
     }

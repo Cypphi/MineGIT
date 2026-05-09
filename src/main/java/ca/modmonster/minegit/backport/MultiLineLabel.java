@@ -1,6 +1,6 @@
 package ca.modmonster.minegit.backport;
 
-import net.minecraft.client.render.TextRenderer;
+import net.minecraft.client.font.TextRenderer;
 
 import java.util.ArrayList;
 import java.util.List;
