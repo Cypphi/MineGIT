@@ -28,7 +28,7 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.19.2",
-		"minecraft": ">=b1.5 <=b1.7.3",
+		"minecraft": ">=1.0.0-beta.5 <=1.0.0-beta.7.3",
 		"java": ">=8",
 		"osl-entrypoints": ">=0.4.0"
 	},
