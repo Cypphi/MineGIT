@@ -5,22 +5,16 @@
   "client": [
     "AlphaWorldStorageAccessor",
     "CreateWorldScreenMixin",
-    "EditWorldScreenMixin",
-    "LocaleMixin",
     "MinecraftAccessor",
     "MinecraftMixin",
     "PauseScreenMixin",
     "ScreenMixin",
     "SinglePlayerScreenMixin",
-    "TextFieldWidgetMixin",
     "WorldAccessor",
     "WorldListWidgetMixin",
     "WorldMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "overwrites": {
-    "requireAnnotations": true
   }
 }

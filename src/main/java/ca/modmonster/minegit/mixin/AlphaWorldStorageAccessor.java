@@ -1,13 +1,13 @@
 package ca.modmonster.minegit.mixin;
 
-import net.minecraft.class_81;
+import net.minecraft.core.world.save.SaveHandlerBase;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.io.File;
 
-@Mixin(class_81.class)
+@Mixin(value = SaveHandlerBase.class, remap = false)
 public interface AlphaWorldStorageAccessor {
-    @Accessor("field_279")
+    @Accessor("saveDirectory")
     File getDir();
 }

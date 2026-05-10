@@ -287,7 +287,7 @@ public class GitManager {
     }
 
     public static Path getPath(String worldId) {
-        return Minecraft.getRunDirectory().toPath().resolve("saves/" + worldId);
+        return Minecraft.getMinecraft().getMinecraftDir().toPath().resolve("saves/" + worldId);
     }
 
     /**

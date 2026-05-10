@@ -1,9 +1,10 @@
 package ca.modmonster.minegit.backport;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.ButtonElement;
+import net.minecraft.client.render.texture.Texture;
 
-public class ImageButton extends ButtonWidget {
+public class ImageButton extends ButtonElement {
     public ImageButtonTex texture;
 
     public ImageButton(int buttonId, int x, int y, ImageButtonTex texture) {
@@ -12,11 +13,11 @@ public class ImageButton extends ButtonWidget {
     }
 
     @Override
-    public void render(Minecraft minecraft, int mouseX, int mouseY) {
-        super.render(minecraft, mouseX, mouseY);
-        texture.bind(minecraft, active);
+    public void drawButton(Minecraft minecraft, int mouseX, int mouseY) {
+        super.drawButton(minecraft, mouseX, mouseY);
+        texture.bind(minecraft, enabled);
         ScreenUtil.drawTexture(
-                x, y,
+                xPosition, yPosition,
                 0, 0,
                 20, 20,
                 20, 20
@@ -31,8 +32,8 @@ public class ImageButton extends ButtonWidget {
 
         private final String enabledTex;
         private final String disabledTex;
-        private int enabledGlid;
-        private int disabledGlid;
+        private Texture enabledGlid;
+        private Texture disabledGlid;
 
         ImageButtonTex(String enabledTex, String disabledTex) {
             this.enabledTex = enabledTex;
@@ -45,13 +46,13 @@ public class ImageButton extends ButtonWidget {
 
         public void bind(Minecraft minecraft, boolean enabled) {
             if (enabled) {
-                if (enabledGlid == 0) {
-                    enabledGlid = minecraft.textureManager.getTextureId(enabledTex);
+                if (enabledGlid == null) {
+                    enabledGlid = minecraft.textureManager.loadTexture(enabledTex);
                 }
                 minecraft.textureManager.bindTexture(enabledGlid);
             } else {
-                if (disabledGlid == 0) {
-                    disabledGlid = minecraft.textureManager.getTextureId(disabledTex);
+                if (disabledGlid == null) {
+                    disabledGlid = minecraft.textureManager.loadTexture(disabledTex);
                 }
                 minecraft.textureManager.bindTexture(disabledGlid);
             }

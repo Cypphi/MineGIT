@@ -1,25 +1,25 @@
 package ca.modmonster.minegit.mixin;
 
 import ca.modmonster.minegit.backport.SinglePlayerScreenExtension;
-import net.minecraft.client.gui.screen.world.SelectWorldScreen;
+import net.minecraft.client.gui.ScreenSelectWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(targets = "net.minecraft.client.gui.screen.world.SelectWorldScreen$class_569")
+@Mixin(targets = "net.minecraft.client.gui.ScreenSelectWorld$WorldSlot", remap = false)
 public abstract class WorldListWidgetMixin {
     @Unique
-    private SelectWorldScreen selectWorldScreen = null;
+    private ScreenSelectWorld selectWorldScreen = null;
 
     @Inject(at = @At("RETURN"), method = "<init>")
-    private void init(SelectWorldScreen selectWorldScreen, CallbackInfo ci) {
-        this.selectWorldScreen = selectWorldScreen;
+    private void init(ScreenSelectWorld this$0, CallbackInfo ci) {
+        this.selectWorldScreen = this$0;
     }
 
-    @Inject(method = "entryClicked", at = @At("TAIL"))
-    private void entryClicked(int index, boolean doubleClick, CallbackInfo ci) {
-        ((SinglePlayerScreenExtension) selectWorldScreen).worldSelected(index);
+    @Inject(method = "selectItem", at = @At("TAIL"))
+    private void entryClicked(int itemIndex, boolean doubleClicked, CallbackInfo ci) {
+        ((SinglePlayerScreenExtension) selectWorldScreen).worldSelected(itemIndex);
     }
 }

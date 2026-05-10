@@ -1,10 +1,11 @@
 package ca.modmonster.minegit.backport;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.render.texture.Texture;
 import org.lwjgl.opengl.GL11;
 
-public class RalspinWidget extends DrawableHelper {
+public class RalspinWidget extends Gui {
     private static final String SPRITE = "/assets/minegit/textures/gui/ralspin.png";
     private static final int FRAME_WIDTH = 21;
     private static final int FRAME_HEIGHT = 40;
@@ -12,7 +13,7 @@ public class RalspinWidget extends DrawableHelper {
     private static final int FRAME_TIME = 2;
     private static final int SCALE = 2;
     public static final String TOOLTIP = "hiiiii!! ^-^";
-    private static int glid;
+    private static Texture glid;
 
     public final int x;
     public final int y;
@@ -46,8 +47,8 @@ public class RalspinWidget extends DrawableHelper {
     }
 
     public void bindTexture(Minecraft minecraft) {
-        if (glid == 0) {
-            glid = minecraft.textureManager.getTextureId(SPRITE);
+        if (glid == null) {
+            glid = minecraft.textureManager.loadTexture(SPRITE);
         }
         minecraft.textureManager.bindTexture(glid);
     }

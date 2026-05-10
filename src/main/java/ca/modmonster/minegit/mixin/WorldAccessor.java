@@ -1,12 +1,12 @@
 package ca.modmonster.minegit.mixin;
 
-import net.minecraft.class_52;
-import net.minecraft.world.World;
+import net.minecraft.core.world.World;
+import net.minecraft.core.world.save.LevelStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(World.class)
+@Mixin(value = World.class, remap = false)
 public interface WorldAccessor {
-    @Accessor("field_219")
-    class_52 getStorage();
+    @Accessor("saveHandler")
+    LevelStorage getStorage();
 }

@@ -8,11 +8,10 @@ import ca.modmonster.minegit.data.SyncResult;
 import ca.modmonster.minegit.gui.GitConflictScreen;
 import ca.modmonster.minegit.gui.GitProgressScreen;
 import ca.modmonster.minegit.gui.TwoChoiceScreen;
-import net.minecraft.class_52;
-import net.minecraft.class_62;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.World;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.core.world.ProgressListener;
+import net.minecraft.core.world.World;
+import net.minecraft.core.world.save.LevelStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -22,18 +21,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.nio.file.Path;
 
-@Mixin(World.class)
+@Mixin(value = World.class, remap = false)
 public abstract class WorldMixin {
     @Shadow
-    @Final
-    protected class_52 field_219;
+    public LevelStorage saveHandler;
 
-    @Inject(method = "method_280", at = @At("TAIL"))
-    public void onWorldSave(class_62 progressListener, CallbackInfo ci) {
-        if (!(field_219 instanceof AlphaWorldStorageAccessor)) return;
-        Path path = ((AlphaWorldStorageAccessor) field_219).getDir().toPath();
+    @Inject(method = "saveWorldIndirectly", at = @At("TAIL"))
+    public void onWorldSave(ProgressListener iprogressupdate, CallbackInfo ci) {
         Minecraft minecraft = MinecraftAccessor.getInstance();
-        if (minecraft == null) return;
+        if (minecraft == null || !minecraft.running) return;
+        if (!(saveHandler instanceof AlphaWorldStorageAccessor)) return;
+        Path path = ((AlphaWorldStorageAccessor) saveHandler).getDir().toPath();
 
         if (QuitState.altQuit) return;
         if (!GitManager.syncEnabled(path)) return;
@@ -45,31 +43,31 @@ public abstract class WorldMixin {
     @Unique
     private void doWorldSave(Minecraft minecraft, Path worldFolder) {
         GitProgressScreen progressScreen = new GitProgressScreen("Pushing to GitHub...");
-        minecraft.setScreen(progressScreen);
+        minecraft.displayScreen(progressScreen);
         new Thread(() -> {
             SyncResult status = GitManager.push(worldFolder, progressScreen);
             switch (status) {
                 case SUCCESS:
                     // Success; quit as normal
-                    MainThreadTasks.execute(() -> minecraft.setScreen(null));
+                    MainThreadTasks.execute(() -> minecraft.displayScreen(null));
                     break;
                 case FAIL_GENERIC:
                     // Generic error; show option to keep local or cloud
-                    MainThreadTasks.execute(() -> minecraft.setScreen(new GitConflictScreen(
-                            () -> minecraft.setScreen(null),
+                    MainThreadTasks.execute(() -> minecraft.displayScreen(new GitConflictScreen(
+                            () -> minecraft.displayScreen(null),
                             null,
                             worldFolder
                     )));
                     break;
                 case FAIL_NETWORK:
                     // Network error; show unreachable screen
-                    MainThreadTasks.execute(() -> minecraft.setScreen(new TwoChoiceScreen(
+                    MainThreadTasks.execute(() -> minecraft.displayScreen(new TwoChoiceScreen(
                             "Error syncing world",
                             "Your latest world changes could not be synced with the cloud. Make sure you're not offline and then try again.",
                             "Retry sync",
                             "Exit without syncing",
                             () -> MainThreadTasks.execute(() -> doWorldSave(minecraft, worldFolder)),
-                            () -> minecraft.setScreen(null)
+                            () -> minecraft.displayScreen(null)
                     )));
                     break;
             }

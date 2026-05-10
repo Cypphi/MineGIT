@@ -18,13 +18,16 @@
 	"entrypoints": {
 		"client": [
 			"ca.modmonster.minegit.MineGIT"
+		],
+		"modmenu": [
+			"ca.modmonster.minegit.extra.ModMenuImplementation"
 		]
 	},
 	"mixins": [
 		"minegit.mixins.json"
 	],
 	"depends": {
-		"minecraft": "1.0.0-beta.7.3",
+		"minecraft": "^7.3",
 		"java": ">=8"
 	},
 	"conflicts": {

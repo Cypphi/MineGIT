@@ -7,10 +7,10 @@ import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.gui.AccountLinkScreen;
 import ca.modmonster.minegit.gui.CloneScreen;
-import net.minecraft.class_180;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.world.SelectWorldScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.ButtonElement;
+import net.minecraft.client.gui.Screen;
+import net.minecraft.client.gui.ScreenCreateWorld;
+import net.minecraft.client.gui.ScreenSelectWorld;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(class_180.class)
+@Mixin(value = ScreenCreateWorld.class, remap = false)
 public abstract class CreateWorldScreenMixin extends Screen {
     @Unique
     @Nullable
@@ -37,18 +37,18 @@ public abstract class CreateWorldScreenMixin extends Screen {
 
         if (needsSetup) {
             // Add setup button
-            gitButton = new ImageButton(100, this.width / 2 - 124, this.height / 4 + 96 + 12, ImageButton.ImageButtonTex.CLOUD);
+            gitButton = new ImageButton(100, this.width / 2 - 124, this.height / 4 + 116, ImageButton.ImageButtonTex.CLOUD);
             gitButtonTooltip = "Setup Cloud Syncing";
         } else {
             // Add clone button
-            gitButton = new ImageButton(100, this.width / 2 - 124, this.height / 4 + 96 + 12, ImageButton.ImageButtonTex.CLONE);
+            gitButton = new ImageButton(100, this.width / 2 - 124, this.height / 4 + 116, ImageButton.ImageButtonTex.CLONE);
             gitButtonTooltip = "Clone World";
         }
         buttons.add(gitButton);
     }
 
     @Inject(at = @At("TAIL"), method = "buttonClicked")
-    protected void buttonClicked(ButtonWidget button, CallbackInfo ci) {
+    protected void buttonClicked(ButtonElement button, CallbackInfo ci) {
         if (button.id == 100) {
             onGitButtonPress();
         }
@@ -56,7 +56,7 @@ public abstract class CreateWorldScreenMixin extends Screen {
 
     @Inject(at = @At("TAIL"), method = "render")
     private void render(final int mouseX, final int mouseY, final float a, CallbackInfo info) {
-        if (gitButton != null && ScreenUtil.isHovered(mouseX, mouseY, gitButton.x, gitButton.y, 20, 20)) {
+        if (gitButton != null && ScreenUtil.isHovered(mouseX, mouseY, gitButton.xPosition, gitButton.yPosition, 20, 20)) {
             ((ScreenTooltipRenderer) this).renderTooltip(gitButtonTooltip, mouseX, mouseY);
         }
     }
@@ -64,11 +64,11 @@ public abstract class CreateWorldScreenMixin extends Screen {
     @Unique
     void onGitButtonPress() {
         if (needsSetup) {
-            this.minecraft.setScreen(new AccountLinkScreen(this, this::updateSetupButton));
+            this.mc.displayScreen(new AccountLinkScreen(this, this::updateSetupButton));
         } else {
-            this.minecraft.setScreen(
-                    new CloneScreen(() -> minecraft.setScreen(this), () ->
-                            minecraft.setScreen(new SelectWorldScreen(null))));
+            this.mc.displayScreen(
+                    new CloneScreen(() -> mc.displayScreen(this), () ->
+                            mc.displayScreen(new ScreenSelectWorld(null))));
         }
     }
 

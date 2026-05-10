@@ -1,8 +1,8 @@
 package ca.modmonster.minegit.gui;
 
 import ca.modmonster.minegit.backport.MultiLineLabel;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.ButtonElement;
+import net.minecraft.client.gui.Screen;
 
 public class TwoChoiceScreen extends Screen {
     public TwoChoiceScreen(String title, String description, String continueMessage, String cancelMessage, Runnable continueCallback, Runnable cancelCallback) {
@@ -25,20 +25,20 @@ public class TwoChoiceScreen extends Screen {
     @Override
     public void init() {
         // Confirmation message
-        descriptionWidget = MultiLineLabel.create(this.textRenderer, description, this.width - 50);
+        descriptionWidget = MultiLineLabel.create(this.font, description, this.width - 50);
         int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Continue button
-        ButtonWidget continueButton = new ButtonWidget(0, width / 2 - 152, 98 + descriptionHeight, 150, 20, continueMessage);
+        ButtonElement continueButton = new ButtonElement(0, width / 2 - 152, 98 + descriptionHeight, 150, 20, continueMessage);
         buttons.add(continueButton);
 
         // Cancel button
-        ButtonWidget cancelButton = new ButtonWidget(1, width / 2 + 2, 98 + descriptionHeight, 150, 20, cancelMessage);
+        ButtonElement cancelButton = new ButtonElement(1, width / 2 + 2, 98 + descriptionHeight, 150, 20, cancelMessage);
         buttons.add(cancelButton);
     }
 
     @Override
-    protected void buttonClicked(ButtonWidget button) {
+    protected void buttonClicked(ButtonElement button) {
         if (button.id == 0) {
             continueCallback.run();
         } else if (button.id == 1) {
@@ -48,12 +48,12 @@ public class TwoChoiceScreen extends Screen {
 
     @Override
     public void render(int i, int j, float f) {
-        this.renderBackgroundTexture(i);
-        drawCenteredTextWithShadow(textRenderer, title, this.width / 2, 50, 16777215);
+        this.renderTexturedBackground();
+        drawStringCentered(font, title, this.width / 2, 50, 16777215);
         descriptionWidget.renderCentered(this.width / 2, 90);
         super.render(i, j, f);
     }
 
     @Override
-    protected void keyPressed(char i, int j) {}
+    public void keyPressed(char i, int j, int k, int l) {}
 }

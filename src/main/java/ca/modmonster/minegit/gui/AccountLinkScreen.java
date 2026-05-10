@@ -8,21 +8,21 @@ import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.CryptoManager;
 import ca.modmonster.minegit.data.NetworkManager;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
+import io.github.prospector.modmenu.gui.TextFieldWidget;
+import net.minecraft.client.gui.ButtonElement;
+import net.minecraft.client.gui.Screen;
 
 public class AccountLinkScreen extends Screen {
     private final Screen parent;
     private final Runnable closeCallback;
     private TextFieldWidget usernameEdit;
     private TextFieldWidget patEdit;
-    private ButtonWidget testCredentialsButton;
+    private ButtonElement testCredentialsButton;
     private boolean requestInProgress = false;
     private String testCredentialsStatus = null;
-    private ButtonWidget backButton;
+    private ButtonElement backButton;
     private RalspinWidget ralspinWidget;
-    private ButtonWidget clearButton;
+    private ButtonElement clearButton;
 
     public AccountLinkScreen(Screen parent) {
         this(parent, null);
@@ -36,19 +36,19 @@ public class AccountLinkScreen extends Screen {
     @Override
     public void init() {
         // Username text field
-        usernameEdit = new TextFieldWidget(this, textRenderer, this.width / 2 - 100, 107, 200, 20, "");
-        usernameEdit.setMaxLength(39);
+        usernameEdit = new TextFieldWidget(font, this.width / 2 - 100, 107, 200, 20);
+        usernameEdit.setMaxStringLength(39);
 
         // PAT text field
-        patEdit = new TextFieldWidget(this, textRenderer, this.width / 2 - 100, 152, 200, 20, "");
-        patEdit.setMaxLength(255);
+        patEdit = new TextFieldWidget(font, this.width / 2 - 100, 152, 200, 20);
+        patEdit.setMaxStringLength(255);
 
         // Clear credentials button
-        clearButton = new ButtonWidget(1, this.width / 2 - 100, 180, 60, 20, "Clear");
+        clearButton = new ButtonElement(1, this.width / 2 - 100, 180, 60, 20, "Clear");
         buttons.add(clearButton);
 
         // Test credentials button
-        testCredentialsButton = new ButtonWidget(2, this.width / 2 - 34, 180, 136, 20, "Test Credentials");
+        testCredentialsButton = new ButtonElement(2, this.width / 2 - 34, 180, 136, 20, "Test Credentials");
         buttons.add(testCredentialsButton);
 
         // Back button
@@ -70,7 +70,7 @@ public class AccountLinkScreen extends Screen {
     }
 
     @Override
-    protected void buttonClicked(ButtonWidget button) {
+    protected void buttonClicked(ButtonElement button) {
         if (button.id == 1) {
           usernameEdit.setText("");
           patEdit.setText("");
@@ -84,34 +84,33 @@ public class AccountLinkScreen extends Screen {
 
     @Override
     public void render(int i, int j, float f) {
-        this.renderBackgroundTexture(i);
-        drawCenteredTextWithShadow(this.textRenderer, "MineGit Cloud Sync Setup", this.width / 2, 50, 16777215);
-        drawCenteredTextWithShadow(this.textRenderer, "GitHub Username", this.width / 2, 90, -2130706433);
-        drawCenteredTextWithShadow(this.textRenderer, "GitHub Access Token", this.width / 2, 135, -2130706433);
-        ralspinWidget.render(minecraft, i, j);
-        usernameEdit.render();
-        patEdit.render();
+        this.renderTexturedBackground();
+        drawStringCentered(this.font, "MineGit Cloud Sync Setup", this.width / 2, 50, 16777215);
+        drawStringCentered(this.font, "GitHub Username", this.width / 2, 90, -2130706433);
+        drawStringCentered(this.font, "GitHub Access Token", this.width / 2, 135, -2130706433);
+        ralspinWidget.render(mc, i, j);
+        usernameEdit.drawTextBox();
+        patEdit.drawTextBox();
         super.render(i, j, f);
-        if (testCredentialsStatus != null) drawCenteredTextWithShadow(this.textRenderer, testCredentialsStatus, this.width / 2, 208, 16777215);
-        if (ScreenUtil.isHovered(i, j, backButton.x, backButton.y, 20, 20)) ((ScreenTooltipRenderer) this).renderTooltip("Save and Exit",  i, j);
+        if (testCredentialsStatus != null) drawStringCentered(this.font, testCredentialsStatus, this.width / 2, 208, 16777215);
+        if (ScreenUtil.isHovered(i, j, backButton.xPosition, backButton.yPosition, 20, 20)) ((ScreenTooltipRenderer) this).renderTooltip("Save and Exit",  i, j);
         if (ralspinWidget.isHovered()) ((ScreenTooltipRenderer) this).renderTooltip(RalspinWidget.TOOLTIP, i, j);
     }
 
     @Override
-    protected void keyPressed(char i, int j) {
-        if (this.usernameEdit.focused) {
-            this.usernameEdit.keyPressed(i, j);
+    public void keyPressed(char i, int j, int k, int l) {
+        if (this.usernameEdit.isFocused()) {
+            this.usernameEdit.textboxKeyTyped(i, j);
             updateTestButtonStatus(false);
-        } else if (this.patEdit.focused) {
-            this.patEdit.keyPressed(i, j);
+        } else if (this.patEdit.isFocused()) {
+            this.patEdit.textboxKeyTyped(i, j);
             updateTestButtonStatus(false);
         }
-        clearButton.active = !this.usernameEdit.getText().isEmpty() || !this.patEdit.getText().isEmpty();
         if (j == 1) close();
     }
 
     @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) {
+    public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
         super.mouseClicked(mouseX, mouseY, mouseButton);
         this.usernameEdit.mouseClicked(mouseX, mouseY, mouseButton);
         this.patEdit.mouseClicked(mouseX, mouseY, mouseButton);
@@ -119,8 +118,8 @@ public class AccountLinkScreen extends Screen {
 
     @Override
     public void tick() {
-        usernameEdit.tick();
-        patEdit.tick();
+        usernameEdit.updateCursorCounter();
+        patEdit.updateCursorCounter();
     }
 
     private void testCredentials() {
@@ -154,7 +153,8 @@ public class AccountLinkScreen extends Screen {
     }
 
     private void updateTestButtonStatus(boolean forceDisable) {
-        testCredentialsButton.active = !forceDisable && !requestInProgress && !usernameEdit.getText().replace(" ", "").isEmpty() && !patEdit.getText().replace(" ", "").isEmpty();
+        testCredentialsButton.enabled = !forceDisable && !requestInProgress && !usernameEdit.getText().replace(" ", "").isEmpty() && !patEdit.getText().replace(" ", "").isEmpty();
+        clearButton.enabled = !this.usernameEdit.getText().isEmpty() || !this.patEdit.getText().isEmpty();
     }
 
     public void close() {
@@ -162,7 +162,7 @@ public class AccountLinkScreen extends Screen {
         String username = usernameEdit.getText();
         String pat = CryptoManager.encrypt(patEdit.getText());
         ConfigManager.save(new Config(username, pat));
-        minecraft.setScreen(parent);
+        mc.displayScreen(parent);
         if (closeCallback != null) closeCallback.run();
     }
 }

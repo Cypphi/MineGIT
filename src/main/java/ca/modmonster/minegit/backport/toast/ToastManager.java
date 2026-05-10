@@ -1,8 +1,8 @@
 package ca.modmonster.minegit.backport.toast;
 
-import net.minecraft.class_583;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.render.Lighting;
 import org.lwjgl.Sys;
 import org.lwjgl.opengl.GL11;
 
@@ -10,26 +10,24 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
 
-public class ToastManager extends DrawableHelper {
+public class ToastManager extends Gui {
     public static final ToastManager INSTANCE = new ToastManager();
 
     private final ToastManager.ToastInstance<?>[] toasts = new ToastManager.ToastInstance[5];
     private final Deque<Toast> queue = new ArrayDeque<>();
 
     public void render(Minecraft minecraft, int width) {
-        if (!minecraft.options.hideHud) {
-            // Turn off lighting
-            class_583.method_1927();
+        // Turn off lighting
+        Lighting.disable();
 
-            for (int i = 0; i < this.toasts.length; i++) {
-                ToastManager.ToastInstance<?> toastInstance = this.toasts[i];
-                if (toastInstance != null && toastInstance.render(minecraft, width, i)) {
-                    this.toasts[i] = null;
-                }
+        for (int i = 0; i < this.toasts.length; i++) {
+            ToastManager.ToastInstance<?> toastInstance = this.toasts[i];
+            if (toastInstance != null && toastInstance.render(minecraft, width, i)) {
+                this.toasts[i] = null;
+            }
 
-                if (this.toasts[i] == null && !this.queue.isEmpty()) {
-                    this.toasts[i] = new ToastManager.ToastInstance<>(this.queue.removeFirst());
-                }
+            if (this.toasts[i] == null && !this.queue.isEmpty()) {
+                this.toasts[i] = new ToastManager.ToastInstance<>(this.queue.removeFirst());
             }
         }
     }
