@@ -14,7 +14,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'org.spongepowered.mixin'
 
-version = '1.5.2'
+version = '1.5.3'
 group = 'ca.modmonster.minegit' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'MineGIT'
 

@@ -29,10 +29,7 @@ public class LevelSaveMixin {
 
     @Inject(method = "stopServer", at = @At("TAIL"))
     private void onWorldSaved(CallbackInfo ci) {
-        if (QuitState.altQuit) {
-            QuitState.altQuit = false;
-            return;
-        }
+        if (QuitState.altQuit) return;
 
         MinecraftServer server = (MinecraftServer) (Object) this;
         String levelId = server.getFolderName();

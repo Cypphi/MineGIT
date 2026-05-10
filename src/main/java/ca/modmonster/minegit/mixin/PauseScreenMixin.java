@@ -1,6 +1,7 @@
 package ca.modmonster.minegit.mixin;
 
 import ca.modmonster.minegit.data.GitManager;
+import ca.modmonster.minegit.data.QuitState;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiIngameMenu;
@@ -38,6 +39,7 @@ public class PauseScreenMixin extends GuiScreen {
         IntegratedServer server = mc.getIntegratedServer();
         if (server == null) return;
         if (!GitManager.syncEnabled(mc, server.getFolderName())) return;
+        QuitState.altQuit = isAltKeyDown();
         if (!isAltKeyDown()) return;
 
         if (mineGIT$disconnectButton.isMouseOver()) {
