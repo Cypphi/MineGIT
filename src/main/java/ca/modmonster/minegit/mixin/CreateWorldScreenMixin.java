@@ -30,7 +30,7 @@ public abstract class CreateWorldScreenMixin extends Screen {
         super(title);
     }
 
-    @Inject(at = @At("TAIL"), method = "init", remap = false)
+    @Inject(at = @At("TAIL"), method = "init")
     private void init(CallbackInfo info) {
         checkNeedsSetup();
 
@@ -82,7 +82,7 @@ public abstract class CreateWorldScreenMixin extends Screen {
         }
     }
 
-    @Inject(at = @At("TAIL"), method = "repositionElements", remap = false)
+    @Inject(at = @At("TAIL"), method = "repositionElements")
     protected void repositionElements(CallbackInfo ci) {
         if (gitButton != null) gitButton.setPosition(width / 2 - 178, height - 26);
     }

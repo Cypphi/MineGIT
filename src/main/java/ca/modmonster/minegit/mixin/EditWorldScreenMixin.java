@@ -34,12 +34,11 @@ public class EditWorldScreenMixin extends Screen {
         super(title);
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/LinearLayout;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 10), method = "<init>", remap = false)
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/LinearLayout;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 10), method = "<init>")
     private void init(CallbackInfo info) {
         if (!GitManager.syncEnabled(minecraft, levelAccess.getLevelId())) return;
 
         // Add prune button
         layout.addChild(Button.builder(Component.translatable("minegit.prune.button"), button -> minecraft.setScreen(new PruneWorldScreen(this, levelAccess, callback))).width(200).build());
-        layout.visitWidgets(this::addRenderableWidget);
     }
 }
