@@ -106,7 +106,6 @@ public class AccountLinkScreen extends Screen {
             this.patEdit.keyPressed(i, j);
             updateTestButtonStatus(false);
         }
-        clearButton.active = !this.usernameEdit.getText().isEmpty() || !this.patEdit.getText().isEmpty();
         if (j == 1) close();
     }
 
@@ -155,6 +154,7 @@ public class AccountLinkScreen extends Screen {
 
     private void updateTestButtonStatus(boolean forceDisable) {
         testCredentialsButton.active = !forceDisable && !requestInProgress && !usernameEdit.getText().replace(" ", "").isEmpty() && !patEdit.getText().replace(" ", "").isEmpty();
+        clearButton.active = !this.usernameEdit.getText().isEmpty() || !this.patEdit.getText().isEmpty();
     }
 
     public void close() {
