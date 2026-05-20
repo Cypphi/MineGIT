@@ -1,7 +1,7 @@
 package ca.modmonster.minegit.data;
 
 import ca.modmonster.minegit.MineGIT;
-import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -106,7 +106,7 @@ public class CryptoManager {
         }
 
         // Save a randomly generated key to a file
-        Path keyFilePath = FabricLoader.getInstance().getConfigDir().resolve(".minegit.key");
+        Path keyFilePath = Minecraft.getMinecraft().mcDataDir.toPath().resolve("config/.minegit.key");
         String fileKey = null;
         if (keyFilePath.toFile().exists()) {
             try {

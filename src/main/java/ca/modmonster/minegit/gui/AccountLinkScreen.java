@@ -6,48 +6,51 @@ import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.CryptoManager;
 import ca.modmonster.minegit.data.NetworkManager;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.client.resources.I18n;
 
-public class AccountLinkScreen extends Screen {
-    private final Screen parent;
+import java.io.IOException;
+import java.util.Collections;
+
+public class AccountLinkScreen extends GuiScreen {
+    private final GuiScreen parent;
     private final Runnable closeCallback;
-    private TextFieldWidget usernameEdit;
-    private TextFieldWidget patEdit;
-    private ButtonWidget testCredentialsButton;
+    private GuiTextField usernameEdit;
+    private GuiTextField patEdit;
+    private GuiButton testCredentialsButton;
     private boolean requestInProgress = false;
     private String testCredentialsStatus = null;
-    private ButtonWidget backButton;
+    private GuiButton backButton;
     private RalspinWidget ralspinWidget;
 
-    public AccountLinkScreen(Screen parent) {
+    public AccountLinkScreen(GuiScreen parent) {
         this(parent, null);
     }
 
-    public AccountLinkScreen(Screen parent, Runnable closeCallback) {
+    public AccountLinkScreen(GuiScreen parent, Runnable closeCallback) {
         this.parent = parent;
         this.closeCallback = closeCallback;
     }
 
     @Override
-    public void init() {
+    public void initGui() {
         // Username text field
-        usernameEdit = new TextFieldWidget(0, textRenderer, this.width / 2 - 100, 107, 200, 20);
-        usernameEdit.setMaxLength(39);
+        usernameEdit = new GuiTextField(0, fontRendererObj, this.width / 2 - 100, 107, 200, 20);
+        usernameEdit.setMaxStringLength(39);
 
         // PAT text field
-        patEdit = new TextFieldWidget(1, textRenderer, this.width / 2 - 100, 152, 200, 20);
-        patEdit.setMaxLength(255);
+        patEdit = new GuiTextField(1, fontRendererObj, this.width / 2 - 100, 152, 200, 20);
+        patEdit.setMaxStringLength(255);
 
         // Test credentials button
-        testCredentialsButton = new ButtonWidget(2, this.width / 2 - 100, 180, 200, 20, I18n.translate("minegit.link.test"));
-        buttons.add(testCredentialsButton);
+        testCredentialsButton = new GuiButton(2, this.width / 2 - 100, 180, 200, 20, I18n.format("minegit.link.test"));
+        buttonList.add(testCredentialsButton);
 
         // Back button
         backButton = new ImageButton(3, 6, 6, ImageButton.ImageButtonTex.BACK);
-        buttons.add(backButton);
+        buttonList.add(backButton);
 
         // Ralsei go spinny
         ralspinWidget = new RalspinWidget(width - 60, height - 80);
@@ -64,7 +67,7 @@ public class AccountLinkScreen extends Screen {
     }
 
     @Override
-    protected void buttonClicked(ButtonWidget button) {
+    protected void actionPerformed(GuiButton button) {
         if (button.id == 2) {
             testCredentials();
         } else if (button.id == 3) {
@@ -73,43 +76,43 @@ public class AccountLinkScreen extends Screen {
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.drawBackgroundTexture(i);
-        drawCenteredString(this.textRenderer, I18n.translate("minegit.link.title"), this.width / 2, 50, 16777215);
-        drawCenteredString(this.textRenderer, I18n.translate("minegit.link.username"), this.width / 2, 90, -2130706433);
-        drawCenteredString(this.textRenderer, I18n.translate("minegit.link.pat"), this.width / 2, 135, -2130706433);
+    public void drawScreen(int i, int j, float f) {
+        this.drawDefaultBackground();
+        drawCenteredString(fontRendererObj, I18n.format("minegit.link.title"), this.width / 2, 50, 16777215);
+        drawCenteredString(fontRendererObj, I18n.format("minegit.link.username"), this.width / 2, 90, -2130706433);
+        drawCenteredString(fontRendererObj, I18n.format("minegit.link.pat"), this.width / 2, 135, -2130706433);
         ralspinWidget.render(i, j);
-        usernameEdit.render();
-        patEdit.render();
-        super.render(i, j, f);
-        if (testCredentialsStatus != null) drawCenteredString(this.textRenderer, testCredentialsStatus, this.width / 2, 208, 16777215);
-        if (backButton.isHovered()) renderTooltip(I18n.translate("minegit.link.back"),  i, j);
-        if (ralspinWidget.isHovered()) renderTooltip(RalspinWidget.TOOLTIP, i, j);
+        usernameEdit.drawTextBox();
+        patEdit.drawTextBox();
+        super.drawScreen(i, j, f);
+        if (testCredentialsStatus != null) drawCenteredString(fontRendererObj, testCredentialsStatus, this.width / 2, 208, 16777215);
+        if (backButton.isMouseOver()) drawHoveringText(Collections.singletonList(I18n.format("minegit.link.back")),  i, j);
+        if (ralspinWidget.isHovered()) drawHoveringText(Collections.singletonList(RalspinWidget.TOOLTIP), i, j);
     }
 
     @Override
-    protected void keyPressed(char i, int j) {
+    protected void keyTyped(char i, int j) {
         if (this.usernameEdit.isFocused()) {
-            this.usernameEdit.keyPressed(i, j);
+            this.usernameEdit.textboxKeyTyped(i, j);
             updateTestButtonStatus(false);
         } else if (this.patEdit.isFocused()) {
-            this.patEdit.keyPressed(i, j);
+            this.patEdit.textboxKeyTyped(i, j);
             updateTestButtonStatus(false);
         }
         if (j == 1) close();
     }
 
     @Override
-    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) {
+    protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
         super.mouseClicked(mouseX, mouseY, mouseButton);
         this.usernameEdit.mouseClicked(mouseX, mouseY, mouseButton);
         this.patEdit.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
     @Override
-    public void tick() {
-        usernameEdit.tick();
-        patEdit.tick();
+    public void updateScreen() {
+        usernameEdit.updateCursorCounter();
+        patEdit.updateCursorCounter();
     }
 
     private void testCredentials() {
@@ -123,19 +126,19 @@ public class AccountLinkScreen extends Screen {
 
             switch (statusCode) {
                 case 200:
-                    testCredentialsStatus = I18n.translate("minegit.link.status.success");
+                    testCredentialsStatus = I18n.format("minegit.link.status.success");
                     updateTestButtonStatus(true);
                     break;
                 case 401:
-                    testCredentialsStatus = I18n.translate("minegit.link.status.error.pat");
+                    testCredentialsStatus = I18n.format("minegit.link.status.error.pat");
                     updateTestButtonStatus(true);
                     break;
                 case 404:
-                    testCredentialsStatus = I18n.translate("minegit.link.status.error.username");
+                    testCredentialsStatus = I18n.format("minegit.link.status.error.username");
                     updateTestButtonStatus(true);
                     break;
                 default:
-                    testCredentialsStatus = I18n.translate("minegit.link.status.error.generic", statusCode);
+                    testCredentialsStatus = I18n.format("minegit.link.status.error.generic", statusCode);
                     updateTestButtonStatus(true);
                     break;
             }
@@ -143,7 +146,7 @@ public class AccountLinkScreen extends Screen {
     }
 
     private void updateTestButtonStatus(boolean forceDisable) {
-        testCredentialsButton.active = !forceDisable && !requestInProgress && !usernameEdit.getText().replace(" ", "").isEmpty() && !patEdit.getText().replace(" ", "").isEmpty();
+        testCredentialsButton.enabled = !forceDisable && !requestInProgress && !usernameEdit.getText().replace(" ", "").isEmpty() && !patEdit.getText().replace(" ", "").isEmpty();
     }
 
     public void close() {
@@ -151,7 +154,7 @@ public class AccountLinkScreen extends Screen {
         String username = usernameEdit.getText();
         String pat = CryptoManager.encrypt(patEdit.getText());
         ConfigManager.save(new Config(username, pat));
-        minecraft.openScreen(parent);
+        mc.displayGuiScreen(parent);
         if (closeCallback != null) closeCallback.run();
     }
 }

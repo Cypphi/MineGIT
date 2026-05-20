@@ -1,9 +1,9 @@
 package ca.modmonster.minegit.gui;
 
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.GuiScreen;
 import org.eclipse.jgit.lib.ProgressMonitor;
 
-public class GitProgressScreen extends Screen implements ProgressMonitor {
+public class GitProgressScreen extends GuiScreen implements ProgressMonitor {
     public static final int PROGRESS_BAR_WIDTH = 128;
 
     private final String title;
@@ -16,24 +16,24 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.drawBackgroundTexture(i);
+    public void drawScreen(int i, int j, float f) {
+        this.drawDefaultBackground();
 
         // Render progress bar
         int barLeft = this.width / 2 - PROGRESS_BAR_WIDTH / 2;
-        fill(barLeft, this.height - 16, barLeft + PROGRESS_BAR_WIDTH, this.height - 18, 0xFFA0A0A0);
+        drawRect(barLeft, this.height - 16, barLeft + PROGRESS_BAR_WIDTH, this.height - 18, 0xFFA0A0A0);
 
         float progress = (float) currentTaskWork / currentTaskTotalWork;
         if (progress > 1) progress = 1;
         int barPixels = (int) (PROGRESS_BAR_WIDTH * progress);
-        fill(barLeft, this.height - 16, barLeft + barPixels, this.height - 18, 0xFF80FF80);
+        drawRect(barLeft, this.height - 16, barLeft + barPixels, this.height - 18, 0xFF80FF80);
 
         // Draw message
-        drawCenteredString(this.textRenderer, title, this.width / 2, 70, 16777215);
+        drawCenteredString(fontRendererObj, title, this.width / 2, 70, 16777215);
 
         // Draw status
-        drawCenteredString(textRenderer, currentTask, this.width / 2, this.height - 32, 16777215);
-        super.render(i, j, f);
+        drawCenteredString(fontRendererObj, currentTask, this.width / 2, this.height - 32, 16777215);
+        super.drawScreen(i, j, f);
     }
 
     @Override
@@ -58,5 +58,5 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
     public boolean isCancelled() {return false;}
 
     @Override
-    protected void keyPressed(char typedChar, int keyCode) {}
+    protected void keyTyped(char typedChar, int keyCode) {}
 }

@@ -1,12 +1,12 @@
 package ca.modmonster.minegit.backport;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiElement;
-import net.minecraft.client.render.platform.GlStateManager;
-import net.minecraft.resource.Identifier;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.ResourceLocation;
 
-public class RalspinWidget extends GuiElement {
-    private static final Identifier SPRITE = new Identifier("minegit", "textures/gui/ralspin.png");
+public class RalspinWidget extends Gui {
+    private static final ResourceLocation SPRITE = new ResourceLocation("minegit", "textures/gui/ralspin.png");
     private static final int FRAME_WIDTH = 21;
     private static final int FRAME_HEIGHT = 40;
     private static final int FRAME_COUNT = 12;
@@ -32,11 +32,11 @@ public class RalspinWidget extends GuiElement {
         int v = frame * FRAME_HEIGHT;
 
         GlStateManager.pushMatrix();
-        GlStateManager.translatef(x, y, 0);
-        GlStateManager.scalef(SCALE, SCALE, 1);
-        GlStateManager.color4f(1F, 1F, 1F, 1F);
-        Minecraft.getInstance().getTextureManager().bind(SPRITE);
-        drawTexture(
+        GlStateManager.translate(x, y, 0);
+        GlStateManager.scale(SCALE, SCALE, 1);
+        GlStateManager.color(1F, 1F, 1F, 1F);
+        Minecraft.getMinecraft().getTextureManager().bindTexture(SPRITE);
+        drawModalRectWithCustomSizedTexture(
                 0, 0,
                 u, v,
                 FRAME_WIDTH, FRAME_HEIGHT,

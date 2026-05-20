@@ -8,114 +8,113 @@ import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.NetworkManager;
 import com.google.gson.JsonParser;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.world.storage.WorldSaveInfo;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.world.storage.SaveFormatComparator;
 
-public class EnableWorldSyncScreen extends Screen {
-    private final Screen parent;
-    private final WorldSaveInfo level;
+public class EnableWorldSyncScreen extends GuiScreen {
+    private final GuiScreen parent;
+    private final SaveFormatComparator level;
     private final Runnable closeCallback;
 
-    private ButtonWidget confirmButton;
-    private ButtonWidget cancelButton;
+    private GuiButton confirmButton;
+    private GuiButton cancelButton;
     private boolean showOpenSetupButton = false;
 
-    public EnableWorldSyncScreen(Screen parent, WorldSaveInfo level, Runnable closeCallback) {
+    public EnableWorldSyncScreen(GuiScreen parent, SaveFormatComparator level, Runnable closeCallback) {
         this.parent = parent;
         this.level = level;
         this.closeCallback = closeCallback;
     }
 
     @Override
-    public void init() {
+    public void initGui() {
         // Confirm button
-        confirmButton = new ButtonWidget(0, width / 2 - 152, 124, 150, 20, I18n.translate("minegit.sync.enable.confirm.ok"));
-        buttons.add(confirmButton);
+        confirmButton = new GuiButton(0, width / 2 - 152, 124, 150, 20, I18n.format("minegit.sync.enable.confirm.ok"));
+        buttonList.add(confirmButton);
 
         // Cancel button
-        cancelButton = new ButtonWidget(1, width / 2 + 2, 124, 150, 20, I18n.translate("minegit.sync.enable.confirm.cancel"));
-        buttons.add(cancelButton);
+        cancelButton = new GuiButton(1, width / 2 + 2, 124, 150, 20, I18n.format("minegit.sync.enable.confirm.cancel"));
+        buttonList.add(cancelButton);
 
-        ButtonWidget openSetupButton = new ButtonWidget(2, width / 2 - 75, 152, 150, 20, I18n.translate("minegit.link.setup.open"));
+        GuiButton openSetupButton = new GuiButton(2, width / 2 - 75, 152, 150, 20, I18n.format("minegit.link.setup.open"));
         openSetupButton.visible = showOpenSetupButton;
-        buttons.add(openSetupButton);
+        buttonList.add(openSetupButton);
     }
 
     @Override
-    protected void buttonClicked(ButtonWidget button) {
+    protected void actionPerformed(GuiButton button) {
         if (button.id == 0) {
             setupSync();
         } else if (button.id == 1) {
             close();
         } else if (button.id == 2) {
-            minecraft.openScreen(new AccountLinkScreen(EnableWorldSyncScreen.this.parent, closeCallback));
+            mc.displayGuiScreen(new AccountLinkScreen(EnableWorldSyncScreen.this.parent, closeCallback));
         }
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.drawBackgroundTexture(i);
-        drawCenteredString(this.textRenderer, I18n.translate("minegit.sync.enable.title"), this.width / 2, 50, 16777215);
-        drawCenteredString(this.textRenderer, I18n.translate("minegit.sync.enable.confirm.line1", level.getName()), this.width / 2, 90, 16777215);
-        drawCenteredString(this.textRenderer, I18n.translate("minegit.sync.enable.confirm.line2"), this.width / 2, 103, 16777215);
-        super.render(i, j, f);
+    public void drawScreen(int i, int j, float f) {
+        this.drawDefaultBackground();
+        drawCenteredString(fontRendererObj, I18n.format("minegit.sync.enable.title"), this.width / 2, 50, 16777215);
+        drawCenteredString(fontRendererObj, I18n.format("minegit.sync.enable.confirm.line1", level.getDisplayName()), this.width / 2, 90, 16777215);
+        drawCenteredString(fontRendererObj, I18n.format("minegit.sync.enable.confirm.line2"), this.width / 2, 103, 16777215);
+        super.drawScreen(i, j, f);
     }
 
     private void setupSync() {
-        confirmButton.active = false;
-        cancelButton.active = false;
+        confirmButton.enabled = false;
+        cancelButton.enabled = false;
 
-        GitProgressScreen progressScreen = new GitProgressScreen(I18n.translate("minegit.sync.enable.working"));
-        minecraft.openScreen(progressScreen);
+        GitProgressScreen progressScreen = new GitProgressScreen(I18n.format("minegit.sync.enable.working"));
+        mc.displayGuiScreen(progressScreen);
         new Thread(() -> {
             // Create a repository on GitHub
             Config config = ConfigManager.getCurrentConfig();
             progressScreen.beginTask("Create GitHub repository", 0);
-            NetworkManager.HttpResponse response = NetworkManager.createRepo(config.getPat(), level.getSaveName(), level.getName());
+            NetworkManager.HttpResponse response = NetworkManager.createRepo(config.getPat(), level.getFileName(), level.getDisplayName());
             int statusCode = response == null? -1 : response.statusCode();
             if (statusCode != 201) {
                 // OOPS! ERROR!!
-                minecraft.executeTask(() -> {
-                    ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.sync.enable.create_repo.error", statusCode)));
+                mc.addScheduledTask(() -> {
+                    ToastManager.INSTANCE.add(new Toast(I18n.format("minegit.sync.enable.create_repo.error", statusCode)));
                     showOpenSetupButton = true;
-                    cancelButton.active = true;
+                    cancelButton.enabled = true;
 
                     if (response != null) MineGIT.LOGGER.error(response.body());
-                    minecraft.openScreen(this);
+                    mc.displayGuiScreen(this);
                 });
                 return;
             }
 
-            @SuppressWarnings("deprecation")
             String repoUrl = new JsonParser().parse(response.body()).getAsJsonObject().get("clone_url").getAsString();
             MineGIT.LOGGER.info("Successfully setup GitHub repo with URL: {}", repoUrl);
 
             // Git init on world save folder
             progressScreen.beginTask("Create Git repo", 0);
-            boolean ok = GitManager.init(minecraft, level.getSaveName(), repoUrl, progressScreen);
+            boolean ok = GitManager.init(mc, level.getFileName(), repoUrl, progressScreen);
             if (!ok) {
-                minecraft.executeTask(() -> {
-                    ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.sync.enable.git_init.error")));
-                    minecraft.openScreen(this);
-                    cancelButton.active = true;
+                mc.addScheduledTask(() -> {
+                    ToastManager.INSTANCE.add(new Toast(I18n.format("minegit.sync.enable.git_init.error")));
+                    mc.displayGuiScreen(this);
+                    cancelButton.enabled = true;
                 });
                 return;
             }
 
-            ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.sync.enable.complete")));
-            minecraft.executeTask(this::close);
+            ToastManager.INSTANCE.add(new Toast(I18n.format("minegit.sync.enable.complete")));
+            mc.addScheduledTask(this::close);
         }).start();
     }
 
     public void close() {
-        minecraft.openScreen(parent);
+        mc.displayGuiScreen(parent);
         if (closeCallback != null) closeCallback.run();
     }
 
     @Override
-    protected void keyPressed(char i, int j) {
+    protected void keyTyped(char i, int j) {
         if (j == 1) close();
     }
 }

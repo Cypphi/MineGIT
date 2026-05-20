@@ -2,10 +2,10 @@ package ca.modmonster.minegit.mixin;
 
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.QuitState;
-import net.minecraft.client.gui.screen.GameMenuScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiIngameMenu;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.server.integrated.IntegratedServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -13,54 +13,56 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(GameMenuScreen.class)
-public class PauseScreenMixin extends Screen {
+import java.util.Collections;
+
+@Mixin(GuiIngameMenu.class)
+public class PauseScreenMixin extends GuiScreen {
     @Unique
     private String tooltip;
 
     @Unique
-    private ButtonWidget disconnectButton;
+    private GuiButton disconnectButton;
 
-    @Inject(at = @At("TAIL"), method = "init", remap = false)
+    @Inject(at = @At("TAIL"), method = "initGui")
     protected void createPauseMenu(CallbackInfo ci) {
         // Find the disconnect button
-        for (ButtonWidget button : this.buttons) {
-            if (button.message.equals(I18n.translate("menu.returnToMenu"))) disconnectButton = button;
+        for (GuiButton button : this.buttonList) {
+            if (button.displayString.equals(I18n.format("menu.returnToMenu"))) disconnectButton = button;
         }
 
-        tooltip = I18n.translate("minegit.exit_without_push");
+        tooltip = I18n.format("minegit.exit_without_push");
     }
 
-    @Inject(at = @At("TAIL"), method = "render", remap = false)
+    @Inject(at = @At("TAIL"), method = "drawScreen")
     private void render(int mouseX, int mouseY, float f, CallbackInfo ci) {
         if (disconnectButton == null) return;
-        if (!minecraft.isSingleplayer()) return;
-        IntegratedServer server = minecraft.getServer();
+        if (!mc.isSingleplayer()) return;
+        IntegratedServer server = mc.getIntegratedServer();
         if (server == null) return;
-        if (!GitManager.syncEnabled(minecraft, server.getWorldSaveName())) return;
-        QuitState.altQuit = isAltDown();
-        if (!isAltDown()) return;
+        if (!GitManager.syncEnabled(mc, server.getFolderName())) return;
+        QuitState.altQuit = isAltKeyDown();
+        if (!isAltKeyDown()) return;
 
-        if (disconnectButton.isHovered()) {
+        if (disconnectButton.isMouseOver()) {
             // draw red border
             renderOutline(
-                    disconnectButton.x,
-                    disconnectButton.y,
-                    disconnectButton.getWidth(),
+                    disconnectButton.xPosition,
+                    disconnectButton.yPosition,
+                    disconnectButton.getButtonWidth(),
                     20,
                     -65536
             );
 
             // draw tooltip
-            renderTooltip(tooltip, mouseX, mouseY);
+            drawHoveringText(Collections.singletonList(tooltip), mouseX, mouseY);
         }
     }
 
     @Unique
     private void renderOutline(final int x, final int y, final int width, final int height, final int color) {
-        fill(x, y, x + width, y + 1, color);
-        fill(x, y + height - 1, x + width, y + height, color);
-        fill(x, y + 1, x + 1, y + height - 1, color);
-        fill(x + width - 1, y + 1, x + width, y + height - 1, color);
+        drawRect(x, y, x + width, y + 1, color);
+        drawRect(x, y + height - 1, x + width, y + height, color);
+        drawRect(x, y + 1, x + 1, y + height - 1, color);
+        drawRect(x + width - 1, y + 1, x + width, y + height - 1, color);
     }
 }

@@ -7,10 +7,8 @@ import ca.modmonster.minegit.data.SyncResult;
 import ca.modmonster.minegit.gui.GitConflictScreen;
 import ca.modmonster.minegit.gui.GitProgressScreen;
 import ca.modmonster.minegit.gui.TwoChoiceScreen;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.resource.language.I18n;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.integrated.IntegratedServer;
 import org.spongepowered.asm.mixin.Final;
@@ -23,53 +21,52 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.nio.file.Path;
 
-@Environment(EnvType.CLIENT)
 @Mixin(IntegratedServer.class)
 public class LevelSaveMixin {
     @Shadow
     @Final
-    private Minecraft minecraft;
+    private Minecraft mc;
 
     @Inject(method = "shutdown", at = @At("TAIL"))
     private void onWorldSaved(CallbackInfo ci) {
         if (QuitState.altQuit) return;
 
         MinecraftServer server = (MinecraftServer) (Object) this;
-        String levelId = server.getWorldSaveName();
-        if (!GitManager.syncEnabled(minecraft, levelId)) return;
+        String levelId = server.getFolderName();
+        if (!GitManager.syncEnabled(mc, levelId)) return;
         MineGIT.LOGGER.info("Pushing current world to GitHub");
 
-        doWorldSave(GitManager.getPath(minecraft, levelId));
+        doWorldSave(GitManager.getPath(mc, levelId));
     }
 
     @Unique
     private void doWorldSave(Path worldFolder) {
-        GitProgressScreen progressScreen = new GitProgressScreen(I18n.translate("minegit.sync.status.git_push"));
-        minecraft.openScreen(progressScreen);
+        GitProgressScreen progressScreen = new GitProgressScreen(I18n.format("minegit.sync.status.git_push"));
+        mc.displayGuiScreen(progressScreen);
         new Thread(() -> {
             SyncResult status = GitManager.push(worldFolder, progressScreen);
             switch (status) {
                 case SUCCESS:
                     // Success; quit as normal
-                    minecraft.executeTask(() -> minecraft.openScreen(null));
+                    mc.addScheduledTask(() -> mc.displayGuiScreen(null));
                     break;
                 case FAIL_GENERIC:
                     // Generic error; show option to keep local or cloud
-                    minecraft.executeTask(() -> minecraft.openScreen(new GitConflictScreen(
-                            () -> minecraft.openScreen(null),
+                    mc.addScheduledTask(() -> mc.displayGuiScreen(new GitConflictScreen(
+                            () -> mc.displayGuiScreen(null),
                             null,
                             worldFolder
                     )));
                     break;
                 case FAIL_NETWORK:
                     // Network error; show unreachable screen
-                    minecraft.executeTask(() -> minecraft.openScreen(new TwoChoiceScreen(
-                            I18n.translate("minegit.sync.push_unreachable.title"),
-                            I18n.translate("minegit.sync.push_unreachable.description"),
-                            I18n.translate("minegit.sync.push_unreachable.retry"),
-                            I18n.translate("minegit.sync.push_unreachable.exit"),
-                            () -> minecraft.executeTask(() -> doWorldSave(worldFolder)),
-                            () -> minecraft.openScreen(null)
+                    mc.addScheduledTask(() -> mc.displayGuiScreen(new TwoChoiceScreen(
+                            I18n.format("minegit.sync.push_unreachable.title"),
+                            I18n.format("minegit.sync.push_unreachable.description"),
+                            I18n.format("minegit.sync.push_unreachable.retry"),
+                            I18n.format("minegit.sync.push_unreachable.exit"),
+                            () -> mc.addScheduledTask(() -> doWorldSave(worldFolder)),
+                            () -> mc.displayGuiScreen(null)
                     )));
                     break;
             }

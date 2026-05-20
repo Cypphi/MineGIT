@@ -1,13 +1,11 @@
 package ca.modmonster.minegit.backport.toast;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.render.platform.GlStateManager;
-import net.minecraft.resource.Identifier;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.util.ResourceLocation;
 
 public class Toast {
-    Identifier TOASTS_LOCATION = new Identifier("minegit", "textures/gui/toasts.png");
+    ResourceLocation TOASTS_LOCATION = new ResourceLocation("minegit", "textures/gui/toasts.png");
     private final String message;
     private boolean changed;
     private long lastChanged;
@@ -19,17 +17,17 @@ public class Toast {
     private void renderBackgroundRow(ToastManager toastComponent, int width) {
         int m = 20;
         int n = Math.min(60, width - m);
-        toastComponent.drawTexture(0, 0, 0, 64, m, 32);
+        toastComponent.drawTexturedModalRect(0, 0, 0, 64, m, 32);
 
         for (int o = m; o < width - n; o += 64) {
-            toastComponent.drawTexture(o, 0, 32, 64, Math.min(64, width - o - n), 32);
+            toastComponent.drawTexturedModalRect(o, 0, 32, 64, Math.min(64, width - o - n), 32);
         }
 
-        toastComponent.drawTexture(width - n, 0, 160 - n, 64, n, 32);
+        toastComponent.drawTexturedModalRect(width - n, 0, 160 - n, 64, n, 32);
     }
 
     public int getWidth() {
-        return Math.max(Minecraft.getInstance().textRenderer.getWidth(message) + 30, 160);
+        return Math.max(Minecraft.getMinecraft().fontRendererObj.getStringWidth(message) + 30, 160);
     }
 
     public Visibility render(ToastManager toastComponent, long l) {
@@ -38,14 +36,13 @@ public class Toast {
             this.changed = false;
         }
 
-        toastComponent.getMinecraft().getTextureManager().bind(TOASTS_LOCATION);
-        GlStateManager.color3f(1.0F, 1.0F, 1.0F);
+        toastComponent.getMinecraft().getTextureManager().bindTexture(TOASTS_LOCATION);
+        GlStateManager.color(1.0F, 1.0F, 1.0F);
         this.renderBackgroundRow(toastComponent, getWidth());
-        toastComponent.getMinecraft().textRenderer.draw(message, 18, 12, -256);
+        toastComponent.getMinecraft().fontRendererObj.drawString(message, 18, 12, -256);
         return l - this.lastChanged < 5000L? Visibility.SHOW : Visibility.HIDE;
     }
 
-    @Environment(EnvType.CLIENT)
     public enum Visibility {
         SHOW,
         HIDE

@@ -2,16 +2,16 @@ package ca.modmonster.minegit.backport.toast;
 
 import com.google.common.collect.Queues;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiElement;
-import net.minecraft.client.render.platform.GlStateManager;
-import net.minecraft.client.render.platform.Lighting;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.util.MathHelper;
 
 import java.util.Arrays;
 import java.util.Deque;
 
-public class ToastManager extends GuiElement {
-    public static final ToastManager INSTANCE = new ToastManager(Minecraft.getInstance());
+public class ToastManager extends Gui {
+    public static final ToastManager INSTANCE = new ToastManager(Minecraft.getMinecraft());
 
     private final Minecraft minecraft;
     private final ToastManager.ToastInstance<?>[] toasts = new ToastManager.ToastInstance[5];
@@ -22,8 +22,8 @@ public class ToastManager extends GuiElement {
     }
 
     public void render(int width) {
-        if (!this.minecraft.options.hideGui) {
-            Lighting.turnOff();
+        if (!this.minecraft.gameSettings.hideGUI) {
+            RenderHelper.disableStandardItemLighting();
 
             for (int i = 0; i < this.toasts.length; i++) {
                 ToastManager.ToastInstance<?> toastInstance = this.toasts[i];
@@ -66,13 +66,13 @@ public class ToastManager extends GuiElement {
         }
 
         private float getVisibility(long time) {
-            float f = MathHelper.clamp((float)(time - this.time) / 600.0F, 0.0F, 1.0F);
+            float f = MathHelper.clamp_float((float)(time - this.time) / 600.0F, 0.0F, 1.0F);
             f *= f;
             return this.visibility == Toast.Visibility.HIDE ? 1.0F - f : f;
         }
 
         public boolean render(int x, int y) {
-            long l = Minecraft.getTime();
+            long l = Minecraft.getSystemTime();
             if (this.time == -1L) {
                 this.time = l;
             }
@@ -82,7 +82,7 @@ public class ToastManager extends GuiElement {
             }
 
             GlStateManager.pushMatrix();
-            GlStateManager.translatef(x - toast.getWidth() * this.getVisibility(l), y * 32, 500 + y);
+            GlStateManager.translate(x - toast.getWidth() * this.getVisibility(l), y * 32, 500 + y);
             Toast.Visibility visibility = this.toast.render(ToastManager.this, l - this.visibleTime);
             GlStateManager.popMatrix();
             if (visibility != this.visibility) {

@@ -1,10 +1,10 @@
 package ca.modmonster.minegit.gui;
 
 import ca.modmonster.minegit.backport.MultiLineLabel;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
 
-public class TwoChoiceScreen extends Screen {
+public class TwoChoiceScreen extends GuiScreen {
     public TwoChoiceScreen(String title, String description, String continueMessage, String cancelMessage, Runnable continueCallback, Runnable cancelCallback) {
         this.title = title;
         this.description = description;
@@ -23,22 +23,22 @@ public class TwoChoiceScreen extends Screen {
     private MultiLineLabel descriptionWidget;
 
     @Override
-    public void init() {
+    public void initGui() {
         // Confirmation message
-        descriptionWidget = MultiLineLabel.create(this.textRenderer, description, this.width - 50);
+        descriptionWidget = MultiLineLabel.create(this.fontRendererObj, description, this.width - 50);
         int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Continue button
-        ButtonWidget continueButton = new ButtonWidget(0, width / 2 - 152, 98 + descriptionHeight, 150, 20, continueMessage);
-        buttons.add(continueButton);
+        GuiButton continueButton = new GuiButton(0, width / 2 - 152, 98 + descriptionHeight, 150, 20, continueMessage);
+        buttonList.add(continueButton);
 
         // Cancel button
-        ButtonWidget cancelButton = new ButtonWidget(1, width / 2 + 2, 98 + descriptionHeight, 150, 20, cancelMessage);
-        buttons.add(cancelButton);
+        GuiButton cancelButton = new GuiButton(1, width / 2 + 2, 98 + descriptionHeight, 150, 20, cancelMessage);
+        buttonList.add(cancelButton);
     }
 
     @Override
-    protected void buttonClicked(ButtonWidget button) {
+    protected void actionPerformed(GuiButton button) {
         if (button.id == 0) {
             continueCallback.run();
         } else if (button.id == 1) {
@@ -47,13 +47,13 @@ public class TwoChoiceScreen extends Screen {
     }
 
     @Override
-    public void render(int i, int j, float f) {
-        this.drawBackgroundTexture(i);
-        drawCenteredString(textRenderer, title, this.width / 2, 50, 16777215);
+    public void drawScreen(int i, int j, float f) {
+        this.drawDefaultBackground();
+        drawCenteredString(fontRendererObj, title, this.width / 2, 50, 16777215);
         descriptionWidget.renderCentered(this.width / 2, 90);
-        super.render(i, j, f);
+        super.drawScreen(i, j, f);
     }
 
     @Override
-    protected void keyPressed(char i, int j) {}
+    protected void keyTyped(char i, int j) {}
 }

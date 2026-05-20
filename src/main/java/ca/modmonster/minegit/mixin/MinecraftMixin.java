@@ -3,9 +3,9 @@ package ca.modmonster.minegit.mixin;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.QuitState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.server.integrated.IntegratedServer;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,28 +18,28 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin {
     @Shadow
-    private @Nullable IntegratedServer server;
+    private @Nullable IntegratedServer theIntegratedServer;
 
     @Shadow
-    public abstract void openScreen(@Nullable Screen screen);
+    public abstract void displayGuiScreen(@Nullable GuiScreen screen);
 
     @Shadow
-    public int width;
+    public int displayWidth;
     @Unique
     private String prevSaveId = null;
 
-    @Inject(method = "openScreen", at = @At("HEAD"), cancellable = true)
-    private void onOpenScreen(Screen screen, CallbackInfo ci) {
-        if (!(screen instanceof TitleScreen)) return;
+    @Inject(method = "displayGuiScreen", at = @At("HEAD"), cancellable = true)
+    private void onOpenScreen(GuiScreen screen, CallbackInfo ci) {
+        if (!(screen instanceof GuiMainMenu)) return;
         if (prevSaveId == null) return;
 
         // For some reason IntelliJ thinks this is always false. It is confused.
         if (!QuitState.altQuit && GitManager.syncEnabled((Minecraft) (Object) this, prevSaveId)) {
             // Show the generic dirt screen instead
-            openScreen(new Screen() {
+            displayGuiScreen(new GuiScreen() {
                 @Override
-                public void render(int i, int j, float f) {
-                    drawBackgroundTexture(i);
+                public void drawScreen(int i, int j, float f) {
+                    drawDefaultBackground();
                 }
             });
             ci.cancel();
@@ -47,9 +47,9 @@ public abstract class MinecraftMixin {
         prevSaveId = null;
     }
 
-    @Inject(method = "setWorld(Lnet/minecraft/client/world/ClientWorld;Ljava/lang/String;)V", at = @At("HEAD"))
-    private void onSetWorld(ClientWorld world, String message, CallbackInfo ci) {
-        if (server == null) return;
-        prevSaveId = server.getWorldSaveName();
+    @Inject(method = "loadWorld(Lnet/minecraft/client/multiplayer/WorldClient;Ljava/lang/String;)V", at = @At("HEAD"))
+    private void onSetWorld(WorldClient worldClientIn, String loadingMessage, CallbackInfo ci) {
+        if (theIntegratedServer == null) return;
+        prevSaveId = theIntegratedServer.getFolderName();
     }
 }
