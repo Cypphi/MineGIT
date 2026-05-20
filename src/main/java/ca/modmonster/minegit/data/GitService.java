@@ -1,19 +1,29 @@
 package ca.modmonster.minegit.data;
 
-public enum GitService {
-    GITHUB("GitHub", "https://github.com", "https://api.github.com"),
-    GITLAB("GitLab", "https://gitlab.com", "https://gitlab.com/api/v4"),
-    GITEA("Gitea/Forgejo", null, null), 
-    CUSTOM("Custom", null, null); 
+import net.minecraft.resources.Identifier;
 
+public enum GitService {
+    GITHUB("GitHub", "GitHub", "https://github.com", "https://api.github.com"),
+    GITHUB_ORG("GitHub Org", "GitHub Organization", "https://github.com", "https://api.github.com"),
+    GITLAB("GitLab", "GitLab", "https://gitlab.com", "https://gitlab.com/api/v4"),
+    GITEA("Gitea", "Gitea", null, null),
+    FORGEJO("Forgejo", "Forgejo", null, null),
+    CUSTOM("Custom", "Custom Endpoint", null, null);
+
+    private final String shortName;
     private final String displayName;
     private final String defaultWebUrl;
     private final String defaultApiUrl;
 
-    GitService(String displayName, String defaultWebUrl, String defaultApiUrl) {
+    GitService(String shortName, String displayName, String defaultWebUrl, String defaultApiUrl) {
+        this.shortName = shortName;
         this.displayName = displayName;
         this.defaultWebUrl = defaultWebUrl;
         this.defaultApiUrl = defaultApiUrl;
+    }
+
+    public String getShortName() {
+        return shortName;
     }
 
     public String getDisplayName() {
@@ -29,10 +39,14 @@ public enum GitService {
     }
 
     public boolean requiresCustomUrl() {
-        return this == GITEA || this == CUSTOM || this == GITLAB;
+        return this == GITLAB || this == GITEA || this == FORGEJO || this == CUSTOM;
     }
 
     public boolean supportsAutoRepoCreation() {
-        return this == GITHUB || this == GITLAB || this == GITEA;
+        return this == GITHUB || this == GITHUB_ORG || this == GITLAB || this == GITEA || this == FORGEJO;
+    }
+
+    public Identifier getIcon() {
+        return Identifier.fromNamespaceAndPath("minegit", "services/" + getShortName().toLowerCase().replace(" ", "_"));
     }
 }

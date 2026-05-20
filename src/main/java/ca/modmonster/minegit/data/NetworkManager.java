@@ -43,7 +43,7 @@ public class NetworkManager {
                         .header("PRIVATE-TOKEN", pat)
                         .GET().build();
                 break;
-            case GITEA, CUSTOM:
+            case GITEA, FORGEJO, CUSTOM:
                 request = HttpRequest.newBuilder()
                         .uri(URI.create(apiUrl + "/user"))
                         .header("Authorization", "Bearer " + pat)
@@ -63,16 +63,6 @@ public class NetworkManager {
             hasValidCredentials = false;
             return -1;
         }
-    }
-
-    /**
-     * @deprecated Use testCredentials(Config config) instead
-     */
-    @Deprecated
-    public static int testCredentials(String username, String pat) {
-        Config config = new Config(username, pat);
-        config.gitService = GitService.GITHUB;
-        return testCredentials(config);
     }
 
     public static HttpResponse<String> createRepo(Config config, String worldId, String worldName) {
@@ -111,7 +101,7 @@ public class NetworkManager {
                                 "{\"name\":\"minegit_%s\",\"description\":\"Minecraft save for %s. Cloud sync by MineGIT\",\"visibility\":\"private\"}",
                                 worldId, encodedName))).build();
                 break;
-            case GITEA:
+            case GITEA, FORGEJO:
                 request = HttpRequest.newBuilder()
                         .uri(URI.create(apiUrl + "/user/repos"))
                         .header("Authorization", "Bearer " + pat)
@@ -132,16 +122,6 @@ public class NetworkManager {
     }
 
     /**
-     * @deprecated Use createRepo(Config config, String worldId, String worldName) instead
-     */
-    @Deprecated
-    public static HttpResponse<String> createRepo(String pat, String worldId, String worldName) {
-        Config config = new Config("", pat);
-        config.gitService = GitService.GITHUB;
-        return createRepo(config, worldId, worldName);
-    }
-
-    /**
      * Parse clone URL from repository creation response
      */
     public static String parseCloneUrl(HttpResponse<String> response, GitService service) {
@@ -153,7 +133,7 @@ public class NetworkManager {
             var json = com.google.gson.JsonParser.parseString(response.body()).getAsJsonObject();
 
             switch (service) {
-                case GITHUB, GITEA:
+                case GITHUB, GITEA, FORGEJO:
                     if (json.has("clone_url")) {
                         return json.get("clone_url").getAsString();
                     }

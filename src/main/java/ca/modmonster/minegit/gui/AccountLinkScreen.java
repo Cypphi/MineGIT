@@ -1,6 +1,6 @@
 package ca.modmonster.minegit.gui;
 
-import ca.modmonster.minegit.MineGIT;
+import ca.modmonster.minegit.data.*;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
@@ -8,18 +8,11 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
-import ca.modmonster.minegit.data.Config;
-import ca.modmonster.minegit.data.ConfigManager;
-import ca.modmonster.minegit.data.CryptoManager;
-import ca.modmonster.minegit.data.GitService;
-import ca.modmonster.minegit.data.NetworkManager;
-
 public class AccountLinkScreen extends Screen {
     private static final Component USERNAME_EDIT_LABEL = Component.translatable("minegit.link.username");
     private static final Component PAT_EDIT_LABEL = Component.translatable("minegit.link.pat");
     private static final Component WEB_URL_LABEL = Component.translatable("minegit.link.web_url");
     private static final Component API_URL_LABEL = Component.translatable("minegit.link.api_url");
-    private static final Component SERVICE_LABEL = Component.translatable("minegit.link.service");
     private static final Identifier RALSPIN = Identifier.fromNamespaceAndPath("minegit", "ralspin");
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 36);
 
@@ -34,11 +27,8 @@ public class AccountLinkScreen extends Screen {
     private ImageWidget ralspinWidget;
     private boolean requestInProgress = false;
     private StringWidget testCredentialsStatus;
-    private Button prevServiceButton;
-    private Button nextServiceButton;
-    private StringWidget serviceDisplay;
+    private StringWidget selectedServiceLabel;
 
-    private LinearLayout columnLayout;
     private GitService selectedService = GitService.GITHUB;
 
     public AccountLinkScreen(Screen parent) {
@@ -54,25 +44,34 @@ public class AccountLinkScreen extends Screen {
     @Override
     protected void init() {
         // Column layout
-        columnLayout = LinearLayout.vertical().spacing(8);
+        LinearLayout columnLayout = LinearLayout.vertical().spacing(8);
         columnLayout.defaultCellSetting().alignHorizontallyCenter();
 
         // Menu title
         layout.addTitleHeader(this.title, this.font);
 
-        // Compact service selector: < GitHub >
-        StringWidget serviceLabel = columnLayout.addChild(new StringWidget(SERVICE_LABEL, font));
+        StringWidget serviceLabel = new StringWidget(Component.translatable("minegit.link.service"), font);
         serviceLabel.setAlpha(0.5f);
+        columnLayout.addChild(serviceLabel);
 
         LinearLayout serviceRow = columnLayout.addChild(LinearLayout.horizontal().spacing(4));
-        prevServiceButton = Button.builder(Component.literal("<"), button -> cycleService(-1))
-                .size(24, 20).build();
-        nextServiceButton = Button.builder(Component.literal(">"), button -> cycleService(1))
-                .size(24, 20).build();
-        serviceDisplay = new StringWidget(Component.literal("GitHub"), font);
-        serviceRow.addChild(prevServiceButton);
-        serviceRow.addChild(serviceDisplay);
-        serviceRow.addChild(nextServiceButton);
+
+        selectedServiceLabel = new StringWidget(Component.empty(), font);
+        serviceRow.addChild(selectedServiceLabel);
+
+        SelectServiceScreen selectServiceScreen = new SelectServiceScreen((service) -> {
+            minecraft.setScreen(this);
+            if (service != null) {
+                selectedService = service;
+                updateDefaultValues(ConfigManager.getCurrentConfig());
+                updateServiceDisplay();
+                updateCustomUrlVisibility();
+                updateTestButtonStatus(false);
+            }
+        });
+        Button changeServiceButton = Button.builder(Component.translatable("minegit.link.select_service"), (button) ->
+                minecraft.setScreen(selectServiceScreen)).size(70, 20).build();
+        serviceRow.addChild(changeServiceButton);
 
         // Username text field
         StringWidget usernameEditLabel = columnLayout.addChild(new StringWidget(USERNAME_EDIT_LABEL, font));
@@ -163,20 +162,9 @@ public class AccountLinkScreen extends Screen {
         }
     }
 
-    private void cycleService(int direction) {
-        GitService[] services = GitService.values();
-        int currentIndex = selectedService.ordinal();
-        int newIndex = (currentIndex + direction + services.length) % services.length;
-        selectedService = services[newIndex];
-        updateDefaultValues(ConfigManager.getCurrentConfig());
-        updateServiceDisplay();
-        updateCustomUrlVisibility();
-        updateTestButtonStatus(false);
-    }
-
     private void updateServiceDisplay() {
-        serviceDisplay.setMessage(Component.literal(selectedService.getDisplayName()));
-        layout.arrangeElements();
+        selectedServiceLabel.setMessage(Component.literal(selectedService.getDisplayName()));
+        selectedServiceLabel.setSize(126, 22);
     }
 
     private void updateCustomUrlVisibility() {
@@ -199,10 +187,7 @@ public class AccountLinkScreen extends Screen {
         updateTestButtonStatus(false);
 
         // Build config from current UI values
-        Config testConfig = new Config(usernameEdit.getValue(), CryptoManager.encrypt(patEdit.getValue()));
-        testConfig.gitService = selectedService;
-        testConfig.customWebUrl = webUrlEdit.getValue();
-        testConfig.customApiUrl = apiUrlEdit.getValue();
+        Config testConfig = new Config(usernameEdit.getValue(), CryptoManager.encrypt(patEdit.getValue()), selectedService, webUrlEdit.getValue(), apiUrlEdit.getValue());
 
         new Thread(() -> {
             int statusCode = NetworkManager.testCredentials(testConfig);
@@ -255,10 +240,7 @@ public class AccountLinkScreen extends Screen {
         // Save credentials with service configuration
         String username = usernameEdit.getValue();
         String pat = CryptoManager.encrypt(patEdit.getValue());
-        Config config = new Config(username, pat);
-        config.gitService = selectedService;
-        config.customWebUrl = webUrlEdit.getValue();
-        config.customApiUrl = apiUrlEdit.getValue();
+        Config config = new Config(username, pat, selectedService, webUrlEdit.getValue(), apiUrlEdit.getValue());
         ConfigManager.save(config);
 
         minecraft.setScreen(parent);

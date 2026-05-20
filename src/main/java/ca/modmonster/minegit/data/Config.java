@@ -1,21 +1,23 @@
 package ca.modmonster.minegit.data;
 
 public class Config {
-    public String username;
-    public String patEncrypted;
+    public final String username;
+    public final String patEncrypted;
     private transient String pat;
+    public final GitService gitService;
+    public final String customWebUrl;
+    public final String customApiUrl;
 
-    public GitService gitService = GitService.GITHUB;
-    public String customWebUrl = "";
-    public String customApiUrl = "";
-
-    public Config(String username, String patEncrypted) {
+    public Config(String username, String patEncrypted, GitService gitService, String customWebUrl, String customApiUrl) {
         this.username = username;
         this.patEncrypted = patEncrypted;
+        this.gitService = gitService;
+        this.customWebUrl = customWebUrl;
+        this.customApiUrl = customApiUrl;
     }
 
     public Config() {
-        this("", "");
+        this("", "", GitService.GITHUB, "", "");
     }
 
     public String getPat() {
