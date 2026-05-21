@@ -1,5 +1,6 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.GitManager;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.toasts.SystemToast;
@@ -92,7 +93,7 @@ public class CloneScreen extends Screen {
 
             minecraft.submit(() -> {
                 if (result == 0) {
-                    minecraft.getToastManager().addToast(new SystemToast(new SystemToast.SystemToastId(), Component.translatable("minegit.clone.success"), null));
+                    minecraft.getToastManager().addToast(new SystemToast(new SystemToast.SystemToastId(), Component.translatable("minegit.clone.success", ConfigManager.getCurrentConfig().gitService.getNaturalName()), null));
                     if (cloneSuccessCallback != null) {
                         cloneSuccessCallback.run();
                     } else {

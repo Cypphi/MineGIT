@@ -20,7 +20,7 @@
   "minegit.sync.enable": "Enable Cloud Sync\n(Alt+Click to configure)",
   "minegit.sync.enable.title": "Enable Cloud Sync",
   "minegit.sync.enable.confirm.line1": "Would you like to enable cloud sync for %s?",
-  "minegit.sync.enable.confirm.line2": "A new repository will be created for this world.",
+  "minegit.sync.enable.confirm.line2": "A new %s repository will be created for this world.",
   "minegit.sync.enable.confirm.custom_service.line1": "To enable cloud sync for %s, you'll need to create a new repository manually.",
   "minegit.sync.enable.confirm.custom_service.line2": "Please paste the link to the repository here:",
   "minegit.sync.enable.repo_url": "Repository URL",
@@ -28,10 +28,10 @@
   "minegit.sync.enable.confirm.cancel": "Cancel",
   "minegit.sync.enable.working": "Enabling cloud sync...",
   "minegit.sync.enable.complete": "Successfully enabled cloud sync!",
-  "minegit.sync.enable.create_repo.error": "Something went wrong while creating the repository! (Error %s)",
+  "minegit.sync.enable.create_repo.error": "Something went wrong while creating the %s repo! (Error %s)",
   "minegit.sync.enable.git_init.error": "Something went wrong while setting up the Git repo!",
-  "minegit.sync.status.git_push": "Pushing to remote...",
-  "minegit.sync.status.git_pull": "Pulling from remote...",
+  "minegit.sync.status.git_push": "Pushing to %s...",
+  "minegit.sync.status.git_pull": "Pulling from %s...",
   "minegit.sync.enabled": "Cloud Sync Enabled!\n(Alt+Click to configure)",
   "minegit.sync.pull_unreachable.title": "Error syncing world",
   "minegit.sync.pull_unreachable.description": "Your latest world changes could not be synced with the cloud. You can continue to load the world if you wish, but you might not have the latest version of your world.",
@@ -51,7 +51,7 @@
   "minegit.clone.confirm": "Clone",
   "minegit.clone.title": "Clone World",
   "minegit.clone.back": "Back",
-  "minegit.clone.success": "Successfully cloned the world from remote!",
+  "minegit.clone.success": "Successfully cloned the world from %s!",
   "minegit.clone.error.invalid_remote": "The world you are looking for doesn't exist!",
   "minegit.clone.error.generic": "Something went wrong when trying to clone the world.",
   "minegit.clone.in_progress": "Cloning world...",
@@ -63,5 +63,5 @@
   "minegit.prune.in_progress": "Pruning world...",
   "minegit.prune.complete": "World pruning complete!",
   "minegit.prune.failed": "Failed to prune world. Please see game console for details",
-  "minegit.exit_without_push": "Force quit without pushing world to remote"
+  "minegit.exit_without_push": "Force quit without pushing world to %s"
 }

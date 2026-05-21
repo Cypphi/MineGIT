@@ -112,7 +112,7 @@ public class EnableWorldSyncScreen extends Screen {
                 if (!createSuccess) {
                     minecraft.submit(() -> {
                         minecraft.getToastManager().addToast(new SystemToast(new SystemToast.SystemToastId(),
-                                Component.translatable("minegit.sync.enable.create_repo.error", statusCode), null));
+                                Component.translatable("minegit.sync.enable.create_repo.error", config.gitService.getNaturalName(), statusCode), null));
                         openSetupButton.visible = true;
                         cancelButton.active = true;
                         if (response != null) MineGIT.LOGGER.error(response.body());
