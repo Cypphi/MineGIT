@@ -30,7 +30,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class GitManager {
@@ -258,6 +257,26 @@ public class GitManager {
     }
 
     /**
+     * @param in Input repository. Can be in any of the following forms:
+     *           [repo name],
+     *           [username]/[repo name],
+     *           full URL with or without .git suffix
+     * @return String representing full repository URL (e.g. https://github.com/modmonster/repo.git)
+     */
+    public static String getRepoUrl(Config config, String in) {
+        if (in.startsWith("http://") || in.startsWith("https://")) {
+            // Full URL; return ensuring .git at the end
+            return in.endsWith(".git") ? in : in + ".git";
+        } else if (in.contains("/")) {
+            // <username>/<repo> format
+            return config.buildCloneUrl(in);
+        } else {
+            // <repo> format
+            return config.buildCloneUrl(config.username + "/" + in);
+        }
+    }
+
+    /**
      * Clone a repository. Accepts full URLs for custom git services.
      * @param minecraft Minecraft client reference
      * @param repoInput Either a full URL (https://...) or a repo name (for GitHub: username/repo)
@@ -269,19 +288,8 @@ public class GitManager {
         Config config = ConfigManager.getCurrentConfig();
 
         // Determine the clone URL based on input type
-        String repoUrl;
-        String worldFolderName;
-
-        // Check if it's already a full URL
-        if (repoInput.startsWith("http://") || repoInput.startsWith("https://")) {
-            repoUrl = repoInput.endsWith(".git") ? repoInput : repoInput + ".git";
-            // Extract folder name from URL
-            worldFolderName = extractRepoNameFromUrl(repoInput);
-        } else {
-            // It's a repo name, build URL based on configured service
-            repoUrl = config.buildCloneUrl(repoInput);
-            worldFolderName = repoInput.replaceFirst(Pattern.quote("minegit_"), "");
-        }
+        String repoUrl = getRepoUrl(config, repoInput);
+        String worldFolderName = extractRepoNameFromUrl(repoUrl).replaceFirst("minegit_", "");
 
         Path localWorldFolder = getPath(minecraft, worldFolderName);
 
@@ -310,8 +318,8 @@ public class GitManager {
 
     /**
      * Extract repository name from a URL
-     * e.g., https://github.com/user/repo.git -> repo
-     *      https://gitlab.com/user/repo -> repo
+     * e.g., https://github.com/user/repo.git -> repo,
+     *       https://gitlab.com/user/repo -> repo
      */
     private static String extractRepoNameFromUrl(String url) {
         // Remove .git suffix if present

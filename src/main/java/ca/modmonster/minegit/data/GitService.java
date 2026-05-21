@@ -43,7 +43,7 @@ public enum GitService {
     }
 
     public boolean supportsAutoRepoCreation() {
-        return this == GITHUB || this == GITHUB_ORG || this == GITLAB || this == GITEA || this == FORGEJO;
+        return this != CUSTOM;
     }
 
     public Identifier getIcon() {

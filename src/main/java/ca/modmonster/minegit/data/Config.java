@@ -42,18 +42,13 @@ public class Config {
         return gitService.getDefaultApiUrl();
     }
 
+    /**
+     * @param repoName Repository name in format [username]/[repo name]
+     * @return URL to clone provided repo
+     */
     public String buildCloneUrl(String repoName) {
-        if (gitService.requiresCustomUrl()) {
-            // For custom services, assume the repoName already contains the full path
-            // or use the base web URL to construct the clone URL
-            String baseUrl = customWebUrl.endsWith("/") ? customWebUrl : customWebUrl + "/";
-            if (repoName.endsWith(".git")) {
-                return baseUrl + repoName;
-            }
-            return baseUrl + repoName + ".git";
-        }
-
-        String baseUrl = gitService.getDefaultWebUrl();
-        return baseUrl + "/" + username + "/" + repoName + ".git";
+        String apiUrl = getWebUrl();
+        String baseUrl = apiUrl.endsWith("/") ? apiUrl : apiUrl + "/";
+        return baseUrl + repoName + ".git";
     }
 }

@@ -53,10 +53,8 @@ public class EnableWorldSyncScreen extends Screen {
 
         if (needsManualRepoUrl) {
             // Custom service without auto-repo support - ask for repo URL
-            StringWidget message = columnLayout.addChild(new StringWidget(
-                    Component.translatable("minegit.sync.enable.custom_service.message", config.gitService.getDisplayName()),
-                    this.font));
-            message.setAlpha(0.7f);
+            columnLayout.addChild(new StringWidget(Component.translatable("minegit.sync.enable.confirm.custom_service.line1", level.getLevelName()), this.font));
+            columnLayout.addChild(new StringWidget(Component.translatable("minegit.sync.enable.confirm.custom_service.line2"), this.font));
 
             StringWidget repoUrlLabel = columnLayout.addChild(new StringWidget(
                     Component.translatable("minegit.sync.enable.repo_url"), this.font));
