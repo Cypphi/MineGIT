@@ -48,9 +48,7 @@ public class CloneScreen extends Screen {
         usernameEditLabel.setAlpha(0.5f);
         repoEdit = new EditBox(font, 0, 0, 200, 20, REPO_LABEL);
         repoEdit.setMaxLength(255);
-        repoEdit.setResponder(string -> {
-            updateButtonsStatus();
-        });
+        repoEdit.setResponder(string -> updateButtonsStatus());
         columnLayout.addChild(repoEdit);
 
         // Clone button

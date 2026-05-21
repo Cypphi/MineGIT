@@ -37,6 +37,12 @@ public class NetworkManager {
                         .header("Authorization", "token " + pat)
                         .GET().build();
                 break;
+            case GITHUB_ORG:
+                request = HttpRequest.newBuilder()
+                        .uri(URI.create(apiUrl + "/orgs/" + username))
+                        .header("Authorization", "token " + pat)
+                        .GET().build();
+                break;
             case GITLAB:
                 request = HttpRequest.newBuilder()
                         .uri(URI.create(apiUrl + "/user"))
@@ -92,6 +98,16 @@ public class NetworkManager {
                                 "{\"name\":\"minegit_%s\",\"description\":\"Minecraft save for %s. Cloud sync by MineGIT\",\"private\":true}",
                                 worldId, encodedName))).build();
                 break;
+            case GITHUB_ORG:
+                request = HttpRequest.newBuilder()
+                        .uri(URI.create(apiUrl + "/orgs/" + config.username + "/repos"))
+                        .header("Authorization", "token " + pat)
+                        .header("X-GitHub-Api-Version", "2026-03-10")
+                        .header("Accept", "application/vnd.github+json")
+                        .POST(HttpRequest.BodyPublishers.ofString(String.format(
+                                "{\"name\":\"minegit_%s\",\"description\":\"Minecraft save for %s. Cloud sync by MineGIT\",\"private\":true}",
+                                worldId, encodedName))).build();
+                break;
             case GITLAB:
                 request = HttpRequest.newBuilder()
                         .uri(URI.create(apiUrl + "/projects"))
@@ -133,7 +149,7 @@ public class NetworkManager {
             var json = com.google.gson.JsonParser.parseString(response.body()).getAsJsonObject();
 
             switch (service) {
-                case GITHUB, GITEA, FORGEJO:
+                case GITHUB, GITHUB_ORG, GITEA, FORGEJO:
                     if (json.has("clone_url")) {
                         return json.get("clone_url").getAsString();
                     }

@@ -18,6 +18,7 @@ import net.minecraft.world.level.storage.LevelResource;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -41,11 +42,12 @@ public class LevelSaveMixin {
         MinecraftServer server = (MinecraftServer) (Object) this;
         Path worldFolder = server.getWorldPath(LevelResource.ROOT); // get world folder
         if (!GitManager.syncEnabled(worldFolder)) return;
-        MineGIT.LOGGER.info("Pushing current world to GitHub");
+        MineGIT.LOGGER.info("Pushing current world to remote");
 
         doWorldSave(worldFolder);
     }
 
+    @Unique
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private void doWorldSave(Path worldFolder) {
         minecraft.submit(() -> {

@@ -66,7 +66,7 @@ public class EnableWorldSyncScreen extends Screen {
         } else {
             // GitHub/GitLab/Gitea - show confirmation and auto-create
             columnLayout.addChild(new StringWidget(Component.translatable("minegit.sync.enable.confirm.line1", level.getLevelName()), this.font));
-            columnLayout.addChild(new StringWidget(Component.translatable("minegit.sync.enable.confirm.line2"), this.font));
+            columnLayout.addChild(new StringWidget(Component.translatable("minegit.sync.enable.confirm.line2", config.gitService.getNaturalName()), this.font));
         }
 
         // Confirm button
