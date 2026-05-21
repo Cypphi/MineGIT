@@ -11,8 +11,6 @@ import net.minecraft.resources.Identifier;
 public class AccountLinkScreen extends Screen {
     private static final Component USERNAME_EDIT_LABEL = Component.translatable("minegit.link.username");
     private static final Component PAT_EDIT_LABEL = Component.translatable("minegit.link.pat");
-    private static final Component WEB_URL_LABEL = Component.translatable("minegit.link.web_url");
-    private static final Component API_URL_LABEL = Component.translatable("minegit.link.api_url");
     private static final Identifier RALSPIN = Identifier.fromNamespaceAndPath("minegit", "ralspin");
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 36);
 
@@ -20,10 +18,7 @@ public class AccountLinkScreen extends Screen {
     private final Runnable closeCallback;
     private EditBox usernameEdit;
     private EditBox patEdit;
-    private EditBox webUrlEdit;
-    private EditBox apiUrlEdit;
     private Button testCredentialsButton;
-    private ScrollableLayout scrollable;
     private ImageWidget ralspinWidget;
     private boolean requestInProgress = false;
     private StringWidget testCredentialsStatus;
@@ -50,24 +45,16 @@ public class AccountLinkScreen extends Screen {
         // Menu title
         layout.addTitleHeader(this.title, this.font);
 
-        StringWidget serviceLabel = new StringWidget(Component.translatable("minegit.link.service"), font);
-        serviceLabel.setAlpha(0.5f);
-        columnLayout.addChild(serviceLabel);
-
         LinearLayout serviceRow = columnLayout.addChild(LinearLayout.horizontal().spacing(4));
 
         selectedServiceLabel = new StringWidget(Component.empty(), font);
+        updateService();
         serviceRow.addChild(selectedServiceLabel);
 
-        SelectServiceScreen selectServiceScreen = new SelectServiceScreen((service) -> {
+        SelectServiceScreen selectServiceScreen = new SelectServiceScreen(this, () -> {
             minecraft.setScreen(this);
-            if (service != null) {
-                selectedService = service;
-                updateDefaultValues(ConfigManager.getCurrentConfig());
-                updateServiceDisplay();
-                updateCustomUrlVisibility();
-                updateTestButtonStatus(false);
-            }
+            updateService();
+            updateTestButtonStatus(false);
         });
         Button changeServiceButton = Button.builder(Component.translatable("minegit.link.select_service"), (button) ->
                 minecraft.setScreen(selectServiceScreen)).size(70, 20).build();
@@ -89,23 +76,6 @@ public class AccountLinkScreen extends Screen {
         patEdit.setResponder(string -> updateTestButtonStatus(false));
         columnLayout.addChild(patEdit);
 
-        // Custom URL fields (for Custom service)
-        StringWidget webUrlLabel = columnLayout.addChild(new StringWidget(WEB_URL_LABEL, font));
-        webUrlLabel.setAlpha(0.5f);
-        webUrlEdit = new EditBox(font, 0, 0, 200, 20, WEB_URL_LABEL);
-        webUrlEdit.setMaxLength(255);
-        webUrlEdit.setResponder(string -> updateTestButtonStatus(false));
-        webUrlEdit.visible = false;
-        columnLayout.addChild(webUrlEdit);
-
-        StringWidget apiUrlLabel = columnLayout.addChild(new StringWidget(API_URL_LABEL, font));
-        apiUrlLabel.setAlpha(0.5f);
-        apiUrlEdit = new EditBox(font, 0, 0, 200, 20, API_URL_LABEL);
-        apiUrlEdit.setMaxLength(255);
-        apiUrlEdit.setResponder(string -> updateTestButtonStatus(false));
-        apiUrlEdit.visible = false;
-        columnLayout.addChild(apiUrlEdit);
-
         // Test credentials button
         testCredentialsButton = Button.builder(Component.translatable("minegit.link.test"), button -> testCredentials()).size(200, 20).build();
         columnLayout.addChild(testCredentialsButton);
@@ -114,12 +84,8 @@ public class AccountLinkScreen extends Screen {
         testCredentialsStatus = new StringWidget(Component.empty(), font);
         columnLayout.addChild(testCredentialsStatus);
 
-        int availableHeight = this.height - layout.getHeaderHeight() - layout.getFooterHeight();
-        ScrollableLayout scrollable = new ScrollableLayout(minecraft, columnLayout, availableHeight);
-        this.layout.addToContents(scrollable);
-        this.scrollable = scrollable;
-
         // Add layout widgets
+        layout.addToContents(columnLayout);
         this.layout.visitWidgets(this::addRenderableWidget);
         this.layout.arrangeElements();
 
@@ -143,43 +109,12 @@ public class AccountLinkScreen extends Screen {
         usernameEdit.setValue(config.username);
         String pat = config.getPat();
         if (pat != null) patEdit.setValue(pat);
-
-        // Set the current service and update UI
-        selectedService = config.gitService;
-        webUrlEdit.setValue(config.customWebUrl);
-        apiUrlEdit.setValue(config.customApiUrl);
-        updateServiceDisplay();
-        updateCustomUrlVisibility();
     }
 
-    private void updateDefaultValues(Config config) {
-        if (selectedService == GitService.GITLAB) {
-            webUrlEdit.setValue(GitService.GITLAB.getDefaultWebUrl());
-            apiUrlEdit.setValue(GitService.GITLAB.getDefaultApiUrl());
-        } else {
-            webUrlEdit.setValue(config.customWebUrl);
-            apiUrlEdit.setValue(config.customApiUrl);
-        }
-    }
-
-    private void updateServiceDisplay() {
+    private void updateService() {
+        selectedService = ConfigManager.getCurrentConfig().gitService;
         selectedServiceLabel.setMessage(Component.literal(selectedService.getDisplayName()));
         selectedServiceLabel.setSize(126, 22);
-    }
-
-    private void updateCustomUrlVisibility() {
-        boolean showCustomUrls = selectedService.requiresCustomUrl();
-        webUrlEdit.visible = showCustomUrls;
-        apiUrlEdit.visible = showCustomUrls;
-
-        // Update username field constraints
-        if (showCustomUrls) {
-            usernameEdit.setMaxLength(100);
-        } else {
-            usernameEdit.setMaxLength(39);
-        }
-
-        layout.arrangeElements();
     }
 
     private void testCredentials() {
@@ -187,7 +122,8 @@ public class AccountLinkScreen extends Screen {
         updateTestButtonStatus(false);
 
         // Build config from current UI values
-        Config testConfig = new Config(usernameEdit.getValue(), CryptoManager.encrypt(patEdit.getValue()), selectedService, webUrlEdit.getValue(), apiUrlEdit.getValue());
+        Config currentConfig = ConfigManager.getCurrentConfig();
+        Config testConfig = new Config(usernameEdit.getValue(), CryptoManager.encrypt(patEdit.getValue()), selectedService, currentConfig.customWebUrl, currentConfig.customApiUrl);
 
         new Thread(() -> {
             int statusCode = NetworkManager.testCredentials(testConfig);
@@ -223,11 +159,7 @@ public class AccountLinkScreen extends Screen {
     }
 
     private void updateTestButtonStatus(boolean forceDisable) {
-        boolean hasBasicInfo = !usernameEdit.getValue().isBlank() && !patEdit.getValue().isBlank();
-        boolean hasCustomUrls = !selectedService.requiresCustomUrl() ||
-                                 (!webUrlEdit.getValue().isBlank() && !apiUrlEdit.getValue().isBlank());
-
-        testCredentialsButton.active = !forceDisable && !requestInProgress && hasBasicInfo && hasCustomUrls;
+        testCredentialsButton.active = !forceDisable && !requestInProgress && !usernameEdit.getValue().isBlank() && !patEdit.getValue().isBlank();
     }
 
     private void updateTestCredentialsStatus(Component message) {
@@ -240,7 +172,8 @@ public class AccountLinkScreen extends Screen {
         // Save credentials with service configuration
         String username = usernameEdit.getValue();
         String pat = CryptoManager.encrypt(patEdit.getValue());
-        Config config = new Config(username, pat, selectedService, webUrlEdit.getValue(), apiUrlEdit.getValue());
+        Config currentConfig = ConfigManager.getCurrentConfig();
+        Config config = new Config(username, pat, currentConfig.gitService, currentConfig.customWebUrl, currentConfig.customApiUrl);
         ConfigManager.save(config);
 
         minecraft.setScreen(parent);
@@ -254,7 +187,6 @@ public class AccountLinkScreen extends Screen {
 
     @Override
     protected void repositionElements() {
-        scrollable.setMaxHeight(this.height - layout.getHeaderHeight() - layout.getFooterHeight());
         layout.arrangeElements();
         ralspinWidget.setPosition(width - 60, height - 80);
     }

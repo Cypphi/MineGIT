@@ -1,5 +1,7 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.data.Config;
+import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.GitService;
 import ca.modmonster.minegit.widget.GitServiceButton;
 import net.minecraft.client.gui.components.Button;
@@ -9,15 +11,15 @@ import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-import java.util.function.Consumer;
-
 public class SelectServiceScreen extends Screen {
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 36);
-    private final Consumer<GitService> closeCallback;
+    private final Screen parent;
+    private final Runnable selectCallback;
 
-    public SelectServiceScreen(Consumer<GitService> closeCallback) {
+    public SelectServiceScreen(Screen parent, Runnable selectCallback) {
         super(Component.translatable("minegit.select_service.title"));
-        this.closeCallback = closeCallback;
+        this.parent = parent;
+        this.selectCallback = selectCallback;
     }
 
     @Override
@@ -30,11 +32,11 @@ public class SelectServiceScreen extends Screen {
         int row = 0;
         int col = 0;
         for (GitService service : GitService.values()) {
-            Button githubButton = new GitServiceButton(
+            Button button = new GitServiceButton(
                     Component.literal(service.getShortName()), service.getIcon(),
-                    (button) -> closeCallback.accept(service)
+                    (b) -> selectService(service)
             );
-            grid.addChild(githubButton, row, col);
+            grid.addChild(button, row, col);
 
             col++;
             if (col > 3) {
@@ -55,9 +57,22 @@ public class SelectServiceScreen extends Screen {
         addRenderableWidget(backButton);
     }
 
+    public void selectService(GitService service) {
+        if (service.requiresCustomUrl()) {
+            // Open screen to provide custom URL
+            minecraft.setScreen(new EndpointURLScreen(this, selectCallback, service));
+        } else {
+            // We do not need a custom URL; do a save
+            Config currentConfig = ConfigManager.getCurrentConfig();
+            Config config = new Config(currentConfig.username, currentConfig.patEncrypted, service, "", "");
+            ConfigManager.save(config);
+            selectCallback.run();
+        }
+    }
+
     @Override
     public void onClose() {
-        closeCallback.accept(null);
+        minecraft.setScreen(parent);
     }
 
     @Override

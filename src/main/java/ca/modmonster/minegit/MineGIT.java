@@ -6,8 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // TODO: explanation for api url vs web url (do we need both?)
-// TODO: hide entire web url section for GitHub
-// TODO: remove need for scrolling, i don't like it
 
 public class MineGIT implements ClientModInitializer {
 	public static final String MOD_ID = "minegit";
