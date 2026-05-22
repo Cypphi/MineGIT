@@ -49,6 +49,7 @@ public class GitManager {
      * @return SyncResult representing if the pull was successful or why it failed
      */
     public static SyncResult pull(Path worldFolder, ProgressMonitor progressMonitor) {
+        progressMonitor.beginTask(I18n.get("minegit.status.open"), 0);
         Config config = ConfigManager.getCurrentConfig();
         try (Git git = Git.open(worldFolder.toFile())) {
             PullResult result = git.pull()

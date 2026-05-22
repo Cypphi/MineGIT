@@ -19,7 +19,8 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
     @Nullable
     private StringWidget currentTaskWidget;
 
-    private int currentTaskWork = 0;
+    private float currentTaskProgress = 0;
+    private float currentTaskProgressTarget = 0;
     private int currentTaskTotalWork = 1;
     private float indeterminateTimer = 0;
 
@@ -73,9 +74,9 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
         // Render progress fill
         if (currentTaskTotalWork != 0) {
             // Determinate progress
-            float progress = (float) currentTaskWork / currentTaskTotalWork;
-            if (progress > 1) progress = 1;
-            int barPixels = (int) (PROGRESS_BAR_WIDTH * progress);
+            currentTaskProgress += (currentTaskProgressTarget - currentTaskProgress) * f * 0.2f;
+            if (currentTaskProgress > 1) currentTaskProgress = 1;
+            int barPixels = (int) (PROGRESS_BAR_WIDTH * currentTaskProgress);
             guiGraphics.fill(barLeft, this.height - 16, barLeft + barPixels, this.height - 18, 0xFF80FF80);
         } else {
             // Indeterminate progress
@@ -103,13 +104,14 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
             });
         }
         if (currentTaskTotalWork != 0) indeterminateTimer = 0;
-        currentTaskWork = 0;
+        currentTaskProgress = 0;
+        currentTaskProgressTarget = 0;
         currentTaskTotalWork = totalWork;
     }
 
     @Override
     public void update(int completed) {
-        currentTaskWork += completed;
+        currentTaskProgressTarget += (float) completed / currentTaskTotalWork;
     }
 
     @Override
