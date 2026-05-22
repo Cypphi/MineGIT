@@ -392,7 +392,6 @@ public class GitManager {
     }
 
     public static boolean prune(Minecraft minecraft, String worldId, ProgressMonitor progressMonitor) {
-        progressMonitor.beginTask(I18n.get("minegit.status.prune.open"), 0);
         Path worldFolder = getPath(minecraft, worldId);
         Config config = ConfigManager.getCurrentConfig();
         try (Git git = Git.open(worldFolder.toFile())) {

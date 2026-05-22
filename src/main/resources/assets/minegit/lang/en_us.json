@@ -74,7 +74,6 @@
   "minegit.status.stage": "Stage world to commit",
   "minegit.status.commit": "Commit world state",
   "minegit.status.clone": "Start world clone",
-  "minegit.status.prune.open": "Open world",
   "minegit.status.prune.create": "Create temporary branch",
   "minegit.status.prune.rename": "Rename temporary branch to main"
 }

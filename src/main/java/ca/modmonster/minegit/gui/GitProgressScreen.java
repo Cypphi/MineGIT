@@ -21,6 +21,7 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
 
     private int currentTaskWork = 0;
     private int currentTaskTotalWork = 1;
+    private float indeterminateTimer = 0;
 
     public GitProgressScreen(Component component) {
         super(component);
@@ -65,14 +66,28 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
     public void extractRenderState(@NotNull GuiGraphicsExtractor guiGraphics, int i, int j, float f) {
         super.extractRenderState(guiGraphics, i, j, f);
 
-        // Render progress bar
+        // Render progress bar base
         int barLeft = this.width / 2 - PROGRESS_BAR_WIDTH / 2;
         guiGraphics.fill(barLeft, this.height - 16, barLeft + PROGRESS_BAR_WIDTH, this.height - 18, 0xFFA0A0A0);
 
-        float progress = (float) currentTaskWork / currentTaskTotalWork;
-        if (progress > 1) progress = 1;
-        int barPixels = (int) (PROGRESS_BAR_WIDTH * progress);
-        guiGraphics.fill(barLeft, this.height - 16, barLeft + barPixels, this.height - 18, 0xFF80FF80);
+        // Render progress fill
+        if (currentTaskTotalWork != 0) {
+            // Determinate progress
+            float progress = (float) currentTaskWork / currentTaskTotalWork;
+            if (progress > 1) progress = 1;
+            int barPixels = (int) (PROGRESS_BAR_WIDTH * progress);
+            guiGraphics.fill(barLeft, this.height - 16, barLeft + barPixels, this.height - 18, 0xFF80FF80);
+        } else {
+            // Indeterminate progress
+            indeterminateTimer += f;
+
+            // ranges from [-barwidth, barwidth]
+            int l = (int) (Math.sin(indeterminateTimer / 10f) * PROGRESS_BAR_WIDTH);
+            int r = l + PROGRESS_BAR_WIDTH;
+            l = Math.clamp(l, 0, PROGRESS_BAR_WIDTH);
+            r = Math.clamp(r, 0, PROGRESS_BAR_WIDTH);
+            guiGraphics.fill(barLeft + l, this.height - 16, barLeft + r, this.height - 18, 0xFF80FF80);
+        }
     }
 
     @Override
@@ -87,8 +102,9 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
                 repositionElements();
             });
         }
+        if (currentTaskTotalWork != 0) indeterminateTimer = 0;
         currentTaskWork = 0;
-        currentTaskTotalWork = totalWork != 0? totalWork : 1;
+        currentTaskTotalWork = totalWork;
     }
 
     @Override
