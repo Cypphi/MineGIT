@@ -2,6 +2,7 @@ package ca.modmonster.minegit.data;
 
 import ca.modmonster.minegit.MineGIT;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.language.I18n;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.MergeCommand;
 import org.eclipse.jgit.api.PullResult;
@@ -60,7 +61,7 @@ public class GitManager {
             if (result.isSuccessful()) return SyncResult.SUCCESS;
 
             // pull was unsuccessful, check if it was caused by a recent prune
-            progressMonitor.beginTask("Checking for pruning", 0);
+            progressMonitor.beginTask(I18n.get("minegit.status.pull_check_prune"), 0);
             Repository repo = git.getRepository();
             ObjectId head = repo.resolve("HEAD");
             int localCommitTime;
@@ -156,12 +157,12 @@ public class GitManager {
         Config config = ConfigManager.getCurrentConfig();
         try (Git git = Git.open(worldFolder.toFile())) {
             // add all
-            progressMonitor.beginTask("Stage world to commit", 0);
+            progressMonitor.beginTask(I18n.get("minegit.status.stage"), 0);
             git.add()
                     .addFilepattern(".")
                     .call();
             // commit
-            progressMonitor.beginTask("Commit world state", 0);
+            progressMonitor.beginTask(I18n.get("minegit.status.commit"), 0);
             String timestamp = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("h:mm a, MM/dd/yy"));
             git.commit()
                     .setMessage("World snapshot - " + timestamp)
@@ -222,13 +223,13 @@ public class GitManager {
         Path worldFolder = getPath(minecraft, worldId);
         Config config = ConfigManager.getCurrentConfig();
         try (Git git = Git.init().setDirectory(worldFolder.toFile()).call()) {
-            progressMonitor.beginTask("Stage world to commit", 0);
+            progressMonitor.beginTask(I18n.get("minegit.status.stage"), 0);
             // add all
             git.add()
                     .addFilepattern(".")
                     .call();
             // commit
-            progressMonitor.beginTask("Commit world state", 0);
+            progressMonitor.beginTask(I18n.get("minegit.status.commit"), 0);
             String timestamp = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("h:mm a, MM/dd/yy"));
             git.commit()
                     .setMessage("Initial world snapshot - " + timestamp)
@@ -284,7 +285,7 @@ public class GitManager {
      * @return 0 on success, 1 for invalid remote, 2 for other errors
      */
     public static int cloneRepo(Minecraft minecraft, String repoInput, ProgressMonitor progressMonitor) {
-        progressMonitor.beginTask("Starting world clone", 0);
+        progressMonitor.beginTask(I18n.get("minegit.status.clone"), 0);
         Config config = ConfigManager.getCurrentConfig();
 
         // Determine the clone URL based on input type
@@ -391,14 +392,14 @@ public class GitManager {
     }
 
     public static boolean prune(Minecraft minecraft, String worldId, ProgressMonitor progressMonitor) {
-        progressMonitor.beginTask("Opening world", 0);
+        progressMonitor.beginTask(I18n.get("minegit.status.prune.open"), 0);
         Path worldFolder = getPath(minecraft, worldId);
         Config config = ConfigManager.getCurrentConfig();
         try (Git git = Git.open(worldFolder.toFile())) {
             // get current branch name
             String mainBranch = git.getRepository().getBranch();
 
-            progressMonitor.beginTask("Creating temporary branch", 0);
+            progressMonitor.beginTask(I18n.get("minegit.status.prune.create"), 0);
             // new branch
             git.checkout()
                     .setName("prune")
@@ -406,12 +407,12 @@ public class GitManager {
                     .setProgressMonitor(progressMonitor)
                     .call();
             // add all
-            progressMonitor.beginTask("Stage world to commit", 0);
+            progressMonitor.beginTask(I18n.get("minegit.status.stage"), 0);
             git.add()
                     .addFilepattern(".")
                     .call();
             // commit
-            progressMonitor.beginTask("Commit world state", 0);
+            progressMonitor.beginTask(I18n.get("minegit.status.commit"), 0);
             String timestamp = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("h:mm a, MM/dd/yy"));
             git.commit()
                     .setMessage("World pruning - " + timestamp)
@@ -422,7 +423,7 @@ public class GitManager {
                     .setForce(true)
                     .setProgressMonitor(progressMonitor)
                     .call();
-            progressMonitor.beginTask("Renaming temporary branch to main", 0);
+            progressMonitor.beginTask(I18n.get("minegit.status.prune.rename"), 0);
             // rename temp branch to main
             git.branchRename()
                     .setNewName(mainBranch)
