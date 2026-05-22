@@ -30,7 +30,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class GitManager {
@@ -257,16 +256,47 @@ public class GitManager {
         }
     }
 
-    public static int cloneRepo(Minecraft minecraft, String repo, ProgressMonitor progressMonitor) {
+    /**
+     * @param in Input repository. Can be in any of the following forms:
+     *           [repo name],
+     *           [username]/[repo name],
+     *           full URL with or without .git suffix
+     * @return String representing full repository URL (e.g. https://github.com/modmonster/repo.git)
+     */
+    public static String getRepoUrl(Config config, String in) {
+        if (in.startsWith("http://") || in.startsWith("https://")) {
+            // Full URL; return ensuring .git at the end
+            return in.endsWith(".git") ? in : in + ".git";
+        } else if (in.contains("/")) {
+            // <username>/<repo> format
+            return config.buildCloneUrl(in);
+        } else {
+            // <repo> format
+            return config.buildCloneUrl(config.username + "/" + in);
+        }
+    }
+
+    /**
+     * Clone a repository. Accepts full URLs for custom git services.
+     * @param minecraft Minecraft client reference
+     * @param repoInput Either a full URL (https://...) or a repo name (for GitHub: username/repo)
+     * @param progressMonitor ProgressMonitor for tracking clone progress
+     * @return 0 on success, 1 for invalid remote, 2 for other errors
+     */
+    public static int cloneRepo(Minecraft minecraft, String repoInput, ProgressMonitor progressMonitor) {
         progressMonitor.beginTask("Starting world clone", 0);
         Config config = ConfigManager.getCurrentConfig();
-        String repoUrl = String.format("https://github.com/%s/%s.git", config.username, repo);
-        Path localWorldFolder = getPath(minecraft, repo.replaceFirst(Pattern.quote("minegit_"), ""));
+
+        // Determine the clone URL based on input type
+        String repoUrl = getRepoUrl(config, repoInput);
+        String worldFolderName = extractRepoNameFromUrl(repoUrl).replaceFirst("minegit_", "");
+
+        Path localWorldFolder = getPath(minecraft, worldFolderName);
 
         // Add a counter at the end if world folder already exists
         int i = 1;
         while (localWorldFolder.toFile().exists()) {
-            localWorldFolder = getPath(minecraft, repo.replaceFirst(Pattern.quote("minegit_"), "") + "_" + i);
+            localWorldFolder = getPath(minecraft, worldFolderName + "_" + i);
             i++;
         }
 
@@ -284,6 +314,23 @@ public class GitManager {
             MineGIT.LOGGER.error("Error cloning repo", e);
             return 2;
         }
+    }
+
+    /**
+     * Extract repository name from a URL
+     * e.g., https://github.com/user/repo.git -> repo,
+     *       https://gitlab.com/user/repo -> repo
+     */
+    private static String extractRepoNameFromUrl(String url) {
+        // Remove .git suffix if present
+        String cleanUrl = url.replaceAll("\\.git$", "");
+
+        // Find the last path segment
+        int lastSlash = cleanUrl.lastIndexOf('/');
+        if (lastSlash >= 0 && lastSlash < cleanUrl.length() - 1) {
+            return cleanUrl.substring(lastSlash + 1);
+        }
+        return cleanUrl;
     }
 
     public static Path getPath(Minecraft minecraft, String worldId) {
