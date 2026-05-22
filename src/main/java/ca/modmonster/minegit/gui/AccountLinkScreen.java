@@ -10,6 +10,7 @@ import net.minecraft.resources.Identifier;
 
 public class AccountLinkScreen extends Screen {
     private static final Component USERNAME_EDIT_LABEL = Component.translatable("minegit.link.username");
+    private static final Component USERNAME_EDIT_LABEL_ORG = Component.translatable("minegit.link.username.org");
     private static final Component PAT_EDIT_LABEL = Component.translatable("minegit.link.pat");
     private static final Identifier RALSPIN = Identifier.fromNamespaceAndPath("minegit", "ralspin");
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 36);
@@ -23,6 +24,7 @@ public class AccountLinkScreen extends Screen {
     private boolean requestInProgress = false;
     private StringWidget testCredentialsStatus;
     private StringWidget selectedServiceLabel;
+    private StringWidget usernameEditLabel;
 
     private GitService selectedService = GitService.GITHUB;
 
@@ -48,7 +50,6 @@ public class AccountLinkScreen extends Screen {
         LinearLayout serviceRow = columnLayout.addChild(LinearLayout.horizontal().spacing(4));
 
         selectedServiceLabel = new StringWidget(Component.empty(), font);
-        updateService();
         serviceRow.addChild(selectedServiceLabel);
 
         SelectServiceScreen selectServiceScreen = new SelectServiceScreen(this, () -> {
@@ -61,7 +62,7 @@ public class AccountLinkScreen extends Screen {
         serviceRow.addChild(changeServiceButton);
 
         // Username text field
-        StringWidget usernameEditLabel = columnLayout.addChild(new StringWidget(USERNAME_EDIT_LABEL, font));
+        usernameEditLabel = columnLayout.addChild(new StringWidget(USERNAME_EDIT_LABEL, font));
         usernameEditLabel.setAlpha(0.5f);
         usernameEdit = new EditBox(font, 0, 0, 200, 20, USERNAME_EDIT_LABEL);
         usernameEdit.setMaxLength(39);
@@ -84,6 +85,9 @@ public class AccountLinkScreen extends Screen {
         testCredentialsStatus = new StringWidget(Component.empty(), font);
         columnLayout.addChild(testCredentialsStatus);
 
+        updateService();
+        updateTestButtonStatus(false);
+
         // Add layout widgets
         layout.addToContents(columnLayout);
         this.layout.visitWidgets(this::addRenderableWidget);
@@ -102,8 +106,6 @@ public class AccountLinkScreen extends Screen {
         ralspinWidget.setTooltip(Tooltip.create(Component.literal("hiiiii!! ^-^")));
         addRenderableWidget(ralspinWidget);
 
-        updateTestButtonStatus(false);
-
         // Load configuration and update default values
         Config config = ConfigManager.getCurrentConfig();
         usernameEdit.setValue(config.username);
@@ -115,6 +117,15 @@ public class AccountLinkScreen extends Screen {
         selectedService = ConfigManager.getCurrentConfig().gitService;
         selectedServiceLabel.setMessage(Component.literal(selectedService.getDisplayName()));
         selectedServiceLabel.setSize(126, 22);
+
+        if (selectedService == GitService.GITHUB_ORG) {
+            usernameEditLabel.setMessage(USERNAME_EDIT_LABEL_ORG);
+            usernameEdit.setMessage(USERNAME_EDIT_LABEL_ORG);
+        } else {
+            usernameEditLabel.setMessage(USERNAME_EDIT_LABEL);
+            usernameEdit.setMessage(USERNAME_EDIT_LABEL);
+        }
+        layout.arrangeElements();
     }
 
     private void testCredentials() {

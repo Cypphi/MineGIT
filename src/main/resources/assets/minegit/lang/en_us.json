@@ -3,6 +3,7 @@
   "minegit.link.setup": "Setup Cloud Syncing",
   "minegit.link.setup.open": "Open Cloud Sync Setup",
   "minegit.link.username": "Username",
+  "minegit.link.username.org": "Organization Name",
   "minegit.link.pat": "Access Token",
   "minegit.link.test": "Test Credentials",
   "minegit.link.back": "Save and Exit",
