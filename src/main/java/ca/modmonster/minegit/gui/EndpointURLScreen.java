@@ -10,8 +10,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 public class EndpointURLScreen extends Screen {
-    private static final Component WEB_URL_LABEL = Component.translatable("minegit.endpoint_url.web");
     private static final Component API_URL_LABEL = Component.translatable("minegit.endpoint_url.api");
+    private static final Component WEB_URL_LABEL = Component.translatable("minegit.endpoint_url.clone");
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 36);
 
     private final Screen parent;
@@ -43,19 +43,21 @@ public class EndpointURLScreen extends Screen {
         }
 
         // Custom URL fields
-        StringWidget webUrlLabel = columnLayout.addChild(new StringWidget(WEB_URL_LABEL, font));
-        webUrlLabel.setAlpha(0.5f);
-        webUrlEdit = new EditBox(font, 0, 0, 200, 20, WEB_URL_LABEL);
-        webUrlEdit.setMaxLength(255);
-        webUrlEdit.setResponder(string -> updateContinueButtonStatus());
-        columnLayout.addChild(webUrlEdit);
-
         StringWidget apiUrlLabel = columnLayout.addChild(new StringWidget(API_URL_LABEL, font));
         apiUrlLabel.setAlpha(0.5f);
+        apiUrlLabel.setTooltip(Tooltip.create(Component.translatable("minegit.endpoint_url.api.tooltip")));
         apiUrlEdit = new EditBox(font, 0, 0, 200, 20, API_URL_LABEL);
         apiUrlEdit.setMaxLength(255);
         apiUrlEdit.setResponder(string -> updateContinueButtonStatus());
         columnLayout.addChild(apiUrlEdit);
+
+        StringWidget webUrlLabel = columnLayout.addChild(new StringWidget(WEB_URL_LABEL, font));
+        webUrlLabel.setAlpha(0.5f);
+        webUrlLabel.setTooltip(Tooltip.create(Component.translatable("minegit.endpoint_url.clone.tooltip")));
+        webUrlEdit = new EditBox(font, 0, 0, 200, 20, WEB_URL_LABEL);
+        webUrlEdit.setMaxLength(255);
+        webUrlEdit.setResponder(string -> updateContinueButtonStatus());
+        columnLayout.addChild(webUrlEdit);
 
         // Continue button
         continueButton = Button.builder(Component.translatable("minegit.endpoint_url.continue"), button -> {

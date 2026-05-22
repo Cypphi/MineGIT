@@ -5,7 +5,15 @@ public class Config {
     public final String patEncrypted;
     private transient String pat;
     public final GitService gitService;
+
+    /**
+     * Base website URL used when cloning a repo
+     */
     public final String customWebUrl;
+
+    /**
+     * Base API URL used when making request to create repo
+     */
     public final String customApiUrl;
 
     public Config(String username, String patEncrypted, GitService gitService, String customWebUrl, String customApiUrl) {
