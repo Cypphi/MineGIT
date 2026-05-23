@@ -1,15 +1,11 @@
 package ca.modmonster.minegit.mixin;
 
-import ca.modmonster.minegit.data.GitManager;
-import ca.modmonster.minegit.data.SyncResult;
-import ca.modmonster.minegit.gui.GitConflictScreen;
-import ca.modmonster.minegit.gui.GitProgressScreen;
-import ca.modmonster.minegit.gui.TwoChoiceScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelSummary;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -17,6 +13,13 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import ca.modmonster.minegit.data.ConfigManager;
+import ca.modmonster.minegit.data.GitManager;
+import ca.modmonster.minegit.data.SyncResult;
+import ca.modmonster.minegit.gui.GitConflictScreen;
+import ca.modmonster.minegit.gui.GitProgressScreen;
+import ca.modmonster.minegit.gui.TwoChoiceScreen;
 
 @Mixin(WorldSelectionList.WorldListEntry.class)
 public abstract class WorldListEntryMixin {
@@ -44,7 +47,7 @@ public abstract class WorldListEntryMixin {
         String worldId = summary.getLevelId();
         if (!GitManager.syncEnabled(minecraft, worldId)) return;
         ci.cancel();
-        GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_pull"));
+        GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_pull", ConfigManager.getCurrentConfig().gitService.getNaturalName()));
         minecraft.setScreen(progressScreen);
         new Thread(() -> {
             SyncResult status = GitManager.pull(GitManager.getPath(minecraft, worldId), progressScreen);
