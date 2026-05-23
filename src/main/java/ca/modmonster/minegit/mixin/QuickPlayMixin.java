@@ -1,21 +1,24 @@
 package ca.modmonster.minegit.mixin;
 
-import ca.modmonster.minegit.data.GitManager;
-import ca.modmonster.minegit.data.SyncResult;
-import ca.modmonster.minegit.gui.GitConflictScreen;
-import ca.modmonster.minegit.gui.GitProgressScreen;
-import ca.modmonster.minegit.gui.TwoChoiceScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.quickplay.QuickPlay;
 import net.minecraft.network.chat.Component;
+
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import ca.modmonster.minegit.data.ConfigManager;
+import ca.modmonster.minegit.data.GitManager;
+import ca.modmonster.minegit.data.SyncResult;
+import ca.modmonster.minegit.gui.GitConflictScreen;
+import ca.modmonster.minegit.gui.GitProgressScreen;
+import ca.modmonster.minegit.gui.TwoChoiceScreen;
 import oshi.util.Util;
 
 @Mixin(QuickPlay.class)
@@ -25,7 +28,7 @@ public class QuickPlayMixin {
         if (Util.isBlank(identifier) || !minecraft.getLevelSource().levelExists(identifier)) return;
         if (!GitManager.syncEnabled(minecraft, identifier)) return;
         ci.cancel();
-        GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_pull"));
+        GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_pull", ConfigManager.getCurrentConfig().gitService.getNaturalName()));
         minecraft.setScreen(progressScreen);
         new Thread(() -> {
             SyncResult status = GitManager.pull(GitManager.getPath(minecraft, identifier), progressScreen);

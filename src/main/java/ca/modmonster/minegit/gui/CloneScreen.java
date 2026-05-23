@@ -12,6 +12,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
 import ca.modmonster.minegit.backport.RalspinWidget;
+import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.GitManager;
 
 public class CloneScreen extends Screen {
@@ -46,11 +47,11 @@ public class CloneScreen extends Screen {
         // Menu title
         layout.addToHeader(new StringWidget(this.title, this.font));
 
-        // Repo name text field
+        // Repo name/URL text field
         StringWidget usernameEditLabel = columnLayout.addChild(new StringWidget(REPO_LABEL, font), 0, 0);
         usernameEditLabel.setAlpha(0.5f);
         repoEdit = new EditBox(font, 0, 0, 200, 20, REPO_LABEL);
-        repoEdit.setMaxLength(39);
+        repoEdit.setMaxLength(255);
         repoEdit.setResponder(string -> updateButtonsStatus());
         columnLayout.addChild(repoEdit, 1, 0);
 
@@ -98,7 +99,7 @@ public class CloneScreen extends Screen {
 
             minecraft.submit(() -> {
                 if (result == 0) {
-                    SystemToast.add(minecraft.getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION, Component.translatable("minegit.clone.success"), null);
+                    SystemToast.add(minecraft.getToasts(), SystemToast.SystemToastIds.PERIODIC_NOTIFICATION, Component.translatable("minegit.clone.success", ConfigManager.getCurrentConfig().gitService.getNaturalName()), null);
                     if (cloneSuccessCallback != null) {
                         cloneSuccessCallback.run();
                     } else {
