@@ -1,17 +1,31 @@
 package ca.modmonster.minegit.data;
 
 public class Config {
-    public String username;
-    public String patEncrypted;
+    public final String username;
+    public final String patEncrypted;
     private transient String pat;
+    public final GitService gitService;
 
-    public Config(String username, String patEncrypted) {
+    /**
+     * Base website URL used when cloning a repo
+     */
+    public final String customWebUrl;
+
+    /**
+     * Base API URL used when making request to create repo
+     */
+    public final String customApiUrl;
+
+    public Config(String username, String patEncrypted, GitService gitService, String customWebUrl, String customApiUrl) {
         this.username = username;
         this.patEncrypted = patEncrypted;
+        this.gitService = gitService;
+        this.customWebUrl = customWebUrl;
+        this.customApiUrl = customApiUrl;
     }
 
     public Config() {
-        this("", "");
+        this("", "", GitService.GITHUB, "", "");
     }
 
     public String getPat() {
@@ -20,5 +34,29 @@ public class Config {
             if (pat == null) pat = "";
         }
         return pat;
+    }
+
+    public String getWebUrl() {
+        if (gitService.requiresCustomUrl()) {
+            return customWebUrl;
+        }
+        return gitService.getDefaultWebUrl();
+    }
+
+    public String getApiUrl() {
+        if (gitService.requiresCustomUrl()) {
+            return customApiUrl;
+        }
+        return gitService.getDefaultApiUrl();
+    }
+
+    /**
+     * @param repoName Repository name in format [username]/[repo name]
+     * @return URL to clone provided repo
+     */
+    public String buildCloneUrl(String repoName) {
+        String apiUrl = getWebUrl();
+        String baseUrl = apiUrl.endsWith("/") ? apiUrl : apiUrl + "/";
+        return baseUrl + repoName + ".git";
     }
 }

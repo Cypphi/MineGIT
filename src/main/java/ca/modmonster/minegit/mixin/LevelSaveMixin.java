@@ -1,6 +1,7 @@
 package ca.modmonster.minegit.mixin;
 
 import ca.modmonster.minegit.MineGIT;
+import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.QuitState;
 import ca.modmonster.minegit.data.SyncResult;
@@ -38,7 +39,7 @@ public class LevelSaveMixin {
         MinecraftServer server = (MinecraftServer) (Object) this;
         Path worldFolder = server.getWorldPath(LevelResource.ROOT); // get world folder
         if (!GitManager.syncEnabled(worldFolder)) return;
-        MineGIT.LOGGER.info("Pushing current world to GitHub");
+        MineGIT.LOGGER.info("Pushing current world to remote");
 
         doWorldSave(worldFolder);
     }
@@ -47,7 +48,7 @@ public class LevelSaveMixin {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     private void doWorldSave(Path worldFolder) {
         minecraft.submit(() -> {
-            GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_push"));
+            GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_push", ConfigManager.getCurrentConfig().gitService.getNaturalName()));
             minecraft.setScreen(progressScreen);
             new Thread(() -> {
                 SyncResult status = GitManager.push(worldFolder, progressScreen);
