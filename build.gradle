@@ -41,7 +41,7 @@ dependencies {
     include "org.eclipse.jgit:org.eclipse.jgit:7.6.0.202603022253-r"
 
     // Mod Menu
-//	implementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+	compileOnly "com.terraformersmc:modmenu:${project.modmenu_version}"
 }
 
 processResources {
