@@ -11,8 +11,8 @@ import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.GitService;
 
 public class EndpointURLScreen extends Screen {
-    private static final Component API_URL_LABEL = Component.translatable("minegit.endpoint_url.api");
-    private static final Component WEB_URL_LABEL = Component.translatable("minegit.endpoint_url.clone");
+    private static final Component API_URL_LABEL = Component.translatable("minegit.endpoint_url.api").append(" ⓘ");
+    private static final Component WEB_URL_LABEL = Component.translatable("minegit.endpoint_url.clone").append(" ⓘ");
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 36);
 
     private final Screen parent;
@@ -61,7 +61,7 @@ public class EndpointURLScreen extends Screen {
         columnLayout.addChild(webUrlEdit);
 
         // Continue button
-        continueButton = Button.builder(Component.translatable("minegit.endpoint_url.continue"), button -> {
+        continueButton = Button.builder(Component.translatable("gui.continue"), button -> {
             // Save credentials with service configuration
             Config currentConfig = ConfigManager.getCurrentConfig();
             Config config = new Config(currentConfig.username, currentConfig.patEncrypted, selectedService, webUrlEdit.getValue(), apiUrlEdit.getValue());
@@ -77,7 +77,7 @@ public class EndpointURLScreen extends Screen {
 
         // Back button
         Button backButton = Button.builder(Component.literal("←"), button -> onClose())
-                .tooltip(Tooltip.create(Component.translatable("minegit.endpoint_url.back")))
+                .tooltip(Tooltip.create(Component.translatable("gui.back")))
                 .bounds(6, 6, 20, 20)
                 .build();
         addRenderableWidget(backButton);

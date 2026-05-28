@@ -31,7 +31,7 @@ public class LevelSaver {
                     case FAIL_NETWORK:
                         // Network error; show unreachable screen
                         minecraft.submit(() -> minecraft.gui.setScreen(new TwoChoiceScreen(
-                                Component.translatable("minegit.sync.push_unreachable.title"),
+                                Component.translatable("minegit.sync.error"),
                                 Component.translatable("minegit.sync.push_unreachable.description"),
                                 Component.translatable("minegit.sync.push_unreachable.retry"),
                                 Component.translatable("minegit.sync.push_unreachable.exit"),
