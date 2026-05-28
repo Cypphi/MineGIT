@@ -1,0 +1,18 @@
+{
+  "minegit.link.title": "MineGIT setupzz!!!",
+  "minegit.link.setup": "setup clod sink",
+  "minegit.link.setup.open": "open clod sink setupz",
+  "minegit.link.username": "Uzernaem!!",
+  "minegit.link.pat": "Aksess tokin",
+  "minegit.link.test": "Test teh crednatials",
+  "minegit.link.back": "Saev and Xit",
+  "minegit.link.status.error.generic": "somethin not gud happnd :( cuold no do test! (uh oh %s)",
+  "minegit.link.status.error.pat": "bad aksess kee :(",
+  "minegit.link.status.error.username": "bad uzernaem :(",
+  "minegit.link.status.success": "Sucessed!!!",
+  "minegit.link.select_service": "Selec another",
+  "minegit.select_service.title": "change Gitz!!!!",
+  "minegit.endpoint_url.api": "appy linkz",
+  "minegit.endpoint_url.clone": "copy linkz",
+  "minegit.sync.enable.confirm.ok": "ok!"
+}

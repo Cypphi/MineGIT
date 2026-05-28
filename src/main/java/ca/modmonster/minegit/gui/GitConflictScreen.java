@@ -21,7 +21,7 @@ public class GitConflictScreen extends Screen {
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 60);
 
     public GitConflictScreen(@NotNull Runnable resolvedCallback, @Nullable Runnable cancelCallback, @NonNull Path worldFolder) {
-        super(Component.translatable("minegit.sync.conflict.title"));
+        super(Component.translatable("minegit.sync.error"));
         this.resolvedCallback = resolvedCallback;
         this.cancelCallback = cancelCallback;
         this.worldFolder = worldFolder;

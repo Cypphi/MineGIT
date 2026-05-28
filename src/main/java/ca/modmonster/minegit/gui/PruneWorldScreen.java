@@ -1,5 +1,8 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.data.GitManager;
+import ca.modmonster.minegit.data.SyncResult;
+import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.components.StringWidget;
@@ -10,12 +13,7 @@ import net.minecraft.client.gui.layouts.SpacerElement;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.storage.LevelStorageSource;
-
 import org.eclipse.jgit.lib.ProgressMonitor;
-
-import ca.modmonster.minegit.data.GitManager;
-import ca.modmonster.minegit.data.SyncResult;
-import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 
 public class PruneWorldScreen extends Screen {
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 60);
@@ -53,7 +51,7 @@ public class PruneWorldScreen extends Screen {
         buttonRowLayout.addChild(confirmButton);
 
         // Cancel button
-        Button cancelButton = Button.builder(Component.translatable("minegit.prune.cancel"), button -> onClose()).build();
+        Button cancelButton = Button.builder(Component.translatable("gui.cancel"), button -> onClose()).build();
         buttonRowLayout.addChild(cancelButton);
 
         StringWidget statusWidget = new StringWidget(Component.empty(), this.font);
@@ -102,10 +100,10 @@ public class PruneWorldScreen extends Screen {
                 case FAIL_NETWORK:
                     // Network error; show unreachable screen
                     minecraft.submit(() -> minecraft.setScreen(new TwoChoiceScreen(
-                            Component.translatable("minegit.sync.pull_unreachable.title"),
+                            Component.translatable("minegit.sync.error"),
                             Component.translatable("minegit.sync.pull_unreachable.description"),
                             Component.translatable("minegit.sync.pull_unreachable.continue"),
-                            Component.translatable("minegit.sync.pull_unreachable.cancel"),
+                            Component.translatable("gui.cancel"),
                             () -> doPrune(progressScreen),
                             this::onClose
                     )));
