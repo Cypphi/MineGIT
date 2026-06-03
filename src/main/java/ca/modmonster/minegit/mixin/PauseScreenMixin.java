@@ -1,5 +1,6 @@
 package ca.modmonster.minegit.mixin;
 
+import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.QuitState;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -33,7 +34,7 @@ public class PauseScreenMixin extends Screen {
     private Button disconnectButton;
 
     @Unique
-    private final Tooltip tooltip = Tooltip.create(Component.translatable("minegit.exit_without_push"));
+    private final Tooltip tooltip = Tooltip.create(Component.translatable("minegit.exit_without_push", ConfigManager.getCurrentConfig().gitService.getNaturalName()));
 
     @Inject(at = @At("TAIL"), method = "extractRenderState")
     private void extractRenderState(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a, CallbackInfo info) {

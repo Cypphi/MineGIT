@@ -1,5 +1,6 @@
 package ca.modmonster.minegit.mixin;
 
+import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.SyncResult;
 import ca.modmonster.minegit.gui.GitConflictScreen;
@@ -26,7 +27,7 @@ public class QuickPlayMixin {
         if (StringUtil.isBlank(identifier) || !minecraft.getLevelSource().levelExists(identifier)) return;
         if (!GitManager.syncEnabled(minecraft, identifier)) return;
         ci.cancel();
-        GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_pull"));
+        GitProgressScreen progressScreen = new GitProgressScreen(Component.translatable("minegit.sync.status.git_pull", ConfigManager.getCurrentConfig().gitService.getNaturalName()));
         minecraft.setScreen(progressScreen);
         new Thread(() -> {
             SyncResult status = GitManager.pull(GitManager.getPath(minecraft, identifier), progressScreen);
