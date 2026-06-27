@@ -53,6 +53,8 @@
   "minegit.sync.conflict.local": "Local save",
   "minegit.sync.conflict.cancel": "Cancel loading world",
   "minegit.sync.conflict.failed": "Resolving sync conflict failed. You may need to delete the world and re-clone.",
+  "minegit.sync.dirty": "Fix World Sync",
+  "minegit.sync.dirty.description": "The version of the world saved on your device is out of sync with the one stored in the cloud. Would you like to attempt to synchronize your world with the cloud now?",
   "minegit.clone.repo": "Repository",
   "minegit.clone.confirm": "Clone",
   "minegit.clone.title": "Clone World",

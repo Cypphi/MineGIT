@@ -8,6 +8,7 @@ public class WorldSyncButtonState {
     public static final WorldSyncButtonState SETUP = new WorldSyncButtonState(Component.literal("☁"), Component.translatable("minegit.link.setup"));
     public static final WorldSyncButtonState ENABLE = new WorldSyncButtonState(Component.literal("☁"), Component.translatable("minegit.sync.enable"));
     public static final WorldSyncButtonState WORLD_CONFIGURE = new WorldSyncButtonState(Component.literal("✔"), Component.translatable("minegit.sync.enabled"));
+    public static final WorldSyncButtonState DIRTY = new WorldSyncButtonState(Component.literal("!"), Component.translatable("minegit.sync.dirty"));
 
     public Component message;
     public Tooltip tooltip;

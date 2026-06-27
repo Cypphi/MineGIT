@@ -1,12 +1,9 @@
 package ca.modmonster.minegit.data;
 
+import ca.modmonster.minegit.MineGIT;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
-
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.MergeCommand;
-import org.eclipse.jgit.api.PullResult;
-import org.eclipse.jgit.api.ResetCommand;
+import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
@@ -32,8 +29,6 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.stream.Stream;
-
-import ca.modmonster.minegit.MineGIT;
 
 public class GitManager {
     public static boolean syncEnabled(Minecraft minecraft, String worldId) {
@@ -449,8 +444,39 @@ public class GitManager {
         }
     }
 
-    // format like Apr 26, 2026 at 7:38 PM
+    /**
+     * Determine if a provided world's state matches the origin,
+     * i.e. no uncommitted changes and no commits which are not pushed
+     * @param minecraft Minecraft client reference
+     * @param worldId The world ID containing the Git repo
+     * @return whether the world's state matches origin
+     */
+    public static boolean isClean(Minecraft minecraft, String worldId) {
+        Path worldFolder = getPath(minecraft, worldId);
 
+        try (Git git = Git.open(worldFolder.toFile())) {
+            // Check for uncommitted changes
+            Status status = git.status().call();
+            if (!status.isClean()) return false;
+
+            Repository repo = git.getRepository();
+            String branch = repo.getBranch();
+            ObjectId localId = repo.resolve(branch);
+            BranchTrackingStatus remoteStatus = BranchTrackingStatus.of(repo, repo.getBranch());
+            String remoteBranch = remoteStatus == null? "refs/remotes/origin/" + repo.getBranch() : remoteStatus.getRemoteTrackingBranch();
+            ObjectId remoteId = repo.resolve(remoteBranch);
+
+            Iterable<RevCommit> unpushedCommits = git.log()
+                    .addRange(remoteId, localId)
+                    .call();
+
+            return !unpushedCommits.iterator().hasNext();
+        } catch (IOException | GitAPIException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // format like Apr 26, 2026 at 7:38 PM
     public static String getLatestLocalCommitDate(Path worldFolder) {
         try (Git git = Git.open(worldFolder.toFile())) {
             Repository repo = git.getRepository();
