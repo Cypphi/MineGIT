@@ -169,6 +169,7 @@ public class GitManager {
             String timestamp = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("h:mm a, MM/dd/yy"));
             git.commit()
                     .setMessage("World snapshot - " + timestamp)
+                    .setSign(false)
                     .call();
             // push
             Iterable<PushResult> results = git.push()
@@ -236,6 +237,7 @@ public class GitManager {
             String timestamp = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("h:mm a, MM/dd/yy"));
             git.commit()
                     .setMessage("Initial world snapshot - " + timestamp)
+                    .setSign(false)
                     .call();
             // create branch
             git.checkout()
@@ -418,6 +420,7 @@ public class GitManager {
             String timestamp = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("h:mm a, MM/dd/yy"));
             git.commit()
                     .setMessage("World pruning - " + timestamp)
+                    .setSign(false)
                     .call();
             // delete main branch
             git.branchDelete()
