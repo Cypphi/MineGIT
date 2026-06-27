@@ -7,6 +7,7 @@ public enum GitService {
     GITHUB("https://github.com", "https://api.github.com"),
     GITHUB_ORG("https://github.com", "https://api.github.com"),
     GITLAB("https://gitlab.com", "https://gitlab.com/api/v4"),
+    CODEBERG("https://codeberg.org", "https://codeberg.org/api/v1"),
     GITEA(null, null),
     FORGEJO(null, null),
     CUSTOM(null, null);

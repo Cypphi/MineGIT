@@ -5,7 +5,6 @@ import ca.modmonster.minegit.data.SyncResult;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
-import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
@@ -53,9 +52,6 @@ public class PruneWorldScreen extends Screen {
         // Cancel button
         Button cancelButton = Button.builder(Component.translatable("gui.cancel"), button -> onClose()).build();
         buttonRowLayout.addChild(cancelButton);
-
-        StringWidget statusWidget = new StringWidget(Component.empty(), this.font);
-        columnLayout.addChild(statusWidget);
 
         // Add layout widgets
         this.layout.visitWidgets(this::addRenderableWidget);

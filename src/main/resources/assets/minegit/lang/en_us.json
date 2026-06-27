@@ -54,7 +54,7 @@
   "minegit.clone.error.generic": "Something went wrong when trying to clone the world.",
   "minegit.clone.in_progress": "Cloning world...",
   "minegit.prune.title": "Prune World Commits",
-  "minegit.prune.description": "This will delete all but the most recent version of your world both locally and from cloud storage. You will no longer be able to restore old snapshots of your world, but it will reduce the world's file size.",
+  "minegit.prune.description": "This will delete all but the most recent version of your world both locally and from cloud storage. You will no longer be able to restore old commits of your world, but it will reduce the world's file size.",
   "minegit.prune.confirm": "Confirm",
   "minegit.prune.in_progress": "Pruning world...",
   "minegit.prune.complete": "World pruning complete!",
@@ -77,5 +77,17 @@
   "minegit.service.forgejo": "Forgejo",
   "minegit.service.custom.short_name": "Custom",
   "minegit.service.custom.display_name": "Custom Endpoint",
-  "minegit.service.custom.natural_name": "remote"
+  "minegit.service.custom.natural_name": "remote",
+  "minegit.sync.dirty": "Fix World Sync",
+  "minegit.sync.dirty.description": "The version of the world saved on your device is out of sync with the one stored in the cloud. Would you like to attempt to synchronize your world with the cloud now?",
+  "minegit.prune.button": "Prune Commits",
+  "minegit.revert": "Revert",
+  "minegit.revert.title": "Revert World",
+  "minegit.revert.description": "The world will be reverted to the commit you choose here. All progress after that point will be lost.",
+  "minegit.revert.in_progress": "Reverting world...",
+  "minegit.revert.complete": "World reverting complete!",
+  "minegit.status.clean": "Delete untracked files",
+  "minegit.service.codeberg": "Codeberg",
+  "minegit.endpoint_url.ignore_ssl": "Ignore SSL certificate validity",
+  "minegit.endpoint_url.ignore_ssl.tooltip": "Only enable this on a trusted local network (for instance if you're using self-signed certificates)"
 }

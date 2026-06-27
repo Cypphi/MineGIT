@@ -134,7 +134,7 @@ public class AccountLinkScreen extends Screen {
 
         // Build config from current UI values
         Config currentConfig = ConfigManager.getCurrentConfig();
-        Config testConfig = new Config(usernameEdit.getValue(), CryptoManager.encrypt(patEdit.getValue()), selectedService, currentConfig.customWebUrl, currentConfig.customApiUrl);
+        Config testConfig = new Config(usernameEdit.getValue(), CryptoManager.encrypt(patEdit.getValue()), selectedService, currentConfig.customWebUrl, currentConfig.customApiUrl, currentConfig.ignoreSSL);
 
         new Thread(() -> {
             int statusCode = NetworkManager.testCredentials(testConfig);
@@ -184,7 +184,7 @@ public class AccountLinkScreen extends Screen {
         String username = usernameEdit.getValue();
         String pat = CryptoManager.encrypt(patEdit.getValue());
         Config currentConfig = ConfigManager.getCurrentConfig();
-        Config config = new Config(username, pat, currentConfig.gitService, currentConfig.customWebUrl, currentConfig.customApiUrl);
+        Config config = new Config(username, pat, currentConfig.gitService, currentConfig.customWebUrl, currentConfig.customApiUrl, currentConfig.ignoreSSL);
         ConfigManager.save(config);
 
         minecraft.setScreen(parent);

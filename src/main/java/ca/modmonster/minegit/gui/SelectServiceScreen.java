@@ -64,7 +64,7 @@ public class SelectServiceScreen extends Screen {
         } else {
             // We do not need a custom URL; do a save
             Config currentConfig = ConfigManager.getCurrentConfig();
-            Config config = new Config(currentConfig.username, currentConfig.patEncrypted, service, "", "");
+            Config config = new Config(currentConfig.username, currentConfig.patEncrypted, service, "", "", false);
             ConfigManager.save(config);
             selectCallback.run();
         }
