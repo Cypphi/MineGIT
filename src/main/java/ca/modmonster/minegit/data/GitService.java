@@ -1,39 +1,45 @@
 package ca.modmonster.minegit.data;
 
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.resources.Identifier;
 
 public enum GitService {
-    GITHUB("GitHub", "GitHub", "GitHub", "https://github.com", "https://api.github.com"),
-    GITHUB_ORG("GitHub Org", "GitHub Organization", "GitHub", "https://github.com", "https://api.github.com"),
-    GITLAB("GitLab", "GitLab", "GitLab", "https://gitlab.com", "https://gitlab.com/api/v4"),
-    GITEA("Gitea", "Gitea", "Gitea", null, null),
-    FORGEJO("Forgejo", "Forgejo", "Forgejo", null, null),
-    CUSTOM("Custom", "Custom Endpoint", "remote", null, null);
+    GITHUB("https://github.com", "https://api.github.com"),
+    GITHUB_ORG("https://github.com", "https://api.github.com"),
+    GITLAB("https://gitlab.com", "https://gitlab.com/api/v4"),
+    CODEBERG("https://codeberg.org", "https://codeberg.org/api/v1"),
+    GITEA(null, null),
+    FORGEJO(null, null),
+    CUSTOM(null, null);
 
-    private final String shortName;
-    private final String displayName;
-    private final String naturalName;
     private final String defaultWebUrl;
     private final String defaultApiUrl;
 
-    GitService(String shortName, String displayName, String naturalName, String defaultWebUrl, String defaultApiUrl) {
-        this.shortName = shortName;
-        this.displayName = displayName;
-        this.naturalName = naturalName;
+    GitService(String defaultWebUrl, String defaultApiUrl) {
         this.defaultWebUrl = defaultWebUrl;
         this.defaultApiUrl = defaultApiUrl;
     }
 
+    public String getIdentifier() {
+        return toString().toLowerCase();
+    }
+
     public String getShortName() {
-        return shortName;
+        return getTranslation("short_name");
     }
 
     public String getDisplayName() {
-        return displayName;
+        return getTranslation("display_name");
     }
 
     public String getNaturalName() {
-        return naturalName;
+        return getTranslation("natural_name");
+    }
+
+    private String getTranslation(String path) {
+        String service = "minegit.service." + getIdentifier();
+        if (I18n.exists(service + "." + path)) return I18n.get(service + "." + path);
+        return I18n.get(service);
     }
 
     public String getDefaultWebUrl() {
@@ -53,6 +59,6 @@ public enum GitService {
     }
 
     public Identifier getIcon() {
-        return Identifier.fromNamespaceAndPath("minegit", "services/" + getShortName().toLowerCase().replace(" ", "_"));
+        return Identifier.fromNamespaceAndPath("minegit", "services/" + getIdentifier());
     }
 }

@@ -48,10 +48,10 @@ public class QuickPlayMixin {
                 case FAIL_NETWORK:
                     // Network error; show unreachable screen
                     minecraft.submit(() -> minecraft.setScreen(new TwoChoiceScreen(
-                            Component.translatable("minegit.sync.pull_unreachable.title"),
+                            Component.translatable("minegit.sync.error"),
                             Component.translatable("minegit.sync.pull_unreachable.description"),
                             Component.translatable("minegit.sync.pull_unreachable.continue"),
-                            Component.translatable("minegit.sync.pull_unreachable.cancel"),
+                            Component.translatable("gui.cancel"),
                             () -> doLoadWorld(minecraft, identifier), // continue
                             () -> dontLoadWorld(minecraft) // cancel
                     )));

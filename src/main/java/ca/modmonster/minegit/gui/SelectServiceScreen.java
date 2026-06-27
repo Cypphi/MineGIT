@@ -51,7 +51,7 @@ public class SelectServiceScreen extends Screen {
 
         // Back button
         Button backButton = Button.builder(Component.literal("←"), button -> onClose())
-                .tooltip(Tooltip.create(Component.translatable("minegit.select_service.back")))
+                .tooltip(Tooltip.create(Component.translatable("gui.back")))
                 .bounds(6, 6, 20, 20)
                 .build();
         addRenderableWidget(backButton);
@@ -64,7 +64,7 @@ public class SelectServiceScreen extends Screen {
         } else {
             // We do not need a custom URL; do a save
             Config currentConfig = ConfigManager.getCurrentConfig();
-            Config config = new Config(currentConfig.username, currentConfig.patEncrypted, service, "", "");
+            Config config = new Config(currentConfig.username, currentConfig.patEncrypted, service, "", "", false);
             ConfigManager.save(config);
             selectCallback.run();
         }
