@@ -1,5 +1,7 @@
 package ca.modmonster.minegit.data;
 
+import ca.modmonster.minegit.MineGIT;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -64,8 +66,10 @@ public class NetworkManager {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             int status = response.statusCode();
             hasValidCredentials = status == 200;
+            if (!hasValidCredentials) MineGIT.LOGGER.error("Error with credentials: {}", response.body());
             return status;
         } catch (IOException | InterruptedException e) {
+            MineGIT.LOGGER.error("Error testing credentials!", e);
             hasValidCredentials = false;
             return -1;
         }
