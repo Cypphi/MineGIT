@@ -77,5 +77,15 @@
   "minegit.service.forgejo": "oɾ̣ǝƃɹoℲ",
   "minegit.service.custom.short_name": "ɯoʇsnƆ",
   "minegit.service.custom.display_name": "ʇuı̣odpuƎ ɯoʇsnƆ",
-  "minegit.service.custom.natural_name": "ǝʇoɯǝɹ"
+  "minegit.service.custom.natural_name": "ǝʇoɯǝɹ",
+  "minegit.sync.dirty": "ɔuʎS pꞁɹoM xᴉℲ",
+  "minegit.sync.dirty.description": "¿ʍou pnoꞁɔ ǝɥʇ ɥʇᴉʍ pꞁɹoʍ ɹnoʎ ǝzᴉuoɹɥɔuʎs oʇ ʇdɯǝʇʇɐ oʇ ǝʞᴉꞁ noʎ pꞁnoM ˙pnoꞁɔ ǝɥʇ uᴉ pǝɹoʇs ǝuo ǝɥʇ ɥʇᴉʍ ɔuʎs ɟo ʇno sᴉ ǝɔᴉʌǝp ɹnoʎ uo pǝʌɐs pꞁɹoʍ ǝɥʇ ɟo uoᴉsɹǝʌ ǝɥ⟘",
+  "minegit.prune.button": "sʇᴉɯɯoƆ ǝunɹԀ",
+  "minegit.revert": "ʇɹǝʌǝᴚ",
+  "minegit.revert.title": "pꞁɹoM ʇɹǝʌǝᴚ",
+  "minegit.revert.description": "˙ʇsoꞁ ǝq ꞁꞁᴉʍ ʇuᴉod ʇɐɥʇ ɹǝʇɟɐ ssǝɹᵷoɹd ꞁꞁⱯ ˙ǝɹǝɥ ǝsooɥɔ noʎ ʇᴉɯɯoɔ ǝɥʇ oʇ pǝʇɹǝʌǝɹ ǝq ꞁꞁᴉʍ pꞁɹoʍ ǝɥ⟘",
+  "minegit.revert.in_progress": "˙˙˙pꞁɹoʍ ᵷuᴉʇɹǝʌǝᴚ",
+  "minegit.revert.complete": "¡ǝʇǝꞁdɯoɔ ᵷuᴉʇɹǝʌǝɹ pꞁɹoM",
+  "minegit.status.clean": "sǝꞁᴉɟ pǝʞɔɐɹʇun ǝʇǝꞁǝᗡ",
+  "minegit.service.codeberg": "ᵷɹǝqǝpoƆ"
 }

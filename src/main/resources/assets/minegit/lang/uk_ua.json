@@ -67,9 +67,18 @@
   "minegit.status.open": "Відкрити світ",
   "minegit.status.prune.create": "Створити тимчасову гілку",
   "minegit.status.prune.rename": "Перейменувати тимчасову гілку на основну",
+  "modmenu.descriptionTranslation.minegit": "Система хмарного збереження Minecraft за допомогою Git!",
   "minegit.service.github": "GitHub",
+  "minegit.service.github_org.short_name": "Орг. GitHub",
+  "minegit.service.github_org.display_name": "Організація GitHub",
   "minegit.service.github_org.natural_name": "GitHub",
   "minegit.service.gitlab": "GitLab",
   "minegit.service.gitea": "Gitea",
-  "minegit.service.forgejo": "Forgejo"
+  "minegit.service.forgejo": "Forgejo",
+  "minegit.service.custom.short_name": "Власний",
+  "minegit.service.custom.display_name": "Користувацька кінцева точка",
+  "minegit.service.custom.natural_name": "віддалена",
+  "minegit.sync.dirty": "Виправити синхронізацію світу",
+  "minegit.sync.dirty.description": "Версія світу, збережена на вашому пристрої, не синхронізується з копією у хмарі. Хочете спробувати синхронізувати свій світ з хмарою?",
+  "minegit.service.codeberg": "Codeberg"
 }

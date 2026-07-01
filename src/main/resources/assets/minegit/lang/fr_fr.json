@@ -77,5 +77,15 @@
   "minegit.service.forgejo": "Forgejo",
   "minegit.service.custom.short_name": "Personnalisé",
   "minegit.service.custom.display_name": "Service personnalisé",
-  "minegit.service.custom.natural_name": "télécommande"
+  "minegit.service.custom.natural_name": "télécommande",
+  "minegit.sync.dirty": "Réparer la synchronisation du monde",
+  "minegit.sync.dirty.description": "La version du monde enregistrée sur votre appareil est désynchronisée avec celle stockée dans le cloud. Voulez-vous essayer de synchroniser votre monde avec le cloud maintenant ?",
+  "minegit.prune.button": "Nettoyer les commits",
+  "minegit.revert": "Rétablir",
+  "minegit.revert.title": "Rétablis le monde",
+  "minegit.revert.description": "Le monde sera restauré à l'état du commit que vous choisissez ici. Tout progrès effectué après ce point sera perdu.",
+  "minegit.revert.in_progress": "Rétablir le monde...",
+  "minegit.revert.complete": "Rétablir du monde terminé !",
+  "minegit.status.clean": "Supprimer les fichiers non suivis",
+  "minegit.service.codeberg": "Codeberg"
 }
