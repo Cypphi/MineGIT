@@ -2,21 +2,55 @@ package ca.modmonster.minegit.data;
 
 import ca.modmonster.minegit.MineGIT;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 
 public class NetworkManager {
     public static boolean hasValidCredentials = false;
 
-    private static final HttpClient client;
+    private static volatile HttpClient client;
     static {
+        rebuildClient();
+    }
+
+    public static void rebuildClient() {
         try {
-            client = HttpClient.newBuilder().build();
+            HttpClient.Builder builder = HttpClient.newBuilder();
+
+            if (ConfigManager.getCurrentConfig().ignoreSSL) {
+                builder.sslContext(getInsecureContext());
+            }
+
+            client = builder.build();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize HTTP client", e);
+        }
+    }
+
+    private static SSLContext getInsecureContext() {
+        try {
+            TrustManager[] trustAll = new TrustManager[] {
+                    new X509TrustManager() {
+                        public void checkClientTrusted(X509Certificate[] chain, String authType) {}
+                        public void checkServerTrusted(X509Certificate[] chain, String authType) {}
+                        public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+                    }
+            };
+
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, trustAll, new SecureRandom());
+            return sc;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

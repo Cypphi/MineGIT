@@ -7,13 +7,17 @@ import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.storage.file.FileBasedConfig;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.eclipse.jgit.util.FS;
+import org.eclipse.jgit.util.SystemReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +35,42 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 public class GitManager {
+    static {
+        rebuildReader();
+    }
+
+    public static void rebuildReader() {
+        SystemReader base = SystemReader.getInstance();
+
+        SystemReader.setInstance(new SystemReader() {
+            @Override public String getHostname() { return base.getHostname(); }
+            @Override public String getenv(String variable) { return base.getenv(variable); }
+            @Override public String getProperty(String key) { return base.getProperty(key); }
+            @Override public FileBasedConfig openSystemConfig(org.eclipse.jgit.lib.Config parent, FS fs) { return base.openSystemConfig(parent, fs); }
+            @Override public FileBasedConfig openJGitConfig(org.eclipse.jgit.lib.Config parent, FS fs) { return base.openJGitConfig(parent, fs); }
+            @SuppressWarnings("deprecation") @Override public long getCurrentTime() { return base.getCurrentTime(); }
+            @SuppressWarnings("deprecation") @Override public int getTimezone(long when) { return base.getTimezone(when); }
+
+            @Override
+            public FileBasedConfig openUserConfig(org.eclipse.jgit.lib.Config parent, FS fs) {
+                FileBasedConfig userConfig = base.openUserConfig(parent, fs);
+                try {
+                    userConfig.load();
+                } catch (ConfigInvalidException | IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                // Disable SSL verification based on mod config
+                if (ConfigManager.getCurrentConfig().ignoreSSL) {
+                    userConfig.setBoolean("http", null, "sslVerify", false);
+                } else {
+                    userConfig.unset("http", null, "sslVerify");
+                }
+                return userConfig;
+            }
+        });
+    }
+
     public static boolean syncEnabled(Minecraft minecraft, String worldId) {
         return syncEnabled(getPath(minecraft, worldId));
     }

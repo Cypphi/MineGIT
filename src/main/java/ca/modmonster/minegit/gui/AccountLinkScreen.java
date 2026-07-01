@@ -1,13 +1,12 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.data.*;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-
-import ca.modmonster.minegit.data.*;
 
 public class AccountLinkScreen extends Screen {
     private static final Component USERNAME_EDIT_LABEL = Component.translatable("minegit.link.username");
@@ -135,7 +134,7 @@ public class AccountLinkScreen extends Screen {
 
         // Build config from current UI values
         Config currentConfig = ConfigManager.getCurrentConfig();
-        Config testConfig = new Config(usernameEdit.getValue(), CryptoManager.encrypt(patEdit.getValue()), selectedService, currentConfig.customWebUrl, currentConfig.customApiUrl);
+        Config testConfig = new Config(usernameEdit.getValue(), CryptoManager.encrypt(patEdit.getValue()), selectedService, currentConfig.customWebUrl, currentConfig.customApiUrl, currentConfig.ignoreSSL);
 
         new Thread(() -> {
             int statusCode = NetworkManager.testCredentials(testConfig);
@@ -185,7 +184,7 @@ public class AccountLinkScreen extends Screen {
         String username = usernameEdit.getValue();
         String pat = CryptoManager.encrypt(patEdit.getValue());
         Config currentConfig = ConfigManager.getCurrentConfig();
-        Config config = new Config(username, pat, currentConfig.gitService, currentConfig.customWebUrl, currentConfig.customApiUrl);
+        Config config = new Config(username, pat, currentConfig.gitService, currentConfig.customWebUrl, currentConfig.customApiUrl, currentConfig.ignoreSSL);
         ConfigManager.save(config);
 
         minecraft.gui.setScreen(parent);

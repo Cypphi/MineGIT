@@ -1,14 +1,11 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.data.*;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-
-import ca.modmonster.minegit.data.Config;
-import ca.modmonster.minegit.data.ConfigManager;
-import ca.modmonster.minegit.data.GitService;
 
 public class EndpointURLScreen extends Screen {
     private static final Component API_URL_LABEL = Component.translatable("minegit.endpoint_url.api").append(" ⓘ");
@@ -20,6 +17,7 @@ public class EndpointURLScreen extends Screen {
     private final GitService selectedService;
     private EditBox webUrlEdit;
     private EditBox apiUrlEdit;
+    private Checkbox ignoreSSL;
     private Button continueButton;
 
     public EndpointURLScreen(Screen parent, Runnable finishCallback, GitService selectedService) {
@@ -60,12 +58,19 @@ public class EndpointURLScreen extends Screen {
         webUrlEdit.setResponder(string -> updateContinueButtonStatus());
         columnLayout.addChild(webUrlEdit);
 
+        // Ignore SSL certs
+        ignoreSSL = Checkbox.builder(Component.translatable("minegit.endpoint_url.ignore_ssl"), font).build();
+        ignoreSSL.setTooltip(Tooltip.create(Component.translatable("minegit.endpoint_url.ignore_ssl.tooltip")));
+        columnLayout.addChild(ignoreSSL);
+
         // Continue button
         continueButton = Button.builder(Component.translatable("gui.continue"), button -> {
             // Save credentials with service configuration
             Config currentConfig = ConfigManager.getCurrentConfig();
-            Config config = new Config(currentConfig.username, currentConfig.patEncrypted, selectedService, webUrlEdit.getValue(), apiUrlEdit.getValue());
+            Config config = new Config(currentConfig.username, currentConfig.patEncrypted, selectedService, webUrlEdit.getValue(), apiUrlEdit.getValue(), ignoreSSL.selected());
             ConfigManager.save(config);
+            NetworkManager.rebuildClient();
+            GitManager.rebuildReader();
             finishCallback.run();
         }).size(200, 20).build();
         columnLayout.addChild(continueButton);
