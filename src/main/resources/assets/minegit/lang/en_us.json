@@ -82,6 +82,7 @@
   "minegit.service.github_org.display_name": "GitHub Organization",
   "minegit.service.github_org.natural_name": "GitHub",
   "minegit.service.gitlab": "GitLab",
+  "minegit.service.codeberg": "Codeberg",
   "minegit.service.gitea": "Gitea",
   "minegit.service.forgejo": "Forgejo",
   "minegit.service.custom.short_name": "Custom",

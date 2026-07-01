@@ -51,7 +51,7 @@ public class NetworkManager {
                         .header("PRIVATE-TOKEN", pat)
                         .GET().build();
                 break;
-            case GITEA, FORGEJO, CUSTOM:
+            case CODEBERG, GITEA, FORGEJO, CUSTOM:
                 request = HttpRequest.newBuilder()
                         .uri(URI.create(apiUrl + "/user"))
                         .header("Authorization", "Bearer " + pat)
@@ -125,7 +125,7 @@ public class NetworkManager {
                                 "{\"name\":\"minegit_%s\",\"description\":\"Minecraft save for %s. Cloud sync by MineGIT\",\"visibility\":\"private\"}",
                                 worldId, encodedName))).build();
                 break;
-            case GITEA, FORGEJO:
+            case CODEBERG, GITEA, FORGEJO:
                 request = HttpRequest.newBuilder()
                         .uri(URI.create(apiUrl + "/user/repos"))
                         .header("Authorization", "Bearer " + pat)
@@ -157,7 +157,7 @@ public class NetworkManager {
             var json = com.google.gson.JsonParser.parseString(response.body()).getAsJsonObject();
 
             switch (service) {
-                case GITHUB, GITHUB_ORG, GITEA, FORGEJO:
+                case GITHUB, GITHUB_ORG, CODEBERG, GITEA, FORGEJO:
                     if (json.has("clone_url")) {
                         return json.get("clone_url").getAsString();
                     }
