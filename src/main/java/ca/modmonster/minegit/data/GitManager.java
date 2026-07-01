@@ -509,6 +509,33 @@ public class GitManager {
         }
     }
 
+    public static Iterable<RevCommit> listCommits(Minecraft minecraft, String worldId) {
+        Path worldFolder = getPath(minecraft, worldId);
+        try (Git git = Git.open(worldFolder.toFile())) {
+            return git.log().call();
+        } catch (IOException | GitAPIException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void revert(Minecraft minecraft, String worldId, RevCommit commit, ProgressMonitor progressMonitor) {
+        Path worldFolder = getPath(minecraft, worldId);
+        try (Git git = Git.open(worldFolder.toFile())) {
+            git.reset()
+                    .setMode(ResetCommand.ResetType.HARD)
+                    .setRef(commit.getName())
+                    .setProgressMonitor(progressMonitor)
+                    .call();
+            progressMonitor.beginTask(I18n.get("minegit.status.clean"), 0);
+            git.clean()
+                    .setForce(true)
+                    .setCleanDirectories(true)
+                    .call();
+        } catch (IOException | GitAPIException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static String formatCommitTimestamp(int timestamp) {
         Instant instant = Instant.ofEpochSecond(timestamp);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d, yyyy 'at' h:mm a").withZone(ZoneId.systemDefault());

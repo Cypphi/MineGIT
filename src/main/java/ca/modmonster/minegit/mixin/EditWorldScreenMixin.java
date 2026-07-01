@@ -2,6 +2,7 @@ package ca.modmonster.minegit.mixin;
 
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.gui.PruneWorldScreen;
+import ca.modmonster.minegit.gui.RevertScreen;
 import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.layouts.LinearLayout;
@@ -38,8 +39,15 @@ public class EditWorldScreenMixin extends Screen {
     private void init(CallbackInfo info) {
         if (!GitManager.syncEnabled(minecraft, levelAccess.getLevelId())) return;
 
-        // Add prune button
-        layout.addChild(Button.builder(Component.literal("☁ ").append(Component.translatable("minegit.prune.title")), button -> minecraft.gui.setScreen(new PruneWorldScreen(this, levelAccess, callback))).width(200).build());
+        LinearLayout row = new LinearLayout(0, 0, LinearLayout.Orientation.HORIZONTAL);
+        row.spacing(4);
+
+        // Add buttons
+        row.addChild(Button.builder(Component.translatable("minegit.prune.button"), button -> minecraft.gui.setScreen(new PruneWorldScreen(this, levelAccess, callback))).width(98).build());
+        row.addChild(Button.builder(Component.translatable("minegit.revert"), button -> minecraft.gui.setScreen(new RevertScreen(this, levelAccess, callback))).width(98).build());
+
+        // Add row
+        layout.addChild(row);
         layout.visitWidgets(this::addRenderableWidget);
     }
 }
