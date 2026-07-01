@@ -2,7 +2,9 @@ package ca.modmonster.minegit.data;
 
 import ca.modmonster.minegit.MineGIT;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
@@ -36,6 +38,10 @@ import java.util.stream.Stream;
 
 public class GitManager {
     static {
+        rebuildReader();
+    }
+
+    public static void rebuildReader() {
         SystemReader base = SystemReader.getInstance();
 
         SystemReader.setInstance(new SystemReader() {
@@ -58,8 +64,10 @@ public class GitManager {
 
                 // Disable SSL verification based on mod config
                 if (ConfigManager.getCurrentConfig().ignoreSSL) {
+                    SystemToast.add(Minecraft.getInstance().gui.toastManager(), new SystemToast.SystemToastId(), Component.literal("SSL IS BEING IGNORED"), null);
                     userConfig.setBoolean("http", null, "sslVerify", false);
                 } else {
+                    SystemToast.add(Minecraft.getInstance().gui.toastManager(), new SystemToast.SystemToastId(), Component.literal("NOPE"), null);
                     userConfig.unset("http", null, "sslVerify");
                 }
                 return userConfig;

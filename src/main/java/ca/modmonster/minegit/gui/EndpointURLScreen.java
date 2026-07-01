@@ -1,9 +1,6 @@
 package ca.modmonster.minegit.gui;
 
-import ca.modmonster.minegit.data.Config;
-import ca.modmonster.minegit.data.ConfigManager;
-import ca.modmonster.minegit.data.GitService;
-import ca.modmonster.minegit.data.NetworkManager;
+import ca.modmonster.minegit.data.*;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.layouts.LinearLayout;
@@ -71,8 +68,9 @@ public class EndpointURLScreen extends Screen {
             // Save credentials with service configuration
             Config currentConfig = ConfigManager.getCurrentConfig();
             Config config = new Config(currentConfig.username, currentConfig.patEncrypted, selectedService, webUrlEdit.getValue(), apiUrlEdit.getValue(), ignoreSSL.selected());
-            NetworkManager.rebuildClient();
             ConfigManager.save(config);
+            NetworkManager.rebuildClient();
+            GitManager.rebuildReader();
             finishCallback.run();
         }).size(200, 20).build();
         columnLayout.addChild(continueButton);
