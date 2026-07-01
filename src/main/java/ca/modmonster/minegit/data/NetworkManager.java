@@ -85,6 +85,10 @@ public class NetworkManager {
         String pat = config.getPat();
         String encodedName = worldName.replace("\"", "\\\"");
 
+        // remove bad characters from worldId
+        worldId = worldId.replace(' ', '-')
+                .replaceAll("[^a-zA-Z0-9-_.]", "");
+
         HttpRequest request;
 
         switch (config.gitService) {
