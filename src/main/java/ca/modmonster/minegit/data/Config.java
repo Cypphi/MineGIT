@@ -16,16 +16,22 @@ public class Config {
      */
     public final String customApiUrl;
 
-    public Config(String username, String patEncrypted, GitService gitService, String customWebUrl, String customApiUrl) {
+    /**
+     * Whether to skip SSL certificate validation when making requests to the endpoint
+     */
+    public final boolean ignoreSSL;
+
+    public Config(String username, String patEncrypted, GitService gitService, String customWebUrl, String customApiUrl, boolean ignoreSSL) {
         this.username = username;
         this.patEncrypted = patEncrypted;
         this.gitService = gitService;
         this.customWebUrl = customWebUrl;
         this.customApiUrl = customApiUrl;
+        this.ignoreSSL = ignoreSSL;
     }
 
     public Config() {
-        this("", "", GitService.GITHUB, "", "");
+        this("", "", GitService.GITHUB, "", "", false);
     }
 
     public String getPat() {

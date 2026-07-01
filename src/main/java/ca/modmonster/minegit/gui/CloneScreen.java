@@ -1,5 +1,7 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.data.ConfigManager;
+import ca.modmonster.minegit.data.GitManager;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
@@ -7,9 +9,6 @@ import net.minecraft.client.gui.layouts.LinearLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-
-import ca.modmonster.minegit.data.ConfigManager;
-import ca.modmonster.minegit.data.GitManager;
 
 public class CloneScreen extends Screen {
     private static final Component REPO_LABEL = Component.translatable("minegit.clone.repo");
@@ -61,7 +60,7 @@ public class CloneScreen extends Screen {
 
         // Back button
         Button backButton = Button.builder(Component.literal("←"), button -> onClose())
-                .tooltip(Tooltip.create(Component.translatable("minegit.clone.back")))
+                .tooltip(Tooltip.create(Component.translatable("gui.back")))
                 .bounds(6, 6, 20, 20)
                 .build();
         addRenderableWidget(backButton);

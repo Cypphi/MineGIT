@@ -1,16 +1,15 @@
 package ca.modmonster.minegit.gui;
 
+import ca.modmonster.minegit.data.Config;
+import ca.modmonster.minegit.data.ConfigManager;
+import ca.modmonster.minegit.data.GitService;
+import ca.modmonster.minegit.widget.GitServiceButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.HeaderAndFooterLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-
-import ca.modmonster.minegit.data.Config;
-import ca.modmonster.minegit.data.ConfigManager;
-import ca.modmonster.minegit.data.GitService;
-import ca.modmonster.minegit.widget.GitServiceButton;
 
 public class SelectServiceScreen extends Screen {
     private final HeaderAndFooterLayout layout = new HeaderAndFooterLayout(this, 8 + 9 + 8 + 20 + 4, 36);
@@ -52,7 +51,7 @@ public class SelectServiceScreen extends Screen {
 
         // Back button
         Button backButton = Button.builder(Component.literal("←"), button -> onClose())
-                .tooltip(Tooltip.create(Component.translatable("minegit.select_service.back")))
+                .tooltip(Tooltip.create(Component.translatable("gui.back")))
                 .bounds(6, 6, 20, 20)
                 .build();
         addRenderableWidget(backButton);
@@ -65,7 +64,7 @@ public class SelectServiceScreen extends Screen {
         } else {
             // We do not need a custom URL; do a save
             Config currentConfig = ConfigManager.getCurrentConfig();
-            Config config = new Config(currentConfig.username, currentConfig.patEncrypted, service, "", "");
+            Config config = new Config(currentConfig.username, currentConfig.patEncrypted, service, "", "", false);
             ConfigManager.save(config);
             selectCallback.run();
         }

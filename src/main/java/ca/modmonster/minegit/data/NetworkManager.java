@@ -1,20 +1,56 @@
 package ca.modmonster.minegit.data;
 
+import ca.modmonster.minegit.MineGIT;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 
 public class NetworkManager {
     public static boolean hasValidCredentials = false;
 
-    private static final HttpClient client;
+    private static volatile HttpClient client;
     static {
+        rebuildClient();
+    }
+
+    public static void rebuildClient() {
         try {
-            client = HttpClient.newBuilder().build();
+            HttpClient.Builder builder = HttpClient.newBuilder();
+
+            if (ConfigManager.getCurrentConfig().ignoreSSL) {
+                builder.sslContext(getInsecureContext());
+            }
+
+            client = builder.build();
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize HTTP client", e);
+        }
+    }
+
+    private static SSLContext getInsecureContext() {
+        try {
+            TrustManager[] trustAll = new TrustManager[] {
+                    new X509TrustManager() {
+                        public void checkClientTrusted(X509Certificate[] chain, String authType) {}
+                        public void checkServerTrusted(X509Certificate[] chain, String authType) {}
+                        public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+                    }
+            };
+
+            SSLContext sc = SSLContext.getInstance("TLS");
+            sc.init(null, trustAll, new SecureRandom());
+            return sc;
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -49,7 +85,7 @@ public class NetworkManager {
                         .header("PRIVATE-TOKEN", pat)
                         .GET().build();
                 break;
-            case GITEA, FORGEJO, CUSTOM:
+            case CODEBERG, GITEA, FORGEJO, CUSTOM:
                 request = HttpRequest.newBuilder()
                         .uri(URI.create(apiUrl + "/user"))
                         .header("Authorization", "Bearer " + pat)
@@ -64,8 +100,10 @@ public class NetworkManager {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             int status = response.statusCode();
             hasValidCredentials = status == 200;
+            if (!hasValidCredentials) MineGIT.LOGGER.error("Error with credentials: {}", response.body());
             return status;
         } catch (IOException | InterruptedException e) {
+            MineGIT.LOGGER.error("Error testing credentials!", e);
             hasValidCredentials = false;
             return -1;
         }
@@ -84,6 +122,10 @@ public class NetworkManager {
         String apiUrl = config.getApiUrl();
         String pat = config.getPat();
         String encodedName = worldName.replace("\"", "\\\"");
+
+        // remove bad characters from worldId
+        worldId = worldId.replace(' ', '-')
+                .replaceAll("[^a-zA-Z0-9-_.]", "");
 
         HttpRequest request;
 
@@ -117,7 +159,7 @@ public class NetworkManager {
                                 "{\"name\":\"minegit_%s\",\"description\":\"Minecraft save for %s. Cloud sync by MineGIT\",\"visibility\":\"private\"}",
                                 worldId, encodedName))).build();
                 break;
-            case GITEA, FORGEJO:
+            case CODEBERG, GITEA, FORGEJO:
                 request = HttpRequest.newBuilder()
                         .uri(URI.create(apiUrl + "/user/repos"))
                         .header("Authorization", "Bearer " + pat)
@@ -149,7 +191,7 @@ public class NetworkManager {
             var json = com.google.gson.JsonParser.parseString(response.body()).getAsJsonObject();
 
             switch (service) {
-                case GITHUB, GITHUB_ORG, GITEA, FORGEJO:
+                case GITHUB, GITHUB_ORG, CODEBERG, GITEA, FORGEJO:
                     if (json.has("clone_url")) {
                         return json.get("clone_url").getAsString();
                     }

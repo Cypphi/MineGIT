@@ -1,22 +1,23 @@
 package ca.modmonster.minegit.data;
 
+import ca.modmonster.minegit.MineGIT;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
-
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.MergeCommand;
-import org.eclipse.jgit.api.PullResult;
-import org.eclipse.jgit.api.ResetCommand;
+import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
+import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.storage.file.FileBasedConfig;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.eclipse.jgit.util.FS;
+import org.eclipse.jgit.util.SystemReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,9 +34,43 @@ import java.time.format.DateTimeFormatter;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import ca.modmonster.minegit.MineGIT;
-
 public class GitManager {
+    static {
+        rebuildReader();
+    }
+
+    public static void rebuildReader() {
+        SystemReader base = SystemReader.getInstance();
+
+        SystemReader.setInstance(new SystemReader() {
+            @Override public String getHostname() { return base.getHostname(); }
+            @Override public String getenv(String variable) { return base.getenv(variable); }
+            @Override public String getProperty(String key) { return base.getProperty(key); }
+            @Override public FileBasedConfig openSystemConfig(org.eclipse.jgit.lib.Config parent, FS fs) { return base.openSystemConfig(parent, fs); }
+            @Override public FileBasedConfig openJGitConfig(org.eclipse.jgit.lib.Config parent, FS fs) { return base.openJGitConfig(parent, fs); }
+            @SuppressWarnings("deprecation") @Override public long getCurrentTime() { return base.getCurrentTime(); }
+            @SuppressWarnings("deprecation") @Override public int getTimezone(long when) { return base.getTimezone(when); }
+
+            @Override
+            public FileBasedConfig openUserConfig(org.eclipse.jgit.lib.Config parent, FS fs) {
+                FileBasedConfig userConfig = base.openUserConfig(parent, fs);
+                try {
+                    userConfig.load();
+                } catch (ConfigInvalidException | IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                // Disable SSL verification based on mod config
+                if (ConfigManager.getCurrentConfig().ignoreSSL) {
+                    userConfig.setBoolean("http", null, "sslVerify", false);
+                } else {
+                    userConfig.unset("http", null, "sslVerify");
+                }
+                return userConfig;
+            }
+        });
+    }
+
     public static boolean syncEnabled(Minecraft minecraft, String worldId) {
         return syncEnabled(getPath(minecraft, worldId));
     }
@@ -169,6 +204,7 @@ public class GitManager {
             String timestamp = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("h:mm a, MM/dd/yy"));
             git.commit()
                     .setMessage("World snapshot - " + timestamp)
+                    .setSign(false)
                     .call();
             // push
             Iterable<PushResult> results = git.push()
@@ -236,6 +272,7 @@ public class GitManager {
             String timestamp = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("h:mm a, MM/dd/yy"));
             git.commit()
                     .setMessage("Initial world snapshot - " + timestamp)
+                    .setSign(false)
                     .call();
             // create branch
             git.checkout()
@@ -418,6 +455,7 @@ public class GitManager {
             String timestamp = ZonedDateTime.now().format(DateTimeFormatter.ofPattern("h:mm a, MM/dd/yy"));
             git.commit()
                     .setMessage("World pruning - " + timestamp)
+                    .setSign(false)
                     .call();
             // delete main branch
             git.branchDelete()
@@ -446,8 +484,39 @@ public class GitManager {
         }
     }
 
-    // format like Apr 26, 2026 at 7:38 PM
+    /**
+     * Determine if a provided world's state matches the origin,
+     * i.e. no uncommitted changes and no commits which are not pushed
+     * @param minecraft Minecraft client reference
+     * @param worldId The world ID containing the Git repo
+     * @return whether the world's state matches origin
+     */
+    public static boolean isClean(Minecraft minecraft, String worldId) {
+        Path worldFolder = getPath(minecraft, worldId);
 
+        try (Git git = Git.open(worldFolder.toFile())) {
+            // Check for uncommitted changes
+            Status status = git.status().call();
+            if (!status.isClean()) return false;
+
+            Repository repo = git.getRepository();
+            String branch = repo.getBranch();
+            ObjectId localId = repo.resolve(branch);
+            BranchTrackingStatus remoteStatus = BranchTrackingStatus.of(repo, repo.getBranch());
+            String remoteBranch = remoteStatus == null? "refs/remotes/origin/" + repo.getBranch() : remoteStatus.getRemoteTrackingBranch();
+            ObjectId remoteId = repo.resolve(remoteBranch);
+
+            Iterable<RevCommit> unpushedCommits = git.log()
+                    .addRange(remoteId, localId)
+                    .call();
+
+            return !unpushedCommits.iterator().hasNext();
+        } catch (IOException | GitAPIException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // format like Apr 26, 2026 at 7:38 PM
     public static String getLatestLocalCommitDate(Path worldFolder) {
         try (Git git = Git.open(worldFolder.toFile())) {
             Repository repo = git.getRepository();
@@ -476,6 +545,33 @@ public class GitManager {
                 return formatCommitTimestamp(commit.getCommitTime());
             }
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Iterable<RevCommit> listCommits(Minecraft minecraft, String worldId) {
+        Path worldFolder = getPath(minecraft, worldId);
+        try (Git git = Git.open(worldFolder.toFile())) {
+            return git.log().call();
+        } catch (IOException | GitAPIException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void revert(Minecraft minecraft, String worldId, RevCommit commit, ProgressMonitor progressMonitor) {
+        Path worldFolder = getPath(minecraft, worldId);
+        try (Git git = Git.open(worldFolder.toFile())) {
+            git.reset()
+                    .setMode(ResetCommand.ResetType.HARD)
+                    .setRef(commit.getName())
+                    .setProgressMonitor(progressMonitor)
+                    .call();
+            progressMonitor.beginTask(I18n.get("minegit.status.clean"), 0);
+            git.clean()
+                    .setForce(true)
+                    .setCleanDirectories(true)
+                    .call();
+        } catch (IOException | GitAPIException e) {
             throw new RuntimeException(e);
         }
     }
