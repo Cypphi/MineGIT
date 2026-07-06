@@ -60,7 +60,7 @@ public class CloneScreen extends Screen {
 
         // Back button
         Button backButton = Button.builder(Component.literal("←"), button -> onClose())
-                .tooltip(Tooltip.create(Component.translatable("minegit.clone.back")))
+                .tooltip(Tooltip.create(Component.translatable("gui.back")))
                 .bounds(6, 6, 20, 20)
                 .build();
         addRenderableWidget(backButton);

@@ -1,0 +1,10 @@
+{
+  "minegit.link.title": "MineGIT Setup sincronització al núvol",
+  "minegit.link.setup": "Setup Sincronitzant núvol",
+  "minegit.link.setup.open": "Obrir Setup sincronització del núvol",
+  "minegit.link.username": "Nom d'usuari",
+  "minegit.link.username.org": "Nom de l'organització",
+  "minegit.link.pat": "Token d'accés",
+  "minegit.link.test": "Probar Credencials",
+  "minegit.link.back": "Guardar i sortir"
+}

@@ -75,7 +75,7 @@ public class EnableWorldSyncScreen extends Screen {
         buttonRowLayout.addChild(confirmButton);
 
         // Cancel button
-        cancelButton = Button.builder(Component.translatable("minegit.sync.enable.confirm.cancel"), button -> onClose()).build();
+        cancelButton = Button.builder(Component.translatable("gui.cancel"), button -> onClose()).build();
         buttonRowLayout.addChild(cancelButton);
 
         openSetupButton = Button.builder(Component.translatable("minegit.link.setup.open"), button -> minecraft.setScreen(new AccountLinkScreen(this.parent, closeCallback))).build();

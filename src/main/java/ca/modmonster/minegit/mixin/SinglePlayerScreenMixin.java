@@ -1,7 +1,16 @@
 package ca.modmonster.minegit.mixin;
 
+import ca.modmonster.minegit.data.Config;
+import ca.modmonster.minegit.data.ConfigManager;
+import ca.modmonster.minegit.data.GitManager;
+import ca.modmonster.minegit.data.LevelSaver;
+import ca.modmonster.minegit.gui.AccountLinkScreen;
+import ca.modmonster.minegit.gui.CloneScreen;
+import ca.modmonster.minegit.gui.EnableWorldSyncScreen;
+import ca.modmonster.minegit.gui.TwoChoiceScreen;
+import ca.modmonster.minegit.widget.WorldSyncButtonState;
 import com.mojang.blaze3d.platform.InputConstants;
-
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
@@ -9,8 +18,9 @@ import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldSelectionList;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.CommonColors;
 import net.minecraft.world.level.storage.LevelSummary;
-
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -18,14 +28,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import ca.modmonster.minegit.data.Config;
-import ca.modmonster.minegit.data.ConfigManager;
-import ca.modmonster.minegit.data.GitManager;
-import ca.modmonster.minegit.gui.AccountLinkScreen;
-import ca.modmonster.minegit.gui.CloneScreen;
-import ca.modmonster.minegit.gui.EnableWorldSyncScreen;
-import ca.modmonster.minegit.widget.WorldSyncButtonState;
 
 @Mixin(SelectWorldScreen.class)
 public class SinglePlayerScreenMixin extends Screen {
@@ -48,6 +50,12 @@ public class SinglePlayerScreenMixin extends Screen {
     @Unique @Nullable
     private LevelSummary hoveredLevel;
 
+    @Unique @Nullable
+    private LevelSummary previousHoveredLevel;
+
+    @Unique
+    private boolean hoveredDirty = false;
+
     @Unique
     private boolean altHeld;
 
@@ -66,6 +74,24 @@ public class SinglePlayerScreenMixin extends Screen {
                     if (this.list != null) this.list.returnToScreen();
                     updateWorldSyncButton();
                 }));
+            } else if (worldSyncButtonState == WorldSyncButtonState.DIRTY) {
+                this.minecraft.setScreen(new TwoChoiceScreen(
+                        Component.translatable("minegit.sync.dirty"),
+                        Component.translatable("minegit.sync.dirty.description"),
+                        Component.translatable("gui.continue"),
+                        Component.translatable("gui.cancel"),
+                        () -> {
+                            assert hoveredLevel != null;
+                            LevelSaver.doWorldSave(minecraft, GitManager.getPath(minecraft, hoveredLevel.getLevelId()), () -> {
+                                if (this.list != null) this.list.returnToScreen();
+                                previousHoveredLevel = null;
+                                updateWorldSyncButton();
+                            });
+                        },
+                        () -> {
+                            if (this.list != null) this.list.returnToScreen();
+                        }
+                ));
             }
         }).size(20, 20).build();
         worldSyncButton.active = false;
@@ -97,6 +123,23 @@ public class SinglePlayerScreenMixin extends Screen {
         if (cloneButton != null) cloneButton.setPosition(width / 2 - 178, height - 28);
     }
 
+    @Override
+    public void render(@NonNull GuiGraphics graphics, int mouseX, int mouseY, float a) {
+        super.render(graphics, mouseX, mouseY, a);
+        if (worldSyncButton == null) return;
+        if (altHeld) return;
+        if (worldSyncButtonState == WorldSyncButtonState.DIRTY) {
+            // draw yellow border
+            graphics.renderOutline(
+                    worldSyncButton.getX(),
+                    worldSyncButton.getY(),
+                    worldSyncButton.getWidth(),
+                    worldSyncButton.getHeight(),
+                    CommonColors.YELLOW
+            );
+        }
+    }
+
     @Unique
     private void updateWorldSyncButton() {
         if (worldSyncButton == null) return;
@@ -107,8 +150,30 @@ public class SinglePlayerScreenMixin extends Screen {
             worldSyncButtonState = WorldSyncButtonState.SETUP;
             this.worldSyncButton.active = true;
         } else if (hoveredLevel != null && GitManager.syncEnabled(minecraft, hoveredLevel.getLevelId())) {
-            worldSyncButtonState = WorldSyncButtonState.WORLD_CONFIGURE;
-            this.worldSyncButton.active = false;
+            if (previousHoveredLevel != hoveredLevel) {
+                // Selected level has changed; check if dirty
+                previousHoveredLevel = hoveredLevel;
+                hoveredDirty = false;
+                new Thread(() -> {
+                    hoveredDirty = !GitManager.isClean(minecraft, hoveredLevel.getLevelId());
+                    if (hoveredDirty) {
+                        worldSyncButtonState = WorldSyncButtonState.DIRTY;
+                        worldSyncButtonState.apply(worldSyncButton);
+                        this.worldSyncButton.active = true;
+                    }
+                }).start();
+            }
+
+            if (hoveredDirty) {
+                // Selected level is dirty
+                worldSyncButtonState = WorldSyncButtonState.DIRTY;
+                worldSyncButtonState.apply(worldSyncButton);
+                this.worldSyncButton.active = true;
+            } else {
+                // Selected level is allll clean!!
+                worldSyncButtonState = WorldSyncButtonState.WORLD_CONFIGURE;
+                this.worldSyncButton.active = false;
+            }
         } else {
             worldSyncButtonState = WorldSyncButtonState.ENABLE;
             this.worldSyncButton.active = hoveredLevel != null;
