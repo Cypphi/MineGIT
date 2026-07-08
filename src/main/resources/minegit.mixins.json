@@ -2,9 +2,11 @@
   "required": true,
   "package": "ca.modmonster.minegit.mixin",
   "compatibilityLevel": "JAVA_21",
+  "plugin": "ca.modmonster.minegit.mixin.MixinPlugin",
   "client": [
     "CreateWorldScreenMixin",
     "EditWorldScreenMixin",
+    "FavoriteCreateWorldMixin",
     "LevelSaveMixin",
     "PauseScreenMixin",
     "QuickPlayMixin",

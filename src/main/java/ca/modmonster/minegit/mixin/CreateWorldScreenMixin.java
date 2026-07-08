@@ -4,10 +4,8 @@ import ca.modmonster.minegit.data.Config;
 import ca.modmonster.minegit.data.ConfigManager;
 import ca.modmonster.minegit.gui.AccountLinkScreen;
 import ca.modmonster.minegit.gui.CloneScreen;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
@@ -52,16 +50,6 @@ public abstract class CreateWorldScreenMixin extends Screen {
         addRenderableWidget(gitButton);
 
         repositionElements();
-
-        // Move the Cherished Worlds star 20 pixels to the left
-        minecraft.execute(() -> {
-            for (GuiEventListener child : children()) {
-                if (child.getClass().getSimpleName().equals("FavoriteCreateWorldWidget")) {
-                    AbstractWidget widget = (AbstractWidget) child;
-                    widget.setX(widget.getX() - 24);
-                }
-            }
-        });
     }
 
     @Unique
