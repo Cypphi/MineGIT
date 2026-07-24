@@ -36,11 +36,11 @@ public class AccountLinkScreen extends Screen {
     @Override
     public void init() {
         // Username text field
-        usernameEdit = new TextFieldWidget(font, this.width / 2 - 100, 107, 200, 20);
+        usernameEdit = new TextFieldWidget(null, this.width / 2 - 100, 107, 200, 20);
         usernameEdit.setMaxStringLength(39);
 
         // PAT text field
-        patEdit = new TextFieldWidget(font, this.width / 2 - 100, 152, 200, 20);
+        patEdit = new TextFieldWidget(null, this.width / 2 - 100, 152, 200, 20);
         patEdit.setMaxStringLength(255);
 
         // Clear credentials button
@@ -85,14 +85,14 @@ public class AccountLinkScreen extends Screen {
     @Override
     public void render(int i, int j, float f) {
         this.renderTexturedBackground();
-        drawStringCentered(this.font, "MineGit Cloud Sync Setup", this.width / 2, 50, 16777215);
-        drawStringCentered(this.font, "GitHub Username", this.width / 2, 90, -2130706433);
-        drawStringCentered(this.font, "GitHub Access Token", this.width / 2, 135, -2130706433);
+        drawStringCenteredShadow(this.fontRenderer, "MineGit Cloud Sync Setup", this.width / 2, 50, 16777215);
+        drawStringCenteredShadow(this.fontRenderer, "GitHub Username", this.width / 2, 90, -2130706433);
+        drawStringCenteredShadow(this.fontRenderer, "GitHub Access Token", this.width / 2, 135, -2130706433);
         ralspinWidget.render(mc, i, j);
         usernameEdit.drawTextBox();
         patEdit.drawTextBox();
         super.render(i, j, f);
-        if (testCredentialsStatus != null) drawStringCentered(this.font, testCredentialsStatus, this.width / 2, 208, 16777215);
+        if (testCredentialsStatus != null) drawStringCenteredShadow(this.fontRenderer, testCredentialsStatus, this.width / 2, 208, 16777215);
         if (ScreenUtil.isHovered(i, j, backButton.xPosition, backButton.yPosition, 20, 20)) ((ScreenTooltipRenderer) this).renderTooltip("Save and Exit",  i, j);
         if (ralspinWidget.isHovered()) ((ScreenTooltipRenderer) this).renderTooltip(RalspinWidget.TOOLTIP, i, j);
     }

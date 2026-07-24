@@ -41,8 +41,8 @@ public class PauseScreenMixin extends Screen {
         if (mc.isMultiplayerWorld()) return;
         if (mc.currentWorld == null) return;
         LevelStorage worldStorage = ((WorldAccessor) mc.currentWorld).getStorage();
-        if (!(worldStorage instanceof AlphaWorldStorageAccessor)) return;
-        if (!GitManager.syncEnabled(((AlphaWorldStorageAccessor) worldStorage).getDir().toPath())) return;
+        if (!(worldStorage instanceof LevelStorageBaseAccessor)) return;
+        if (!GitManager.syncEnabled(((LevelStorageBaseAccessor) worldStorage).getDir().toPath())) return;
         QuitState.altQuit = ScreenUtil.isAltDown();
         if (!ScreenUtil.isAltDown()) return;
 

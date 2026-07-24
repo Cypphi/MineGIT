@@ -26,7 +26,7 @@ public class PruneWorldScreen extends Screen {
     @Override
     public void init() {
         // Confirmation message
-        descriptionWidget = MultiLineLabel.create(font, "This will delete all but the most recent version of your world both locally and from cloud storage. You will no longer be able to restore old snapshots of your world, but it will reduce the world's file size.", this.width - 50);
+        descriptionWidget = MultiLineLabel.create(this, fontRenderer, "This will delete all but the most recent version of your world both locally and from cloud storage. You will no longer be able to restore old snapshots of your world, but it will reduce the world's file size.", this.width - 50);
         int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Confirm button
@@ -50,7 +50,7 @@ public class PruneWorldScreen extends Screen {
     @Override
     public void render(int i, int j, float f) {
         this.renderTexturedBackground();
-        drawStringCentered(font, "Prune World Commits", this.width / 2, 50, 16777215);
+        drawStringCenteredShadow(fontRenderer, "Prune World Commits", this.width / 2, 50, 16777215);
         descriptionWidget.renderCentered(this.width / 2, 90);
         super.render(i, j, f);
     }

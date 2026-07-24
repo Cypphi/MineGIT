@@ -38,8 +38,8 @@ public abstract class MinecraftMixin {
     private void onSetWorld(WorldClient world, String loadingTitle, Player player, CallbackInfo ci) {
         if (world == null) return;
         LevelStorage worldStorage = ((WorldAccessor) world).getStorage();
-        if (!(worldStorage instanceof AlphaWorldStorageAccessor)) return;
-        Path path = ((AlphaWorldStorageAccessor) worldStorage).getDir().toPath();
+        if (!(worldStorage instanceof LevelStorageBaseAccessor)) return;
+        Path path = ((LevelStorageBaseAccessor) worldStorage).getDir().toPath();
         prevSaveId = path.getFileName().toString();
     }
 

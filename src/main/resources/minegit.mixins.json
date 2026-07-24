@@ -3,8 +3,8 @@
   "package": "ca.modmonster.minegit.mixin",
   "compatibilityLevel": "JAVA_8",
   "client": [
-    "AlphaWorldStorageAccessor",
     "CreateWorldScreenMixin",
+    "LevelStorageBaseAccessor",
     "MinecraftAccessor",
     "MinecraftMixin",
     "PauseScreenMixin",

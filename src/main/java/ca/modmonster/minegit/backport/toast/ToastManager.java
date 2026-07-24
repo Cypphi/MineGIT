@@ -3,8 +3,8 @@ package ca.modmonster.minegit.backport.toast;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.render.Lighting;
+import net.minecraft.client.render.renderer.GLRenderer;
 import org.lwjgl.Sys;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -22,7 +22,7 @@ public class ToastManager extends Gui {
 
         for (int i = 0; i < this.toasts.length; i++) {
             ToastManager.ToastInstance<?> toastInstance = this.toasts[i];
-            if (toastInstance != null && toastInstance.render(minecraft, width, i)) {
+            if (toastInstance != null && toastInstance.render(minecraft, width, i, this)) {
                 this.toasts[i] = null;
             }
 
@@ -67,7 +67,7 @@ public class ToastManager extends Gui {
             return x;
         }
 
-        public boolean render(Minecraft minecraft, int x, int y) {
+        public boolean render(Minecraft minecraft, int x, int y, Gui gui) {
             long l = Sys.getTime() * 1000L / Sys.getTimerResolution();
             if (this.time == -1L) {
                 this.time = l;
@@ -77,10 +77,9 @@ public class ToastManager extends Gui {
                 this.visibleTime = l;
             }
 
-            GL11.glPushMatrix();
-            GL11.glTranslatef(x - toast.getWidth(minecraft) * this.getVisibility(l), y * 32, 500 + y);
-            Toast.Visibility visibility = this.toast.render(minecraft, ToastManager.this, l - this.visibleTime);
-            GL11.glPopMatrix();
+            GLRenderer.pushFrame();
+            Toast.Visibility visibility = this.toast.render(minecraft, ToastManager.this, l - this.visibleTime, (int) (x - toast.getWidth(minecraft) * this.getVisibility(l)), y * 32, gui);
+            GLRenderer.popFrame();
             if (visibility != this.visibility) {
                 this.time = l - (int)((1.0F - this.getVisibility(l)) * 600.0F);
                 this.visibility = visibility;

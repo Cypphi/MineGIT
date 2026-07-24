@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.world.ProgressListener;
 import net.minecraft.core.world.World;
 import net.minecraft.core.world.save.LevelStorage;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -23,15 +24,16 @@ import java.nio.file.Path;
 
 @Mixin(value = World.class, remap = false)
 public abstract class WorldMixin {
+    @Final
     @Shadow
-    public LevelStorage saveHandler;
+    private LevelStorage levelStorage;
 
     @Inject(method = "saveWorldIndirectly", at = @At("TAIL"))
     public void onWorldSave(ProgressListener iprogressupdate, CallbackInfo ci) {
         Minecraft minecraft = MinecraftAccessor.getInstance();
         if (minecraft == null || !minecraft.running) return;
-        if (!(saveHandler instanceof AlphaWorldStorageAccessor)) return;
-        Path path = ((AlphaWorldStorageAccessor) saveHandler).getDir().toPath();
+        if (!(levelStorage instanceof LevelStorageBaseAccessor)) return;
+        Path path = ((LevelStorageBaseAccessor) levelStorage).getDir().toPath();
 
         if (QuitState.altQuit) return;
         if (!GitManager.syncEnabled(path)) return;

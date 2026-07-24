@@ -29,10 +29,10 @@ public class GitProgressScreen extends Screen implements ProgressMonitor {
         drawRect(barLeft, this.height - 16, barLeft + barPixels, this.height - 18, 0xFF80FF80);
 
         // Draw message
-        drawStringCentered(font, title, this.width / 2, 70, 16777215);
+        drawStringCenteredShadow(fontRenderer, title, this.width / 2, 70, 16777215);
 
         // Draw status
-        drawStringCentered(font, currentTask, this.width / 2, this.height - 32, 16777215);
+        drawStringCenteredShadow(fontRenderer, currentTask, this.width / 2, this.height - 32, 16777215);
         super.render(i, j, f);
     }
 

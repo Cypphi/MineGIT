@@ -25,7 +25,7 @@ public class TwoChoiceScreen extends Screen {
     @Override
     public void init() {
         // Confirmation message
-        descriptionWidget = MultiLineLabel.create(this.font, description, this.width - 50);
+        descriptionWidget = MultiLineLabel.create(this, this.fontRenderer, description, this.width - 50);
         int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Continue button
@@ -49,7 +49,7 @@ public class TwoChoiceScreen extends Screen {
     @Override
     public void render(int i, int j, float f) {
         this.renderTexturedBackground();
-        drawStringCentered(font, title, this.width / 2, 50, 16777215);
+        drawStringCenteredShadow(fontRenderer, title, this.width / 2, 50, 16777215);
         descriptionWidget.renderCentered(this.width / 2, 90);
         super.render(i, j, f);
     }

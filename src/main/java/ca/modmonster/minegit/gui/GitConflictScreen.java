@@ -33,7 +33,7 @@ public class GitConflictScreen extends Screen {
         String localCommitDate = GitManager.getLatestLocalCommitDate(worldFolder);
 
         // Confirmation message
-        descriptionWidget = MultiLineLabel.create(font, "The version of the world saved on your device conflicts with the one saved in the cloud. Whichever world data you choose to keep will be synced to this device and the cloud; the other will be overwritten.", this.width - 50);
+        descriptionWidget = MultiLineLabel.create(this, fontRenderer, "The version of the world saved on your device conflicts with the one saved in the cloud. Whichever world data you choose to keep will be synced to this device and the cloud; the other will be overwritten.", this.width - 50);
         int descriptionHeight = descriptionWidget.getLineCount() * 9;
 
         // Remote button
@@ -97,7 +97,7 @@ public class GitConflictScreen extends Screen {
     @Override
     public void render(int i, int j, float f) {
         this.renderTexturedBackground();
-        drawStringCentered(font, "Error syncing world", this.width / 2, 50, 16777215);
+        drawStringCenteredShadow(fontRenderer, "Error syncing world", this.width / 2, 50, 16777215);
         descriptionWidget.renderCentered(this.width / 2, 90);
         super.render(i, j, f);
     }

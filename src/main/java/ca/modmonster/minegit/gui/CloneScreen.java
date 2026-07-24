@@ -29,7 +29,7 @@ public class CloneScreen extends Screen {
     @Override
     public void init() {
         // Repo name text field
-        repoEdit = new TextFieldWidget(font, this.width / 2 - 100, 107, 200, 20);
+        repoEdit = new TextFieldWidget(null, this.width / 2 - 100, 107, 200, 20);
         repoEdit.setMaxStringLength(39);
 
         // Clone button
@@ -80,8 +80,8 @@ public class CloneScreen extends Screen {
     @Override
     public void render(int i, int j, float f) {
         this.renderTexturedBackground();
-        drawStringCentered(font, "Clone World", this.width / 2, 50, 16777215);
-        drawStringCentered(font, "Repository Name", this.width / 2, 90, -2130706433);
+        drawStringCenteredShadow(fontRenderer, "Clone World", this.width / 2, 50, 16777215);
+        drawStringCenteredShadow(fontRenderer, "Repository Name", this.width / 2, 90, -2130706433);
         repoEdit.drawTextBox();
         ralspinWidget.render(mc, i, j);
         super.render(i, j, f);

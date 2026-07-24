@@ -7,6 +7,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(value = World.class, remap = false)
 public interface WorldAccessor {
-    @Accessor("saveHandler")
+    @Accessor("levelStorage")
     LevelStorage getStorage();
 }

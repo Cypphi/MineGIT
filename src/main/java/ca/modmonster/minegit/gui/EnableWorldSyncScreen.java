@@ -57,9 +57,9 @@ public class EnableWorldSyncScreen extends Screen {
     @Override
     public void render(int i, int j, float f) {
         this.renderTexturedBackground();
-        drawStringCentered(font, "Enable Cloud Sync", this.width / 2, 50, 16777215);
-        drawStringCentered(font, String.format("Would you like to enable cloud sync for %s?", level.getDisplayName()), this.width / 2, 90, 16777215);
-        drawStringCentered(font, "A new GitHub repository will be created for this world.", this.width / 2, 103, 16777215);
+        drawStringCenteredShadow(fontRenderer, "Enable Cloud Sync", this.width / 2, 50, 16777215);
+        drawStringCenteredShadow(fontRenderer, String.format("Would you like to enable cloud sync for %s?", level.getDisplayName()), this.width / 2, 90, 16777215);
+        drawStringCenteredShadow(fontRenderer, "A new GitHub repository will be created for this world.", this.width / 2, 103, 16777215);
         super.render(i, j, f);
     }
 

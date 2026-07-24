@@ -2,8 +2,10 @@ package ca.modmonster.minegit.backport;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.render.renderer.GLRenderer;
+import net.minecraft.client.render.renderer.Shaders;
+import net.minecraft.client.render.renderer.State;
 import net.minecraft.client.render.texture.Texture;
-import org.lwjgl.opengl.GL11;
 
 public class RalspinWidget extends Gui {
     private static final String SPRITE = "/assets/minegit/textures/gui/ralspin.png";
@@ -29,21 +31,18 @@ public class RalspinWidget extends Gui {
         long time = System.currentTimeMillis() / 50;
         int frame = (int) ((time / FRAME_TIME) % FRAME_COUNT);
 
-        int u = 0;
-        int v = frame * FRAME_HEIGHT;
-
-        GL11.glPushMatrix();
-        GL11.glTranslatef(x, y, 0);
-        GL11.glScalef(SCALE, SCALE, 1);
-        GL11.glColor4f(1F, 1F, 1F, 1F);
+        GLRenderer.pushFrame();
+        GLRenderer.setShader(Shaders.INTERFACE);
+        GLRenderer.enableState(State.BLEND);
+        GLRenderer.setColor4f(1f, 1f, 1f, 1f);
         bindTexture(minecraft);
         ScreenUtil.drawTexture(
-                0, 0,
-                u, v,
-                FRAME_WIDTH, FRAME_HEIGHT,
-                FRAME_WIDTH, FRAME_HEIGHT * FRAME_COUNT
+                x, y,
+                0, frame * FRAME_HEIGHT * SCALE,
+                FRAME_WIDTH * SCALE, FRAME_HEIGHT * SCALE,
+                FRAME_WIDTH * SCALE, FRAME_HEIGHT * FRAME_COUNT * SCALE
         );
-        GL11.glPopMatrix();
+        GLRenderer.popFrame();
     }
 
     public void bindTexture(Minecraft minecraft) {

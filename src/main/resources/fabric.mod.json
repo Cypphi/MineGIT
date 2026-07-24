@@ -27,7 +27,7 @@
 		"minegit.mixins.json"
 	],
 	"depends": {
-		"minecraft": "^7.3",
+		"minecraft": ">=8.0",
 		"java": ">=8"
 	},
 	"conflicts": {

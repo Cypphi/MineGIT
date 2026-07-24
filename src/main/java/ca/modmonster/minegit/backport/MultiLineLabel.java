@@ -1,13 +1,14 @@
 package ca.modmonster.minegit.backport;
 
-import net.minecraft.client.render.Font;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.render.font.FontRenderer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public interface MultiLineLabel {
-    static List<String> splitByWidth(Font font, String text, int width) {
+    static List<String> splitByWidth(FontRenderer font, String text, int width) {
         List<String> lines = new ArrayList<>();
 
         String[] words = text.split(" ");
@@ -16,7 +17,7 @@ public interface MultiLineLabel {
         String current = "";
         while (j < words.length) {
             // grow line while it still fits
-            if (font.getStringWidth(current + words[j]) < width) {
+            if (font.stringWidth(current + words[j]) < width) {
                 current += words[j++] + " ";
             } else {
                 lines.add(current);
@@ -31,21 +32,21 @@ public interface MultiLineLabel {
         return lines;
     }
 
-    static MultiLineLabel create(Font font, String text, int i) {
+    static MultiLineLabel create(Gui gui, FontRenderer font, String text, int i) {
         List<String> lines = splitByWidth(font, text, i);
         List<TextWithWidth> list = lines.stream().map((str) ->
-                new TextWithWidth(str, font.getStringWidth(str))).collect(Collectors.toList());
-        return createFixed(font, list);
+                new TextWithWidth(str, font.stringWidth(str))).collect(Collectors.toList());
+        return createFixed(gui, font, list);
     }
 
-    static MultiLineLabel createFixed(final Font font, final List<TextWithWidth> list) {
+    static MultiLineLabel createFixed(final Gui gui, final FontRenderer font, final List<TextWithWidth> list) {
         return new MultiLineLabel() {
             public void renderCentered(int i, int j) {
                 int k = 9;
                 int m = j;
 
                 for (TextWithWidth textWithWidth : list) {
-                    font.drawStringWithShadow(textWithWidth.text, i - textWithWidth.width / 2, m, 16777215);
+                    gui.drawStringNoShadow(font, textWithWidth.text, i - textWithWidth.width / 2, m, 16777215);
                     m += k;
                 }
 
