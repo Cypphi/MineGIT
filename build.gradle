@@ -37,15 +37,25 @@ dependencies {
 
 	ploceus.dependOsl(project.osl_version)
 
-    // JGit
-    implementation "org.eclipse.jgit:org.eclipse.jgit:5.13.5.202508271544-r"
-    include "org.eclipse.jgit:org.eclipse.jgit:5.13.5.202508271544-r"
+	// JGit and its runtime dependencies
+	implementation "org.eclipse.jgit:org.eclipse.jgit:5.13.5.202508271544-r"
+	include "org.eclipse.jgit:org.eclipse.jgit:5.13.5.202508271544-r"
+	include "com.googlecode.javaewah:JavaEWAH:1.1.13"
+	include "org.slf4j:slf4j-api:1.7.30"
+	include "org.apache.logging.log4j:log4j-slf4j-impl:2.19.0"
 
-	// Minecraft 12w49a does not provide Log4j, but Mod Menu and OSL use it.
+	// Minecraft 12w49a predates libraries expected by Mod Menu and OSL.
 	implementation "org.apache.logging.log4j:log4j-api:2.19.0"
 	include "org.apache.logging.log4j:log4j-api:2.19.0"
 	implementation "org.apache.logging.log4j:log4j-core:2.19.0"
 	include "org.apache.logging.log4j:log4j-core:2.19.0"
+	implementation "com.google.code.gson:gson:2.10.1"
+	include "com.google.code.gson:gson:2.10.1"
+	include "com.google.guava:guava:17.0"
+	include "org.apache.httpcomponents:httpcore:4.3.2"
+	include "org.apache.httpcomponents:httpclient:4.3.3"
+	include "commons-codec:commons-codec:1.9"
+	include "commons-logging:commons-logging:1.1.3"
 
 	// Mod Menu
 	modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
