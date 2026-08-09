@@ -1,6 +1,7 @@
 package ca.modmonster.minegit.gui;
 
 import ca.modmonster.minegit.backport.MultiLineLabel;
+import ca.modmonster.minegit.backport.MinecraftExecutor;
 import ca.modmonster.minegit.backport.toast.Toast;
 import ca.modmonster.minegit.backport.toast.ToastManager;
 import ca.modmonster.minegit.data.GitManager;
@@ -59,9 +60,9 @@ public class GitConflictScreen extends Screen {
             new Thread(() -> {
                 boolean ok = GitManager.forcePull(worldFolder, progressScreen) == SyncResult.SUCCESS;
                 if (ok) {
-                    minecraft.execute(resolvedCallback);
+                    MinecraftExecutor.execute(minecraft, resolvedCallback);
                 } else {
-                    minecraft.execute(() -> {
+                    MinecraftExecutor.execute(minecraft, () -> {
                         ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.sync.conflict.failed")));
                         if (cancelCallback != null) {
                             cancelCallback.run();
@@ -77,9 +78,9 @@ public class GitConflictScreen extends Screen {
             new Thread(() -> {
                 boolean ok = GitManager.forcePush(worldFolder, progressScreen) == SyncResult.SUCCESS;
                 if (ok) {
-                    minecraft.execute(resolvedCallback);
+                    MinecraftExecutor.execute(minecraft, resolvedCallback);
                 } else {
-                    minecraft.execute(() -> {
+                    MinecraftExecutor.execute(minecraft, () -> {
                         ToastManager.INSTANCE.add(new Toast(I18n.translate("minegit.sync.conflict.failed")));
                         if (cancelCallback != null) {
                             cancelCallback.run();

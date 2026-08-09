@@ -1,6 +1,7 @@
 package ca.modmonster.minegit.mixin;
 
 import ca.modmonster.minegit.backport.ImageButton;
+import ca.modmonster.minegit.backport.MinecraftExecutor;
 import ca.modmonster.minegit.backport.ScreenTooltipRenderer;
 import ca.modmonster.minegit.backport.ScreenUtil;
 import ca.modmonster.minegit.backport.SinglePlayerScreenExtension;
@@ -166,7 +167,7 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
                     break;
                 case FAIL_GENERIC:
                     // Generic error; show option to keep local or cloud
-                    minecraft.execute(() -> minecraft.openScreen(new GitConflictScreen(
+                    MinecraftExecutor.execute(minecraft, () -> minecraft.openScreen(new GitConflictScreen(
                             this::doLoadWorld,
                             this::returnToScreen,
                             GitManager.getPath(minecraft, worldId)
@@ -174,7 +175,7 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
                     break;
                 case FAIL_NETWORK:
                     // Network error; show unreachable screen
-                    minecraft.execute(() -> minecraft.openScreen(new TwoChoiceScreen(
+                    MinecraftExecutor.execute(minecraft, () -> minecraft.openScreen(new TwoChoiceScreen(
                             I18n.translate("minegit.sync.pull_unreachable.title"),
                             I18n.translate("minegit.sync.pull_unreachable.description"),
                             I18n.translate("minegit.sync.pull_unreachable.continue"),
@@ -189,7 +190,7 @@ public abstract class SinglePlayerScreenMixin extends Screen implements SinglePl
 
     @Unique
     private void doLoadWorld() {
-        minecraft.execute(() -> {
+        MinecraftExecutor.execute(minecraft, () -> {
             showGitBeforeJoin = false;
             selectWorld(selectedWorldId);
             showGitBeforeJoin = true;

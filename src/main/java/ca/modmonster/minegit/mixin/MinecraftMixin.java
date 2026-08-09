@@ -1,5 +1,7 @@
 package ca.modmonster.minegit.mixin;
 
+import ca.modmonster.minegit.MineGIT;
+import ca.modmonster.minegit.backport.MinecraftExecutor;
 import ca.modmonster.minegit.data.GitManager;
 import ca.modmonster.minegit.data.QuitState;
 import net.minecraft.client.Minecraft;
@@ -15,8 +17,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 @Mixin(Minecraft.class)
-public abstract class MinecraftMixin {
+public abstract class MinecraftMixin implements MinecraftExecutor {
     @Shadow
     private @Nullable IntegratedServer server;
 
@@ -27,6 +32,26 @@ public abstract class MinecraftMixin {
     public int width;
     @Unique
     private String prevSaveId = null;
+
+    @Unique
+    private final Queue<Runnable> minegit$tasks = new ConcurrentLinkedQueue<>();
+
+    @Override
+    public void minegit$execute(Runnable task) {
+        minegit$tasks.add(task);
+    }
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void minegit$runTasks(CallbackInfo ci) {
+        Runnable task;
+        while ((task = minegit$tasks.poll()) != null) {
+            try {
+                task.run();
+            } catch (Throwable throwable) {
+                MineGIT.LOGGER.error("Error while executing a client task", throwable);
+            }
+        }
+    }
 
     @Inject(method = "openScreen", at = @At("HEAD"), cancellable = true)
     private void onOpenScreen(Screen screen, CallbackInfo ci) {
